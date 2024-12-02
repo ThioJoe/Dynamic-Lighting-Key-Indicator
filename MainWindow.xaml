@@ -8,9 +8,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Dynamic-Lighting-Key-Indicator">
-
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Start Monitoring</Button>
-        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" />
-    </StackPanel>
+    
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Button x:Name="myButton" Click="myButton_Click" Grid.Row="0">Start Monitoring</Button>
+        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="1" />
+    </Grid>
 </Window>

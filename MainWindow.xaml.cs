@@ -106,7 +106,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     foreach (LampArrayInfo info in m_attachedLampArrays)
                     {
-                        message += $"\t{info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
+                        message += $"{deviceIndex+1}: {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
 
                         // Add the device to the dropdown list and store its index in the dictionary
                         TempDropdownPlaceholder.Add(info.displayName);
