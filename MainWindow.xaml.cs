@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Documents;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
@@ -33,18 +34,23 @@ namespace Dynamic_Lighting_Key_Indicator
     public sealed partial class MainWindow : Window
     {
         List<string> TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER
-        string TempLabelPlaceholder = ""; // DEBUGGING - REMOVE LATER
-        int TempSelectionIndexPlacholder = -1; // DEBUGGING - REMOVE LATER
+        //string TempLabelPlaceholder = ""; // DEBUGGING - REMOVE LATER
+        public string TempLabelPlaceholder { get; set; } = ""; // Bound to the statusText TextBlock in the XAML
+        int TempSelectionIndexPlacholder = 2; // DEBUGGING - REMOVE LATER
 
         // Currently attached LampArrays
         private readonly List<LampArrayInfo> m_attachedLampArrays = new List<LampArrayInfo>();
         private DeviceWatcher m_deviceWatcher;
         private Dictionary<int, string> deviceIndexDict = new Dictionary<int, string>();
 
+        private readonly object _lock = new object();
+
         public MainWindow()
         {
             this.InitializeComponent();
-            UpdateLampArrayList();
+            UpdateLampArrayDisplayList();
+
+            statusText.DataContext = this;
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -59,7 +65,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void myButton_Click(object sender, RoutedEventArgs e)
         {
-            //myButton.Content = "Clicked";
+            // Clear the current list of attached devices
+            m_attachedLampArrays.Clear();
+
             StartWatchingForLampArrays();
         }
 
@@ -84,24 +92,38 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private void UpdateLampArrayList()
+        private void UpdateLampArrayDisplayList()
         {
             string message = $"Attached LampArrays: {m_attachedLampArrays.Count}\n";
             int deviceIndex = 0;
-            TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER - Clear the dropdown list
-            deviceIndexDict.Clear();
 
-            foreach (LampArrayInfo info in m_attachedLampArrays)
+            lock (_lock)
             {
-                //message += $"\t{info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
+                TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER - Clear the dropdown list
+                deviceIndexDict.Clear();
 
-                // Add the device to the dropdown list and store its index in the dictionary
-                TempDropdownPlaceholder.Add(info.displayName);
-                deviceIndexDict.Add(deviceIndex, info.id);
-                deviceIndex++;
+                lock (m_attachedLampArrays)
+                {
+                    foreach (LampArrayInfo info in m_attachedLampArrays)
+                    {
+                        message += $"\t{info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
+
+                        // Add the device to the dropdown list and store its index in the dictionary
+                        TempDropdownPlaceholder.Add(info.displayName);
+                        if (deviceIndexDict.ContainsKey(deviceIndex))
+                        {
+                            deviceIndexDict[deviceIndex] = info.id;
+                        }
+                        else
+                        {
+                            deviceIndexDict.Add(deviceIndex, info.id);
+                        }
+                        deviceIndex++;
+                    }
+                }
+
+                TempLabelPlaceholder = message;
             }
-
-            TempLabelPlaceholder = message;
         }
 
         LampArray? GetSelectedDeviceObject()
@@ -234,7 +256,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     if ((int)info.lampArray.LampArrayKind == (int)LampArrayKind.Keyboard)
                     {
-                        await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                        DispatcherQueue.TryEnqueue(() =>
                         {
                             TempSelectionIndexPlacholder = m_attachedLampArrays.IndexOf(info);
                             ApplyLightingToDevice(info.lampArray);
@@ -425,18 +447,21 @@ namespace Dynamic_Lighting_Key_Indicator
         // for the specified LampArray.
         private async void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            await Task.Run(() =>
             {
-                UpdateLampArrayList();
+                UpdateLampArrayDisplayList();
             });
         }
 
         private async void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            await Task.Run(() =>
             {
-                m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
-                UpdateLampArrayList();
+                lock (m_attachedLampArrays)
+                {
+                    m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
+                }
+                UpdateLampArrayDisplayList();
             });
         }
 
@@ -444,36 +469,29 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             var info = new LampArrayInfo(args.Id, args.Name, await LampArray.FromIdAsync(args.Id));
 
-            // DeviceWatcher events are invoked on a background thread.
-            // We need to switch to the foreground thread to update our app UI
-            // and access member variables without race conditions.
-            if (Dispatcher != null)
+            await Task.Run(() =>
             {
-                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                if (info.lampArray == null)
                 {
-                    if (info.lampArray == null)
-                    {
-                        TempLabelPlaceholder = $"Status: Error initializing LampArray: \"{info.displayName}\"";
-                        return;
-                    }
+                    TempLabelPlaceholder = $"Status: Error initializing LampArray: \"{info.displayName}\"";
+                    return;
+                }
 
+                // Set up the AvailabilityChanged event callback for being notified whether this process can control
+                // RGB lighting for the newly attached LampArray.
+                info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
+
+                lock (m_attachedLampArrays)
+                {
                     m_attachedLampArrays.Add(info);
-                    UpdateLampArrayList();
-                });
-            }
-            else
-            {
-                // Handle the case where Dispatcher is null
-                TempLabelPlaceholder = "Error: Dispatcher is not initialized.";
-            }
+                }
+                UpdateLampArrayDisplayList();
+            });
         }
 
         private async void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                CheckForCurrentDeviceAndApplyAsync();
-            });
+            DispatcherQueue.TryEnqueue(async () => await CheckForCurrentDeviceAndApplyAsync());
         }
 
     }
