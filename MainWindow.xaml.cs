@@ -35,8 +35,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         public MainViewModel ViewModel { get; set; }
 
-        List<string> devicesListForDropdown = []; // DEBUGGING - REMOVE LATER
-        int TempSelectionIndexPlacholder = 1; // DEBUGGING - REMOVE LATER
+        List<string> devicesListForDropdown = [];
 
         // Currently attached LampArrays
         private readonly List<LampArrayInfo> m_attachedLampArrays = new List<LampArrayInfo>();
@@ -50,7 +49,6 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeComponent();
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Initializing...";
-            UpdateLampArrayDisplayList();
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -92,7 +90,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             lock (_lock)
             {
-                devicesListForDropdown = new List<string>(); // DEBUGGING - REMOVE LATER - Clear the dropdown list
+                devicesListForDropdown = new List<string>(); // Clear the list
                 deviceIndexDict.Clear();
 
                 lock (m_attachedLampArrays)
@@ -124,26 +122,17 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        LampArray? GetSelectedDeviceObject()
+        LampArrayInfo? GetSelectedDeviceObject()
         {
-            if (TempSelectionIndexPlacholder == -1)
-            {
-                //MessageBox.Show("Please select a device from the dropdown list.");
-                return null;
-            }
-            int selectedDevice = TempSelectionIndexPlacholder;
-            string selectedDeviceID = deviceIndexDict[selectedDevice];
-            return m_attachedLampArrays.Find(info => info.id == selectedDeviceID).lampArray;
-        }
+            // Get the index of the selection from the GUI dropdown
+            int selectedDevice = dropdownDevices.SelectedIndex;
 
-        LampArrayInfo? GetSelectedDeviceInfo()
-        {
-            if (TempSelectionIndexPlacholder == -1)
+            if (selectedDevice == -1)
             {
                 //MessageBox.Show("Please select a device from the dropdown list.");
                 return null;
             }
-            int selectedDevice = TempSelectionIndexPlacholder;
+            
             string selectedDeviceID = deviceIndexDict[selectedDevice];
             return m_attachedLampArrays.Find(info => info.id == selectedDeviceID);
         }
@@ -238,10 +227,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
         }
 
-        private void ApplyLightingToDevice(LampArray lamparray)
+        private void ApplyLightingToDevice(LampArrayInfo lampArrayInfo)
         {
-            ColorSetter.SetCurrentDevice(lamparray);
-            ColorSetter.SetInitialDefaultKeyboardColor(lamparray);
+            LampArray lampArray = lampArrayInfo.lampArray;
+            ColorSetter.SetCurrentDevice(lampArray);
+            ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
             KeyStatesHandler.UpdateKeyStatus();
         }
 
@@ -256,8 +246,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     {
                         DispatcherQueue.TryEnqueue(() =>
                         {
-                            TempSelectionIndexPlacholder = m_attachedLampArrays.IndexOf(info);
-                            ApplyLightingToDevice(info.lampArray);
+                            dropdownDevices.SelectedIndex = m_attachedLampArrays.IndexOf(info);
+                            ApplyLightingToDevice(info);
                         });
                         break;
                     }
@@ -518,11 +508,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void buttonApply_Click(object sender, RoutedEventArgs e)
         {
-            LampArray? selectedLampArray = GetSelectedDeviceObject();
+            LampArrayInfo? selectedLampArrayInfo = GetSelectedDeviceObject();
 
-            if (selectedLampArray != null)
+            if (selectedLampArrayInfo != null)
             {
-                ApplyLightingToDevice(selectedLampArray);
+                ApplyLightingToDevice(selectedLampArrayInfo);
             }
         }
 

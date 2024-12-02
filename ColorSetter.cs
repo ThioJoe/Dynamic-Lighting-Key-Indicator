@@ -73,6 +73,11 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        public static void TestSetEntireDeviceColor(LampArray lampArray)
+        {
+            lampArray.SetColor(Colors.Green);
+        }
+
         public static void SetInitialDefaultKeyboardColor(LampArray lampArray)
         {
             lampArray.SetColor(KeyboardMainColor);
