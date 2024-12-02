@@ -35,7 +35,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         public MainViewModel ViewModel { get; set; }
 
-        List<string> TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER
+        List<string> devicesListForDropdown = []; // DEBUGGING - REMOVE LATER
         int TempSelectionIndexPlacholder = 1; // DEBUGGING - REMOVE LATER
 
         // Currently attached LampArrays
@@ -92,17 +92,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
             lock (_lock)
             {
-                TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER - Clear the dropdown list
+                devicesListForDropdown = new List<string>(); // DEBUGGING - REMOVE LATER - Clear the dropdown list
                 deviceIndexDict.Clear();
 
                 lock (m_attachedLampArrays)
                 {
                     foreach (LampArrayInfo info in m_attachedLampArrays)
                     {
-                        message += $"{deviceIndex+1}: {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
+                        message += $"{deviceIndex + 1}: {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
 
                         // Add the device to the dropdown list and store its index in the dictionary
-                        TempDropdownPlaceholder.Add(info.displayName);
+                        devicesListForDropdown.Add(info.displayName);
                         if (deviceIndexDict.ContainsKey(deviceIndex))
                         {
                             deviceIndexDict[deviceIndex] = info.id;
@@ -119,6 +119,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ViewModel.DeviceStatusMessage = message;
+                    dropdownDevices.ItemsSource = devicesListForDropdown; // Populate the ComboBox
                 });
             }
         }

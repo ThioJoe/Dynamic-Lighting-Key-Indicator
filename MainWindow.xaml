@@ -8,9 +8,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Dynamic-Lighting-Key-Indicator">
-    
+
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -18,9 +19,10 @@
         </Grid.RowDefinitions>
         <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click" Grid.Row="0">Start Monitoring</Button>
         <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Grid.Row="1">Stop Monitoring</Button>
-        <Button x:Name="buttonApply" Click="buttonApply_Click" Grid.Row="2">Apply To Device</Button>
-        
-        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="3" />
-        
+        <ComboBox x:Name="dropdownDevices" Grid.Row="2" Width="200" />
+        <Button x:Name="buttonApply" Click="buttonApply_Click" Grid.Row="3">Apply To Device</Button>
+
+        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="4" />
+
     </Grid>
 </Window>
