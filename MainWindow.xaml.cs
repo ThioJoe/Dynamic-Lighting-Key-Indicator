@@ -36,7 +36,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public MainViewModel ViewModel { get; set; }
 
         List<string> TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER
-        int TempSelectionIndexPlacholder = 2; // DEBUGGING - REMOVE LATER
+        int TempSelectionIndexPlacholder = 1; // DEBUGGING - REMOVE LATER
 
         // Currently attached LampArrays
         private readonly List<LampArrayInfo> m_attachedLampArrays = new List<LampArrayInfo>();
@@ -63,13 +63,6 @@ namespace Dynamic_Lighting_Key_Indicator
             KeyStatesHandler.InitializeHookAndCallback();
         }
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Clear the current list of attached devices
-            m_attachedLampArrays.Clear();
-
-            StartWatchingForLampArrays();
-        }
 
         private void StartWatchingForLampArrays()
         {
@@ -508,5 +501,30 @@ namespace Dynamic_Lighting_Key_Indicator
             DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
         }
 
+        // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
+        private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
+        {
+            // Clear the current list of attached devices
+            m_attachedLampArrays.Clear();
+
+            StartWatchingForLampArrays();
+        }
+
+        private void buttonStopWatch_Click(object sender, RoutedEventArgs e)
+        {
+            StopWatchingForLampArrays();
+        }
+
+        private void buttonApply_Click(object sender, RoutedEventArgs e)
+        {
+            LampArray? selectedLampArray = GetSelectedDeviceObject();
+
+            if (selectedLampArray != null)
+            {
+                ApplyLightingToDevice(selectedLampArray);
+            }
+        }
+
+        // ---------------------------------------------------------------------------------------------------
     }
 }
