@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Dynamic-Lighting-Key-Indicator (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "Dynamic-Lighting-Key-Indicator (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
