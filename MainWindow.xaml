@@ -11,6 +11,6 @@
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Button x:Name="myButton" Click="myButton_Click">Start Monitoring</Button>
-        <TextBlock x:Name="statusText" Text="{Binding TempLabelPlaceholder, Mode=OneWay}" />
+        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" />
     </StackPanel>
 </Window>

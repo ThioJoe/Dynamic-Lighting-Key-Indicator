@@ -33,9 +33,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
     public sealed partial class MainWindow : Window
     {
+        public MainViewModel ViewModel { get; set; }
+
         List<string> TempDropdownPlaceholder = []; // DEBUGGING - REMOVE LATER
-        //string TempLabelPlaceholder = ""; // DEBUGGING - REMOVE LATER
-        public string TempLabelPlaceholder { get; set; } = ""; // Bound to the statusText TextBlock in the XAML
         int TempSelectionIndexPlacholder = 2; // DEBUGGING - REMOVE LATER
 
         // Currently attached LampArrays
@@ -47,16 +47,16 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public MainWindow()
         {
-            this.InitializeComponent();
+            InitializeComponent();
+            ViewModel = new MainViewModel();
+            ViewModel.DeviceStatusMessage = "Status: Initializing...";
             UpdateLampArrayDisplayList();
-
-            statusText.DataContext = this;
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
-                { new MonitoredKey(VK.NumLock,     onColor: (R:255, G:0, B:0), offColor: null) },
-                { new MonitoredKey(VK.CapsLock,    onColor: (R:255, G:0, B:0), offColor: null) },
-                { new MonitoredKey(VK.ScrollLock,  onColor: (R:255, G:0, B:0), offColor: null) }
+                new MonitoredKey(VK.NumLock, onColor: (R:255, G:0, B:0), offColor: null),
+                new MonitoredKey(VK.CapsLock, onColor: (R:255, G:0, B:0), offColor: null),
+                new MonitoredKey(VK.ScrollLock, onColor: (R:255, G:0, B:0), offColor: null)
             });
 
             ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(color: Colors.Blue, brightnessPercent: 100);
@@ -122,7 +122,11 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
 
-                TempLabelPlaceholder = message;
+                // Update ViewModel on UI thread
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ViewModel.DeviceStatusMessage = message;
+                });
             }
         }
 
@@ -248,7 +252,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // If no device has been set, and a keyboard is attached, set the keyboard as the current device
-        private async Task CheckForCurrentDeviceAndApplyAsync()
+        private void CheckForCurrentDeviceAndApply()
         {
             if (ColorSetter.CurrentDevice == null)
             {
@@ -445,53 +449,63 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting
         // for the specified LampArray.
-        private async void LampArray_AvailabilityChanged(LampArray sender, object args)
+        private void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
-            await Task.Run(() =>
+            // Update UI on the UI thread
+            DispatcherQueue.TryEnqueue(() =>
             {
                 UpdateLampArrayDisplayList();
             });
         }
 
-        private async void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            await Task.Run(() =>
+            lock (m_attachedLampArrays)
             {
-                lock (m_attachedLampArrays)
-                {
-                    m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
-                }
+                m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
+            }
+
+            // Update UI on the UI thread
+            DispatcherQueue.TryEnqueue(() =>
+            {
                 UpdateLampArrayDisplayList();
             });
         }
 
         private async void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
-            var info = new LampArrayInfo(args.Id, args.Name, await LampArray.FromIdAsync(args.Id));
+            var lampArray = await LampArray.FromIdAsync(args.Id);
+            var info = new LampArrayInfo(args.Id, args.Name, lampArray);
 
-            await Task.Run(() =>
+            if (info.lampArray == null)
             {
-                if (info.lampArray == null)
+                // Update on UI thread
+                DispatcherQueue.TryEnqueue(() =>
                 {
-                    TempLabelPlaceholder = $"Status: Error initializing LampArray: \"{info.displayName}\"";
-                    return;
-                }
+                    ViewModel.DeviceStatusMessage = $"Status: Error initializing LampArray: \"{info.displayName}\"";
+                });
+                return;
+            }
 
-                // Set up the AvailabilityChanged event callback for being notified whether this process can control
-                // RGB lighting for the newly attached LampArray.
-                info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
+            // Set up the AvailabilityChanged event callback
+            info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
 
-                lock (m_attachedLampArrays)
-                {
-                    m_attachedLampArrays.Add(info);
-                }
+            // Add to the list (thread-safe)
+            lock (m_attachedLampArrays)
+            {
+                m_attachedLampArrays.Add(info);
+            }
+
+            // Update UI on the UI thread
+            DispatcherQueue.TryEnqueue(() =>
+            {
                 UpdateLampArrayDisplayList();
             });
         }
 
-        private async void OnEnumerationCompleted(DeviceWatcher sender, object args)
+        private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
-            DispatcherQueue.TryEnqueue(async () => await CheckForCurrentDeviceAndApplyAsync());
+            DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
         }
 
     }
