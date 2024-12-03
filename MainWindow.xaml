@@ -100,10 +100,10 @@
                 <ColumnDefinition Width="120"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Headers -->
+            <!-- Header Labels -->
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Key" FontWeight="Bold" Margin="0,0,10,5"/>
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="On Color (#RRGGBB)" FontWeight="Bold" Margin="5,0,5,5"/>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="Off Color (#RRGGBB)" FontWeight="Bold" Margin="5,0,5,5"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="On Color" FontWeight="Bold" Margin="5,0,5,5"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Off Color" FontWeight="Bold" Margin="5,0,5,5"/>
 
             <!-- Scroll Lock -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>

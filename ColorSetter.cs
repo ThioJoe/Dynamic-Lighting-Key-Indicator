@@ -56,30 +56,78 @@ namespace Dynamic_Lighting_Key_Indicator
             _currentDevice = device;
         }
 
-        public static void SetWasdPatternToLampArray(LampArray lampArray)
-        {
-            // Set a background color of blue for the whole LampArray.
-            lampArray.SetColor(Colors.Blue);
-
-            // Highlight the WASD keys in white, if the LampArray supports addressing its Lamps using a virtual key to Lamp mapping.
-            // This is typically found on keyboard LampArrays. Other LampArrays will not usually support virtual key based lighting.
-            if (lampArray.SupportsVirtualKeys)
-            {
-                Windows.UI.Color[] colors = Enumerable.Repeat(Colors.White, 4).ToArray();
-                VirtualKey[] virtualKeys = { VirtualKey.W, VirtualKey.A, VirtualKey.S, VirtualKey.D };
-
-                lampArray.SetColorsForKeys(colors, virtualKeys);
-            }
-        }
-
-        public static void TestSetEntireDeviceColor(LampArray lampArray)
-        {
-            lampArray.SetColor(Colors.Green);
-        }
-
         public static void SetInitialDefaultKeyboardColor(LampArray lampArray)
         {
             lampArray.SetColor(KeyboardMainColor);
+        }
+
+        
+
+        public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
+        {
+            if (lampArray == null)
+            {
+                if (CurrentDevice == null)
+                {
+                    throw new ArgumentNullException("LampArray must be defined.");
+                }
+                else
+                {
+                    lampArray = CurrentDevice;
+                }
+            }
+
+            Windows.UI.Color[] colors = new Windows.UI.Color[monitoredKeys.Count];
+            VirtualKey[] keys = new VirtualKey[monitoredKeys.Count];
+
+            // Build arrays of colors and keys
+            foreach (var key in monitoredKeys)
+            {
+                VirtualKey vkCode = (VirtualKey)key.key;
+                Windows.UI.Color color;
+
+                if (key.IsOn)
+                {
+                    if (key.IsOn)
+                    {
+                        if (key.onColor != default)
+                            color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
+                        else
+                            color = KeyboardMainColor;
+                    }
+                    else
+                    {
+                        if (key.offColor != default)
+                            color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
+                        else
+                            color = KeyboardMainColor;
+                    }
+
+                }
+                else
+                {
+                    if (key.offColor != default)
+                        color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
+                    else
+                        color = KeyboardMainColor;
+                }
+
+                colors[monitoredKeys.IndexOf(key)] = color;
+                keys[monitoredKeys.IndexOf(key)] = vkCode;
+            }
+
+            lampArray.SetColorsForKeys(colors, keys);
+        }
+
+
+        // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
+
+        #region Unused
+        public static void SetSpecificKeysToColor(LampArray lampArray, VirtualKey[] keys, Windows.UI.Color color)
+        {
+            Windows.UI.Color[] colors = Enumerable.Repeat(color, keys.Length).ToArray();
+            lampArray.SetColorsForKeys(colors, keys);
+            lampArray.BrightnessLevel = 1.0f;
         }
 
         public static void SetKeyboardColorExceptMonitoredKeys(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
@@ -121,58 +169,6 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.SetColorsForIndices(colors, keys);
         }
 
-        public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
-        {
-            if (lampArray == null)
-            {
-                if (CurrentDevice == null)
-                {
-                    throw new ArgumentNullException("LampArray must be defined.");
-                }
-                else
-                {
-                    lampArray = CurrentDevice;
-                }
-            }
-
-            Windows.UI.Color[] colors = new Windows.UI.Color[monitoredKeys.Count];
-            VirtualKey[] keys = new VirtualKey[monitoredKeys.Count];
-
-            // Build arrays of colors and keys
-            foreach (var key in monitoredKeys)
-            {
-                VirtualKey vkCode = (VirtualKey)key.key;
-                Windows.UI.Color color;
-
-                if (key.IsOn)
-                {
-                    if (key.onColor != null)
-                        color = Windows.UI.Color.FromArgb(255, (byte)key.onColor?.R, (byte)key.onColor?.G, (byte)key.onColor?.B);
-                    else
-                        color = KeyboardMainColor;
-                }
-                else
-                {
-                    if (key.offColor != null)
-                        color = Windows.UI.Color.FromArgb(255, (byte)key.offColor?.R, (byte)key.offColor?.G, (byte)key.offColor?.B);
-                    else
-                        color = KeyboardMainColor;
-                }
-
-                colors[monitoredKeys.IndexOf(key)] = color;
-                keys[monitoredKeys.IndexOf(key)] = vkCode;
-            }
-
-            lampArray.SetColorsForKeys(colors, keys);
-        }
-
-        public static void SetKeysToColor(LampArray lampArray, VirtualKey[] keys, Windows.UI.Color color)
-        {
-            Windows.UI.Color[] colors = Enumerable.Repeat(color, keys.Length).ToArray();
-            lampArray.SetColorsForKeys(colors, keys);
-            lampArray.BrightnessLevel = 1.0f;
-        }
-
         // Use this info to set the colors of all the other keys not being monitored, so we don't cause the monitored keys to flicker
         public static List<int> UpdateMonitoredLampArrayIndices(LampArray lampArray)
         {
@@ -187,5 +183,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return monitoredIndices;
 
         }
+        #endregion
     }
 }

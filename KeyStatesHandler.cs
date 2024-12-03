@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -47,14 +48,19 @@ namespace Dynamic_Lighting_Key_Indicator
         public class MonitoredKey
         {
             public ToggleAbleKeys key;
-            public (int R, int G, int B)? offColor;
-            public (int R, int G, int B)? onColor;
+            public (int R, int G, int B) offColor;
+            public (int R, int G, int B) onColor;
 
-            public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B)? onColor, (int R, int G, int B)? offColor)
+            public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B) onColor, (int R, int G, int B) offColor)
             {
                 this.key = key;
                 this.offColor = offColor;
                 this.onColor = onColor;
+            }
+
+            public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor)
+            {
+                this.key = key;
             }
 
             public bool IsOn
@@ -63,18 +69,18 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             public Windows.UI.Color? GetColorObjCurrent()
-            {
-                return Windows.UI.Color.FromArgb(255, (byte)(IsOn ? onColor?.R : offColor?.R), (byte)(IsOn ? onColor?.G : offColor?.G), (byte)(IsOn ? onColor?.B : offColor?.B));
+                    {
+                return Windows.UI.Color.FromArgb(255, (byte)(IsOn ? onColor.R : offColor.R), (byte)(IsOn ? onColor.G : offColor.G), (byte)(IsOn ? onColor.B : offColor.B));
             }
 
-            public Windows.UI.Color? GetColorObjOff()
+            public Windows.UI.Color GetColorObjOff()
             {
-                return Windows.UI.Color.FromArgb(255, (byte)offColor?.R, (byte)offColor?.G, (byte)offColor?.B);
+                return Windows.UI.Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
             }
 
-            public Windows.UI.Color? GetColorObjOn()
+            public Windows.UI.Color GetColorObjOn()
             {
-                return Windows.UI.Color.FromArgb(255, (byte)onColor?.R, (byte)onColor?.G, (byte)onColor?.B);
+                return Windows.UI.Color.FromArgb(255, (byte)onColor.R, (byte)onColor.G, (byte)onColor.B);
             }
         }
 

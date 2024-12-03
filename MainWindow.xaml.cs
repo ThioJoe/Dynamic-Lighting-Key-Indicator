@@ -57,14 +57,18 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
             ViewModel.ColorSettings = new ColorSettings();
 
+            // TODO: Add check for user config to load here
+            UserConfig currentConfig = new UserConfig();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
+
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
-                new MonitoredKey(VK.NumLock, onColor: (R:255, G:0, B:0), offColor: null),
-                new MonitoredKey(VK.CapsLock, onColor: (R:255, G:0, B:0), offColor: null),
-                new MonitoredKey(VK.ScrollLock, onColor: (R:255, G:0, B:0), offColor: null)
+                new MonitoredKey(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
+                new MonitoredKey(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
+                new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
 
-            ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(color: Colors.Blue, brightnessPercent: 100);
+            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor.R, currentConfig.StandardKeyColor.G, currentConfig.StandardKeyColor.B);
 
         }
 

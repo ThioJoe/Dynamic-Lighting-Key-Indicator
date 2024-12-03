@@ -8,6 +8,8 @@ using System;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
+    using VK = KeyStatesHandler.ToggleAbleKeys;
+
     public class MainViewModel : INotifyPropertyChanged
     {
         private readonly DispatcherQueue _dispatcherQueue;
@@ -152,6 +154,11 @@ namespace Dynamic_Lighting_Key_Indicator
             return Windows.UI.Color.FromArgb(255, r, g, b);
         }
 
+        public string AsString(Windows.UI.Color color)
+        {
+            return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
+        }
+
         // Methods to set the colors. Accepts hex strings with or without the # symbol
         public void SetScrollLockOnColor(string color)
         {
@@ -183,6 +190,7 @@ namespace Dynamic_Lighting_Key_Indicator
             NumLockOffColor = GetColorFromString(color);
         }
 
+
         public void SetDefaultColor(string color)
         {
             DefaultColor = GetColorFromString(color);
@@ -205,6 +213,53 @@ namespace Dynamic_Lighting_Key_Indicator
             SetDefaultColor(DefaultColor.ToString());
             SetBrightness(Brightness);
         }
+
+        internal void SetAllColorsFromUserConfig(UserConfig userConfig)
+        {
+            if (userConfig == null || userConfig.MonitoredKeysAndColors == null)
+            {
+                throw new ArgumentNullException("UserConfig cannot be null.");
+            }
+
+            Brightness = userConfig.Brightness;
+            DefaultColor = Windows.UI.Color.FromArgb(255, (byte)userConfig.StandardKeyColor.R, (byte)userConfig.StandardKeyColor.G, (byte)userConfig.StandardKeyColor.B);
+
+            foreach (KeyStatesHandler.MonitoredKey monitoredKey in userConfig.MonitoredKeysAndColors)
+            {
+                Windows.UI.Color onColor;
+                Windows.UI.Color offColor;
+
+                if (monitoredKey.onColor.Equals(default((int, int, int))))
+                    onColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
+                else
+                    onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
+
+
+                if (monitoredKey.offColor.Equals(default((int, int, int))))
+                    offColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
+                else
+                    offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
+
+
+
+                switch (monitoredKey.key)
+                {
+                    case VK.NumLock:
+                        NumLockOnColor = onColor;
+                        NumLockOffColor = offColor;
+                        break;
+                    case VK.CapsLock:
+                        CapsLockOnColor = onColor;
+                        CapsLockOffColor = offColor;
+                        break;
+                    case VK.ScrollLock:
+                        ScrollLockOnColor = onColor;
+                        ScrollLockOffColor = offColor;
+                        break;
+                }
+            }
+        }
+
     }
 
 }
