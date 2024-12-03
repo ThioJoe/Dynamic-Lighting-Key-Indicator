@@ -6,9 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal static class LightingHandler
+    class LightingDeviceHandler
     {
-
-
     }
 }
