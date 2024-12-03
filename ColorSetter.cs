@@ -49,7 +49,6 @@ namespace Dynamic_Lighting_Key_Indicator
             int b = CalcNewChannelValue(color.B);
 
             _keyboardMainColor = brightnessPercent == 100 ? color : Windows.UI.Color.FromArgb(255, (byte)r, (byte)g, (byte)b);
-
         }
 
         public static void SetCurrentDevice(LampArray device)

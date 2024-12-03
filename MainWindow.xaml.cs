@@ -55,6 +55,7 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
+            ViewModel.ColorSettings = new ColorSettings();
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -504,6 +505,37 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ApplyLightingToDevice(selectedLampArrayInfo);
             }
+        }
+
+        private void buttonSaveColors_Click(object sender, RoutedEventArgs e)
+        {
+            // Save the current color settings to the ViewModel
+            ViewModel.ColorSettings.SetAllColorsFromGUI();
+
+            ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(ViewModel.ColorSettings.DefaultColor, ViewModel.ColorSettings.Brightness);
+
+            // Update the key states to reflect the new color settings
+            var scrollOnColor = (ViewModel.ColorSettings.ScrollLockOnColor.R, ViewModel.ColorSettings.ScrollLockOnColor.G, ViewModel.ColorSettings.ScrollLockOnColor.B);
+            var capsOnColor = (ViewModel.ColorSettings.CapsLockOnColor.R, ViewModel.ColorSettings.CapsLockOnColor.G, ViewModel.ColorSettings.CapsLockOnColor.B);
+            var numOnColor = (ViewModel.ColorSettings.NumLockOnColor.R, ViewModel.ColorSettings.NumLockOnColor.G, ViewModel.ColorSettings.NumLockOnColor.B);
+            var numOffColor = (ViewModel.ColorSettings.NumLockOffColor.R, ViewModel.ColorSettings.NumLockOffColor.G, ViewModel.ColorSettings.NumLockOffColor.B);
+            var capsOffColor = (ViewModel.ColorSettings.CapsLockOffColor.R, ViewModel.ColorSettings.CapsLockOffColor.G, ViewModel.ColorSettings.CapsLockOffColor.B);
+            var scrollOffColor = (ViewModel.ColorSettings.ScrollLockOffColor.R, ViewModel.ColorSettings.ScrollLockOffColor.G, ViewModel.ColorSettings.ScrollLockOffColor.B);
+
+            KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
+                new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor),
+                new MonitoredKey(VK.CapsLock, onColor: capsOnColor, offColor: capsOffColor),
+                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor)
+            });
+
+            Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)> colorUpdateDict = new Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)>
+            {
+                { VK.NumLock,       (onColor: ViewModel.ColorSettings.NumLockOnColor,       offColor: ViewModel.ColorSettings.NumLockOffColor)      },
+                { VK.CapsLock,      (onColor: ViewModel.ColorSettings.CapsLockOnColor,      offColor: ViewModel.ColorSettings.CapsLockOffColor)     },
+                { VK.ScrollLock,    (onColor: ViewModel.ColorSettings.ScrollLockOnColor,    offColor: ViewModel.ColorSettings.ScrollLockOffColor)   }
+            };
+
+            KeyStatesHandler.UpdateMonitoredKeyColors(colorUpdateDict);
         }
 
         // ---------------------------------------------------------------------------------------------------

@@ -31,6 +31,19 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        public static void UpdateMonitoredKeyColors(Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)> keys)
+        {
+            foreach (var key in keys)
+            {
+                if (monitoredKeys.Any(mk => (int)mk.key == (int)key.Key))
+                {
+                    var mk = monitoredKeys.First(mk => (int)mk.key == (int)key.Key);
+                    mk.onColor = (key.Value.onColor.R, key.Value.onColor.G, key.Value.onColor.B);
+                    mk.offColor = (key.Value.offColor.R, key.Value.offColor.G, key.Value.offColor.B);
+                }
+            }
+        }
+
         public class MonitoredKey
         {
             public ToggleAbleKeys key;

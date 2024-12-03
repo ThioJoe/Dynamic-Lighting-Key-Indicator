@@ -19,9 +19,13 @@
             <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            
+            <RowDefinition Height="20" />
+            <!-- Color settings section -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
+        <!-- Existing controls -->
         <TextBlock x:Name="watcherStatusText" 
                    Grid.Row="0" 
                    Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
@@ -63,7 +67,6 @@
                 HorizontalAlignment="Center"
                 Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
                 IsEnabled="{x:Bind ViewModel.HasNoAttachedDevices, Mode=OneWay}">
-                
             <StackPanel Orientation="Horizontal">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
                 <TextBlock Text="Apply To Device"/>
@@ -76,9 +79,67 @@
                    HorizontalAlignment="Center"/>
 
         <TextBlock x:Name="attachedDevices"
-                     Grid.Row="9"
-                     Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
-                     HorizontalAlignment="Center"
-                     Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+                   Grid.Row="9"
+                   Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center"
+                   Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+
+        <!-- Simple Color Settings Grid -->
+        <Grid Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Headers -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Key" FontWeight="Bold" Margin="0,0,10,5"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="On Color (#RRGGBB)" FontWeight="Bold" Margin="5,0,5,5"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="Off Color (#RRGGBB)" FontWeight="Bold" Margin="5,0,5,5"/>
+
+            <!-- Scroll Lock -->
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <TextBox Grid.Row="1" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox Grid.Row="1" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+
+            <!-- Caps Lock -->
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="Caps Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <TextBox Grid.Row="2" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox Grid.Row="2" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+
+            <!-- Num Lock -->
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Num Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <TextBox Grid.Row="3" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox Grid.Row="3" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+
+            <!-- Default Color -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <TextBox Grid.Row="4" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
+
+            <!-- Brightness -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Brightness:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <TextBox Grid.Row="5" Grid.Column="1" 
+                     PlaceholderText="0-100" 
+                     Margin="5,2"/>
+        </Grid>
+
+        <!-- Save Button -->
+        <Button Grid.Row="12" 
+                Margin="0,20,0,0"
+                HorizontalAlignment="Center"
+                Click="buttonSaveColors_Click">
+            <StackPanel Orientation="Horizontal">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" Margin="0,0,8,0"/>
+                <TextBlock Text="Save Color Settings"/>
+            </StackPanel>
+        </Button>
     </Grid>
 </Window>
