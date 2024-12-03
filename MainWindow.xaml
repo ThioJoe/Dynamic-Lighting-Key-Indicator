@@ -18,13 +18,17 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click" Grid.Row="0">Start Monitoring</Button>
-        <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Grid.Row="1">Stop Monitoring</Button>
+
+        <TextBlock x:Name="watcherStatusText" Grid.Row="0" Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"/>
+        
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click">Start Monitoring</Button>
+            <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Margin="10,0,0,0">Stop Monitoring</Button>
+        </StackPanel>
+        
         <ComboBox x:Name="dropdownDevices" Grid.Row="2" Width="200" />
         <Button x:Name="buttonApply" Click="buttonApply_Click" Grid.Row="3">Apply To Device</Button>
-        <TextBlock x:Name="watcherStatusText" Grid.Row="4" />
-
-        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="5" />
-
+        
+        <TextBlock x:Name="statusText" Grid.Row="4" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"  />
     </Grid>
 </Window>
