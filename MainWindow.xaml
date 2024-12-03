@@ -107,28 +107,27 @@
 
             <!-- Scroll Lock -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <TextBox Grid.Row="1" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
-            <TextBox Grid.Row="1" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox x:Name="textScrollOnColor"  Grid.Row="1" Grid.Column="1" Margin="5,2" Text="{x:Bind ViewModel.TextScrollLockOnColor, Mode=TwoWay}"/>
+            <TextBox x:Name="textScrollOffColor" Grid.Row="1" Grid.Column="2" Margin="5,2" Text="{x:Bind ViewModel.TextScrollLockOffColor, Mode=TwoWay}"/>
 
             <!-- Caps Lock -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Caps Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <TextBox Grid.Row="2" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
-            <TextBox Grid.Row="2" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox x:Name="textCapsOnColor" Grid.Row="2" Grid.Column="1" Margin="5,2" Text="{x:Bind ViewModel.TextCapsLockOnColor, Mode=TwoWay}"/>
+            <TextBox x:Name="textCapsOffColor" Grid.Row="2" Grid.Column="2" Margin="5,2" Text="{x:Bind ViewModel.TextCapsLockOffColor, Mode=TwoWay}"/>
 
             <!-- Num Lock -->
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Num Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <TextBox Grid.Row="3" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
-            <TextBox Grid.Row="3" Grid.Column="2" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox x:Name="textNumOnColor" Grid.Row="3" Grid.Column="1" Margin="5,2" Text="{x:Bind ViewModel.TextNumLockOnColor, Mode=TwoWay}"/>
+            <TextBox x:Name="textNumOffColor" Grid.Row="3" Grid.Column="2" Margin="5,2" Text="{x:Bind ViewModel.TextNumLockOffColor, Mode=TwoWay}"/>
 
             <!-- Default Color -->
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <TextBox Grid.Row="4" Grid.Column="1" PlaceholderText="#RRGGBB" Margin="5,2"/>
+            <TextBox x:Name="textDefaultColor" Grid.Row="4" Grid.Column="1" Margin="5,2" Text="{x:Bind ViewModel.TextDefaultColor, Mode=TwoWay}"/>
 
             <!-- Brightness -->
             <TextBlock Grid.Row="5" Grid.Column="0" Text="Brightness:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <TextBox Grid.Row="5" Grid.Column="1" 
-                     PlaceholderText="0-100" 
-                     Margin="5,2"/>
+            <TextBox x:Name="textBrightness" Grid.Row="5" Grid.Column="1" PlaceholderText="0-100" Margin="5,2" Text="{x:Bind ViewModel.ColorSettings.Brightness, Mode=TwoWay}"/>
+
         </Grid>
 
         <!-- Save Button -->

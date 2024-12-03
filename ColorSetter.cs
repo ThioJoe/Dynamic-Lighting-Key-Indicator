@@ -61,7 +61,6 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.SetColor(KeyboardMainColor);
         }
 
-        
 
         public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
         {

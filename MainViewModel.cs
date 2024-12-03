@@ -70,7 +70,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             }
         }
-        
+
         public Visibility WatcherRunningVisibilityBool
         {
             get
@@ -101,7 +101,6 @@ namespace Dynamic_Lighting_Key_Indicator
             set => SetProperty(ref _colorSettings, value);
         }
 
-
         // ----------------------- Event Handlers -----------------------
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -128,6 +127,49 @@ namespace Dynamic_Lighting_Key_Indicator
             OnPropertyChanged(propertyName);
             return true;
         }
+
+        // ------------------------------------- Text Box Text -------------------------------------
+        public string TextScrollLockOnColor
+        {
+            get => ColorSettings.AsString(ColorSettings.ScrollLockOnColor);
+            set => ColorSettings.ScrollLockOnColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextScrollLockOffColor
+        {
+            get => ColorSettings.AsString(ColorSettings.ScrollLockOffColor);
+            set => ColorSettings.ScrollLockOffColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextCapsLockOnColor
+        {
+            get => ColorSettings.AsString(ColorSettings.CapsLockOnColor);
+            set => ColorSettings.CapsLockOnColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextCapsLockOffColor
+        {
+            get => ColorSettings.AsString(ColorSettings.CapsLockOffColor);
+            set => ColorSettings.CapsLockOffColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextNumLockOnColor
+        {
+            get => ColorSettings.AsString(ColorSettings.NumLockOnColor);
+            set => ColorSettings.NumLockOnColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextNumLockOffColor
+        {
+            get => ColorSettings.AsString(ColorSettings.NumLockOffColor);
+            set => ColorSettings.NumLockOffColor = ColorSettings.GetColorFromString(value);
+        }
+
+        public string TextDefaultColor
+        {
+            get => ColorSettings.AsString(ColorSettings.DefaultColor);
+            set => ColorSettings.DefaultColor = ColorSettings.GetColorFromString(value);
+        }
     }
 
     public class ColorSettings
@@ -142,8 +184,14 @@ namespace Dynamic_Lighting_Key_Indicator
         public Windows.UI.Color DefaultColor { get; set; } = Windows.UI.Color.FromArgb(255, 0, 0, 255);
         public int Brightness { get; set; } = 100;
 
-        private Windows.UI.Color GetColorFromString(string color)
+        public Windows.UI.Color GetColorFromString(string color)
         {
+            if (string.IsNullOrEmpty(color))
+            {
+                // If the color is null or empty, return the default color
+                return DefaultColor;
+            }
+
             if (color.StartsWith("#"))
             {
                 color = color.Substring(1);
@@ -190,7 +238,6 @@ namespace Dynamic_Lighting_Key_Indicator
             NumLockOffColor = GetColorFromString(color);
         }
 
-
         public void SetDefaultColor(string color)
         {
             DefaultColor = GetColorFromString(color);
@@ -202,16 +249,16 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Set all the colors from the text boxes in the GUI
-        public void SetAllColorsFromGUI()
+        public void SetAllColorsFromGUI(MainViewModel viewModel)
         {
-            SetScrollLockOnColor(ScrollLockOnColor.ToString());
-            SetScrollLockOffColor(ScrollLockOffColor.ToString());
-            SetCapsLockOnColor(CapsLockOnColor.ToString());
-            SetCapsLockOffColor(CapsLockOffColor.ToString());
-            SetNumLockOnColor(NumLockOnColor.ToString());
-            SetNumLockOffColor(NumLockOffColor.ToString());
-            SetDefaultColor(DefaultColor.ToString());
-            SetBrightness(Brightness);
+            SetScrollLockOnColor(viewModel.TextScrollLockOnColor);
+            SetScrollLockOffColor(viewModel.TextScrollLockOffColor);
+            SetCapsLockOnColor(viewModel.TextCapsLockOnColor);
+            SetCapsLockOffColor(viewModel.TextCapsLockOffColor);
+            SetNumLockOnColor(viewModel.TextNumLockOnColor);
+            SetNumLockOffColor(viewModel.TextNumLockOffColor);
+            SetDefaultColor(viewModel.TextDefaultColor);
+            SetBrightness(viewModel.ColorSettings.Brightness);
         }
 
         internal void SetAllColorsFromUserConfig(UserConfig userConfig)
@@ -234,13 +281,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 else
                     onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
 
-
                 if (monitoredKey.offColor.Equals(default((int, int, int))))
                     offColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
                 else
                     offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
-
-
 
                 switch (monitoredKey.key)
                 {
@@ -259,7 +303,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             }
         }
-
     }
 
 }

@@ -316,7 +316,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private void buttonSaveColors_Click(object sender, RoutedEventArgs e)
         {
             // Save the current color settings to the ViewModel
-            ViewModel.ColorSettings.SetAllColorsFromGUI();
+            ViewModel.ColorSettings.SetAllColorsFromGUI(ViewModel);
 
             ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(ViewModel.ColorSettings.DefaultColor, ViewModel.ColorSettings.Brightness);
 
@@ -342,6 +342,13 @@ namespace Dynamic_Lighting_Key_Indicator
             };
 
             KeyStatesHandler.UpdateMonitoredKeyColors(colorUpdateDict);
+
+            // If there was a device attached, update the colors
+            if (ColorSetter.CurrentDevice != null)
+            {
+                ColorSetter.SetInitialDefaultKeyboardColor(ColorSetter.CurrentDevice);
+                ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys, ColorSetter.CurrentDevice);
+            }
         }
 
         // ---------------------------------------------------------------------------------------------------
