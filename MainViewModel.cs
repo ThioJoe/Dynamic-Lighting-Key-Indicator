@@ -24,6 +24,28 @@ namespace Dynamic_Lighting_Key_Indicator
             set => SetProperty(ref _deviceStatusMessage, value);
         }
 
+        private string _attachedDevicesMessage;
+        public string AttachedDevicesMessage
+        {
+            get => _attachedDevicesMessage;
+            set => SetProperty(ref _attachedDevicesMessage, value);
+        }
+
+        private bool _hasAttachedDevices;
+        public bool HasNoAttachedDevices => !HasAttachedDevices;
+        public bool HasAttachedDevices
+        {
+            get => _hasAttachedDevices;
+            set
+            {
+                if (SetProperty(ref _hasAttachedDevices, value))
+                {
+                    // Notify that HasNoAttachedDevices has also changed
+                    OnPropertyChanged(nameof(HasNoAttachedDevices));
+                }
+            }
+        }
+
         private string _deviceWatcherStatusMessage;
         public string DeviceWatcherStatusMessage
         {

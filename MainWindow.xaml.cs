@@ -98,6 +98,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void StartWatchingForLampArrays()
         {
+            ViewModel.HasAttachedDevices = false;
+
             string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
 
             m_deviceWatcher = DeviceInformation.CreateWatcher(combinedSelector);
@@ -175,11 +177,13 @@ namespace Dynamic_Lighting_Key_Indicator
                 m_deviceWatcher.Stop();
                 ViewModel.IsWatcherRunning = false;
             }
+
+            ViewModel.HasAttachedDevices = false;
         }
 
         private void UpdatAvailableLampArrayDisplayList()
         {
-            string message = $"Available LampArrays: {availableDevices.Count}\n";
+            string message = $"Available LampArrays: {availableDevices.Count}";
             int deviceIndex = 0;
 
             lock (_lock)
@@ -191,7 +195,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     foreach (DeviceInformation device in availableDevices)
                     {
-                        message += $"{deviceIndex + 1}: {device.Name}\n";
+                        //message += $"\n{deviceIndex + 1}: {device.Name}";
 
                         // Add the device to the dropdown list and store its index in the dictionary
                         devicesListForDropdown.Add(device.Name);
@@ -218,39 +222,24 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void UpdateAttachedLampArrayDisplayList()
         {
-            string message = $"Attached LampArrays: {m_attachedLampArrays.Count}\n";
+            string message = $"Attached LampArrays: {m_attachedLampArrays.Count}";
             int deviceIndex = 0;
 
             lock (_lock)
             {
-                devicesListForDropdown = new List<string>(); // Clear the list
-                deviceIndexDict.Clear();
-
                 lock (m_attachedLampArrays)
                 {
                     foreach (LampArrayInfo info in m_attachedLampArrays)
                     {
-                        message += $"{deviceIndex + 1}: {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})\n";
-
-                        // Add the device to the dropdown list and store its index in the dictionary
-                        devicesListForDropdown.Add(info.displayName);
-                        if (deviceIndexDict.ContainsKey(deviceIndex))
-                        {
-                            deviceIndexDict[deviceIndex] = info.id;
-                        }
-                        else
-                        {
-                            deviceIndexDict.Add(deviceIndex, info.id);
-                        }
-                        deviceIndex++;
+                        message += $"\n - {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})";
                     }
                 }
 
                 // Update ViewModel on UI thread
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    ViewModel.DeviceStatusMessage = message;
-                    dropdownDevices.ItemsSource = devicesListForDropdown; // Populate the ComboBox
+                    ViewModel.AttachedDevicesMessage = message;
+                    ViewModel.HasAttachedDevices = m_attachedLampArrays.Count > 0;
                 });
             }
         }
@@ -262,7 +251,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (selectedDeviceIndex == -1 || deviceIndexDict.Count == 0 || selectedDeviceIndex > deviceIndexDict.Count)
             {
-                //MessageBox.Show("Please select a device from the dropdown list.");
+                ShowErrorMessage("Please select a device from the dropdown list.");
                 return null;
             }
             
@@ -279,7 +268,19 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        
+        private async void ShowErrorMessage(string message)
+        {
+            ContentDialog errorDialog = new ContentDialog
+            {
+                Title = "Error",
+                Content = message,
+                CloseButtonText = "OK",
+                XamlRoot = this.Content.XamlRoot // Ensure the dialog is associated with the current window
+            };
+
+            await errorDialog.ShowAsync();
+        }
+
 
         private void ApplyLightingToDevice(LampArrayInfo lampArrayInfo)
         {
@@ -303,21 +304,21 @@ namespace Dynamic_Lighting_Key_Indicator
         //If no device has been set, and a keyboard is attached, set the keyboard as the current device
         private void CheckForCurrentDeviceAndApply()
         {
-            //if (ColorSetter.CurrentDevice == null)
-            //{
-            //    foreach (var info in availableDevices)
-            //    {
-            //        if ((int)info.lampArray.LampArrayKind == (int)LampArrayKind.Keyboard)
-            //        {
-            //            DispatcherQueue.TryEnqueue(() =>
-            //            {
-            //                ViewModel.SelectedDeviceIndex = m_attachedLampArrays.IndexOf(info);
-            //                ApplyLightingToDevice(info);
-            //            });
-            //            break;
-            //        }
-            //    }
-            //}
+            if (ColorSetter.CurrentDevice == null)
+            {
+                foreach (var info in m_attachedLampArrays)
+                {
+                    if ((int)info.lampArray.LampArrayKind == (int)LampArrayKind.Keyboard)
+                    {
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            ViewModel.SelectedDeviceIndex = m_attachedLampArrays.IndexOf(info);
+                            ApplyLightingToDevice(info);
+                        });
+                        break;
+                    }
+                }
+            }
         }
 
 
@@ -460,7 +461,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
-            DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
+            //DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
         }
 
         private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)
@@ -491,6 +492,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void buttonApply_Click(object sender, RoutedEventArgs e)
         {
+            // If there was a device attached, remove it
+            if (ColorSetter.CurrentDevice != null)
+            {
+                ColorSetter.SetCurrentDevice(null);
+            }
+
             LampArrayInfo? selectedLampArrayInfo = await AttachAndGetSelectedDeviceAsync();
 
             if (selectedLampArrayInfo != null)

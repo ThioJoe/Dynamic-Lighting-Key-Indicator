@@ -18,6 +18,8 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="watcherStatusText" 
@@ -59,7 +61,9 @@
                 Click="buttonApply_Click" 
                 Grid.Row="6"
                 HorizontalAlignment="Center"
-                Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}">
+                Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
+                IsEnabled="{x:Bind ViewModel.HasNoAttachedDevices, Mode=OneWay}">
+                
             <StackPanel Orientation="Horizontal">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
                 <TextBlock Text="Apply To Device"/>
@@ -70,5 +74,11 @@
                    Grid.Row="8" 
                    Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"/>
+
+        <TextBlock x:Name="attachedDevices"
+                     Grid.Row="9"
+                     Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
+                     HorizontalAlignment="Center"
+                     Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
     </Grid>
 </Window>
