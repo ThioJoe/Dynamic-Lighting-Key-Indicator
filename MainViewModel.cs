@@ -91,6 +91,17 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        // Custom object for storing colors for scroll lock, caps lock, and num lock. Contains Hex strings for on and off status of each
+        private ColorSettings _colorSettings;
+        public ColorSettings ColorSettings
+        {
+            get => _colorSettings;
+            set => SetProperty(ref _colorSettings, value);
+        }
+
+
+        // ----------------------- Event Handlers -----------------------
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -116,4 +127,72 @@ namespace Dynamic_Lighting_Key_Indicator
             return true;
         }
     }
+
+    public class ColorSettings
+    {
+        // Properties as strings to store hex values for colors
+        public Windows.UI.Color ScrollLockOnColor { get; set; }
+        public Windows.UI.Color ScrollLockOffColor { get; set; }
+        public Windows.UI.Color CapsLockOnColor { get; set; }
+        public Windows.UI.Color CapsLockOffColor { get; set; }
+        public Windows.UI.Color NumLockOnColor { get; set; }
+        public Windows.UI.Color NumLockOffColor { get; set; }
+        public Windows.UI.Color DefaultColor { get; set; }
+        public int Brightness { get; set; }
+
+        private Windows.UI.Color GetColorFromString(string color)
+        {
+            if (color.StartsWith("#"))
+            {
+                color = color.Substring(1);
+            }
+            byte r = Convert.ToByte(color.Substring(0, 2), 16);
+            byte g = Convert.ToByte(color.Substring(2, 2), 16);
+            byte b = Convert.ToByte(color.Substring(4, 2), 16);
+            return Windows.UI.Color.FromArgb(255, r, g, b);
+        }
+
+        // Methods to set the colors. Accepts hex strings with or without the # symbol
+        public void SetScrollLockOnColor(string color)
+        {
+            ScrollLockOnColor = GetColorFromString(color);
+        }
+
+        public void SetScrollLockOffColor(string color)
+        {
+            ScrollLockOffColor = GetColorFromString(color);
+        }
+
+        public void SetCapsLockOnColor(string color)
+        {
+            CapsLockOnColor = GetColorFromString(color);
+        }
+
+        public void SetCapsLockOffColor(string color)
+        {
+            CapsLockOffColor = GetColorFromString(color);
+        }
+
+        public void SetNumLockOnColor(string color)
+        {
+            NumLockOnColor = GetColorFromString(color);
+        }
+
+        public void SetNumLockOffColor(string color)
+        {
+            NumLockOffColor = GetColorFromString(color);
+        }
+
+        public void SetDefaultColor(string color)
+        {
+            DefaultColor = GetColorFromString(color);
+        }
+
+        public void SetBrightness(int brightness)
+        {
+            Brightness = brightness;
+        }
+
+    }
+
 }
