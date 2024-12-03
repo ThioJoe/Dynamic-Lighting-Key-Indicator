@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml;
+using System;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -11,7 +14,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public MainViewModel()
         {
-            // Get the dispatcher queue for the current thread (should be UI thread)
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         }
 
@@ -27,6 +29,44 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             get => _deviceWatcherStatusMessage;
             set => SetProperty(ref _deviceWatcherStatusMessage, value);
+        }
+
+        private bool _isWatcherRunning;
+        public bool IsWatcherStopped => !IsWatcherRunning;
+        public bool IsWatcherRunning
+        {
+            get => _isWatcherRunning;
+            set
+            {
+                if (SetProperty(ref _isWatcherRunning, value))
+                {
+                    // Notify that IsWatcherStopped has also changed
+                    OnPropertyChanged(nameof(IsWatcherStopped));
+                    OnPropertyChanged(nameof(WatcherRunningVisibilityBool));
+                }
+            }
+        }
+        
+        public Visibility WatcherRunningVisibilityBool
+        {
+            get
+            {
+                if (IsWatcherRunning)
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
+        }
+
+        private int _selectedDeviceIndex;
+        public int SelectedDeviceIndex
+        {
+            get => _selectedDeviceIndex;
+            set
+            {
+                _selectedDeviceIndex = value;
+                OnPropertyChanged();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

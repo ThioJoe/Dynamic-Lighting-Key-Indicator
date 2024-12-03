@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Window
     x:Class="Dynamic_Lighting_Key_Indicator.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -8,27 +7,68 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Dynamic-Lighting-Key-Indicator">
-
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="10" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="watcherStatusText" Grid.Row="0" Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"/>
-        
-        <StackPanel Orientation="Horizontal" Grid.Row="1">
-            <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click">Start Monitoring</Button>
-            <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Margin="10,0,0,0">Stop Monitoring</Button>
+        <TextBlock x:Name="watcherStatusText" 
+                   Grid.Row="0" 
+                   Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center"/>
+
+        <StackPanel Orientation="Horizontal" 
+                    Grid.Row="2" 
+                    HorizontalAlignment="Center">
+            <Button x:Name="buttonStartWatch" 
+                    Click="buttonStartWatch_Click"
+                    IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Start Monitoring"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="buttonStopWatch" 
+                    Click="buttonStopWatch_Click"
+                    Margin="10,0,0,0"
+                    IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Stop Monitoring"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
-        
-        <ComboBox x:Name="dropdownDevices" Grid.Row="2" Width="200" />
-        <Button x:Name="buttonApply" Click="buttonApply_Click" Grid.Row="3">Apply To Device</Button>
-        
-        <TextBlock x:Name="statusText" Grid.Row="4" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"  />
+
+        <ComboBox x:Name="dropdownDevices" 
+                  Grid.Row="4" 
+                  Width="300"
+                  HorizontalAlignment="Center"
+                  PlaceholderText="Select a device"
+                  SelectedIndex="{x:Bind ViewModel.SelectedDeviceIndex, Mode=TwoWay}"
+                  Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+
+        <Button x:Name="buttonApply" 
+                Click="buttonApply_Click" 
+                Grid.Row="6"
+                HorizontalAlignment="Center"
+                Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}">
+            <StackPanel Orientation="Horizontal">
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
+                <TextBlock Text="Apply To Device"/>
+            </StackPanel>
+        </Button>
+
+        <TextBlock x:Name="statusText" 
+                   Grid.Row="8" 
+                   Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
+                   HorizontalAlignment="Center"/>
     </Grid>
 </Window>

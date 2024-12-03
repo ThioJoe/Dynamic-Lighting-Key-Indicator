@@ -60,9 +60,8 @@ namespace Dynamic_Lighting_Key_Indicator
             });
 
             ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(color: Colors.Blue, brightnessPercent: 100);
-            
-        }
 
+        }
 
         private void StartWatchingForLampArrays()
         {
@@ -78,9 +77,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
             m_deviceWatcher.Start();
 
-            if (m_deviceWatcher.Status == DeviceWatcherStatus.Started)
+            if (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
             {
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Started.";
+                ViewModel.IsWatcherRunning = true;
                 // Initialize the keyboard hook and callback to monitor key states
                 KeyStatesHandler.InitializeHookAndCallback();
             }
@@ -100,7 +100,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
             {
                 m_deviceWatcher.Stop();
-                //m_deviceWatcher = null;
+                ViewModel.IsWatcherRunning = false;
             }
         }
 
@@ -146,7 +146,7 @@ namespace Dynamic_Lighting_Key_Indicator
         LampArrayInfo? GetSelectedDeviceObject()
         {
             // Get the index of the selection from the GUI dropdown
-            int selectedDevice = dropdownDevices.SelectedIndex;
+            int selectedDevice = ViewModel.SelectedDeviceIndex;
 
             if (selectedDevice == -1)
             {
@@ -179,7 +179,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     {
                         DispatcherQueue.TryEnqueue(() =>
                         {
-                            dropdownDevices.SelectedIndex = m_attachedLampArrays.IndexOf(info);
+                            ViewModel.SelectedDeviceIndex = m_attachedLampArrays.IndexOf(info);
                             ApplyLightingToDevice(info);
                         });
                         break;
