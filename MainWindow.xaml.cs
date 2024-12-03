@@ -35,6 +35,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         public MainViewModel ViewModel { get; set; }
 
+        // GUI Related
         List<string> devicesListForDropdown = [];
 
         // Currently attached LampArrays
@@ -48,7 +49,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             InitializeComponent();
             ViewModel = new MainViewModel();
-            ViewModel.DeviceStatusMessage = "Status: Initializing...";
+            ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
+            ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -58,7 +60,7 @@ namespace Dynamic_Lighting_Key_Indicator
             });
 
             ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(color: Colors.Blue, brightnessPercent: 100);
-            KeyStatesHandler.InitializeHookAndCallback();
+            
         }
 
 
@@ -71,11 +73,30 @@ namespace Dynamic_Lighting_Key_Indicator
             m_deviceWatcher.Removed += Watcher_Removed;
             m_deviceWatcher.EnumerationCompleted += OnEnumerationCompleted;
 
+            // Add event handler OnDeviceWatcherStopped to the Stopped event
+            m_deviceWatcher.Stopped += OnDeviceWatcherStopped;
+
             m_deviceWatcher.Start();
+
+            if (m_deviceWatcher.Status == DeviceWatcherStatus.Started)
+            {
+                ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Started.";
+                // Initialize the keyboard hook and callback to monitor key states
+                KeyStatesHandler.InitializeHookAndCallback();
+            }
+            else
+            {
+                ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started, something may have gone wrong.";
+            }
         }
 
         private void StopWatchingForLampArrays()
         {
+            if (KeyStatesHandler.hookIsActive == true)
+            {
+                KeyStatesHandler.StopHook(); // Stop the keyboard hook 
+            }
+
             if (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
             {
                 m_deviceWatcher.Stop();
@@ -263,6 +284,17 @@ namespace Dynamic_Lighting_Key_Indicator
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
             DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
+        }
+
+        private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)
+        {
+            Console.WriteLine("DeviceWatcher stopped.");
+            ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Stopped.";
+
+            if (KeyStatesHandler.hookIsActive == true)
+            {
+                KeyStatesHandler.StopHook(); // Stop the keyboard hook 
+            }
         }
 
         // -------------------------------------- GUI EVENT HANDLERS --------------------------------------

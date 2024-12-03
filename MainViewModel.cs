@@ -18,6 +18,20 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private string _deviceWatcherStatusMessage;
+        public string DeviceWatcherStatusMessage
+        {
+            get { return _deviceWatcherStatusMessage; }
+            set
+            {
+                if (_deviceWatcherStatusMessage != value)
+                {
+                    _deviceWatcherStatusMessage = value;
+                    OnPropertyChanged(nameof(DeviceWatcherStatusMessage));
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)

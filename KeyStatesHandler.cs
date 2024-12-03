@@ -92,11 +92,21 @@ namespace Dynamic_Lighting_Key_Indicator
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
         private static LowLevelKeyboardProc _proc;
         private static IntPtr _hookID = IntPtr.Zero;
+        public static bool hookIsActive = false;
 
         public static void InitializeHookAndCallback()
         {
             _proc = HookCallback;
             _hookID = SetHook(_proc);
+
+            if (_hookID == IntPtr.Zero)
+            {
+                throw new Exception("Failed to set hook.");
+            }
+            else
+            {
+                hookIsActive = true;
+            }
         }
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
@@ -135,6 +145,13 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             return (GetKeyState((int)vkCode) & 1) == 1;
 
+        }
+
+        // Function to stop the hook
+        public static void StopHook()
+        {
+            UnhookWindowsHookEx(_hookID);
+            hookIsActive = false;
         }
 
         // Returned as pointer in the lparam of the hook callback

@@ -16,13 +16,15 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click" Grid.Row="0">Start Monitoring</Button>
         <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Grid.Row="1">Stop Monitoring</Button>
         <ComboBox x:Name="dropdownDevices" Grid.Row="2" Width="200" />
         <Button x:Name="buttonApply" Click="buttonApply_Click" Grid.Row="3">Apply To Device</Button>
+        <TextBlock x:Name="watcherStatusText" Grid.Row="4" />
 
-        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="4" />
+        <TextBlock x:Name="statusText" Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}" Grid.Row="5" />
 
     </Grid>
 </Window>
