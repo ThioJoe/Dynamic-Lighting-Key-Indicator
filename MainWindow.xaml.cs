@@ -68,35 +68,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         }
 
-        private async Task<string> GetKeyboardLampArrayDeviceSelectorAsync()
-        {
-            List<DeviceInformation> matchingDevices = await FindKeyboardLampArrayDevices();
-
-            if (matchingDevices.Count == 0)
-            {
-                return ""; // No matching devices found
-            }
-
-            string lampArraySelector = LampArray.GetDeviceSelector();
-
-            // Construct combination of lamparrayselector and container id
-            int deviceIndex = 0;
-
-            string newSelector = lampArraySelector + " AND System.Devices.ContainerId:(";
-            foreach (var device in matchingDevices)
-            {
-                if (deviceIndex != 0)
-                {
-                    newSelector += " OR ";
-                }
-                newSelector += "={" + device.Properties["System.Devices.ContainerId"].ToString() + "}";
-                deviceIndex++;
-            }
-            newSelector += ")";
-
-            return newSelector;
-        }
-
         private async void StartWatchingForLampArrays()
         {
             ViewModel.HasAttachedDevices = false;
@@ -125,45 +96,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started, something may have gone wrong.";
             }
-        }
-
-        private async Task<List<DeviceInformation>> FindKeyboardLampArrayDevices()
-        {
-            string keyboardSelector = HidDevice.GetDeviceSelector((ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC, (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD);
-            string lampArraySelector = LampArray.GetDeviceSelector();
-
-            // Get both sets of devices
-            var keyboardDevices = await DeviceInformation.FindAllAsync(keyboardSelector);
-            var lampArrayDevices = await DeviceInformation.FindAllAsync(lampArraySelector);
-
-            var keyboardDict = new Dictionary<string, DeviceInformation>();
-            foreach (var keyboardDevice in keyboardDevices)
-            {
-                var containerId = keyboardDevice.Properties["System.Devices.ContainerId"].ToString();
-                if (containerId != null)
-                {
-                    keyboardDict.Add(containerId, keyboardDevice);
-                }
-            }
-
-            var lampArrayDevicesDict = new Dictionary<string, DeviceInformation>();
-            foreach (var lampArrayDevice in lampArrayDevices)
-            {
-                var containerId = lampArrayDevice.Properties["System.Devices.ContainerId"].ToString();
-                if (containerId != null && !lampArrayDevicesDict.ContainsKey(containerId)) // Check if it's not null and not already in the dictionary
-                {
-                    lampArrayDevicesDict.Add(containerId, lampArrayDevice);
-                }
-            }
-
-            // Find devices that have both interfaces by comparing their container IDs
-            var matchingDevices = new List<DeviceInformation>();
-            foreach (var containerId in keyboardDict.Keys.Intersect(lampArrayDevicesDict.Keys))
-            {
-                matchingDevices.Add(lampArrayDevicesDict[containerId]);
-            }
-
-            return matchingDevices;
         }
 
         private void StopWatchingForLampArrays()
@@ -245,7 +177,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        async Task<LampArrayInfo?> AttachAndGetSelectedDeviceAsync()
+        async Task<LampArrayInfo?> AttachSelectedDevice_Async()
         {
             // Get the index of the selection from the GUI dropdown
             int selectedDeviceIndex = ViewModel.SelectedDeviceIndex;
@@ -255,11 +187,12 @@ namespace Dynamic_Lighting_Key_Indicator
                 ShowErrorMessage("Please select a device from the dropdown list.");
                 return null;
             }
-            
+
             string selectedDeviceID = deviceIndexDict[selectedDeviceIndex];
             DeviceInformation selectedDeviceObj = availableDevices.Find(device => device.Id == selectedDeviceID);
 
-            if (selectedDeviceObj == null) {
+            if (selectedDeviceObj == null)
+            {
                 return null;
             }
             else
@@ -290,38 +223,6 @@ namespace Dynamic_Lighting_Key_Indicator
             ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
             KeyStatesHandler.UpdateKeyStatus();
         }
-
-        private void Check_For_Keybords()
-        {
-            foreach (DeviceInformation device in availableDevices)
-            {
-                // Use enumeration APIs to get the exact kind of device. The 'Kind' property is too general
-                // TESTING
-                Console.WriteLine(device.Kind);
-
-            }
-        }
-
-        //If no device has been set, and a keyboard is attached, set the keyboard as the current device
-        private void CheckForCurrentDeviceAndApply()
-        {
-            if (ColorSetter.CurrentDevice == null)
-            {
-                foreach (var info in m_attachedLampArrays)
-                {
-                    if ((int)info.lampArray.LampArrayKind == (int)LampArrayKind.Keyboard)
-                    {
-                        DispatcherQueue.TryEnqueue(() =>
-                        {
-                            ViewModel.SelectedDeviceIndex = m_attachedLampArrays.IndexOf(info);
-                            ApplyLightingToDevice(info);
-                        });
-                        break;
-                    }
-                }
-            }
-        }
-
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
         internal class LampArrayInfo
@@ -376,105 +277,6 @@ namespace Dynamic_Lighting_Key_Indicator
             HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
         }
 
-        // -------------------------------------- CUSTOM EVENT HANDLERS --------------------------------------
-
-        // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting
-        // for the specified LampArray.
-        private void LampArray_AvailabilityChanged(LampArray sender, object args)
-        {
-            // Update UI on the UI thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateAttachedLampArrayDisplayList();
-            });
-        }
-
-        private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
-        {
-            lock (m_attachedLampArrays)
-            {
-                // Remove devices from our array that match the ID of the device from the event
-                m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
-            }
-
-            // Update UI on the UI thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateAttachedLampArrayDisplayList();
-                UpdatAvailableLampArrayDisplayList();
-            });
-
-
-        }
-
-        private async void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
-        {
-            string addedArrayID = args.Id;
-            string addedArrayName = args.Name;
-
-            if (addedArrayID == null)
-            {
-                return;
-            }
-
-            availableDevices.Add(args);
-
-            // Update UI on the UI thread. Only update the available devices since we might not attach to it.
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdatAvailableLampArrayDisplayList();
-            });
-
-        }
-
-        private async Task<LampArrayInfo?> Attach_To_DeviceAsync(DeviceInformation args)
-        {
-            var lampArray = await LampArray.FromIdAsync(args.Id); // This actually takes control of the device
-            var info = new LampArrayInfo(args.Id, args.Name, lampArray);
-
-            if (info.lampArray == null)
-            {
-                // Update on UI thread
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    ViewModel.DeviceStatusMessage = $"Status: Error initializing LampArray: \"{info.displayName}\"";
-                });
-                return null;
-            }
-
-            // Set up the AvailabilityChanged event callback
-            info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
-
-            // Add to the list (thread-safe)
-            lock (m_attachedLampArrays)
-            {
-                m_attachedLampArrays.Add(info);
-            }
-
-            // Update UI on the UI thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateAttachedLampArrayDisplayList();
-            });
-
-            return info;
-        }
-
-        private void OnEnumerationCompleted(DeviceWatcher sender, object args)
-        {
-            //DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
-        }
-
-        private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)
-        {
-            Console.WriteLine("DeviceWatcher stopped.");
-            ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Stopped.";
-
-            if (KeyStatesHandler.hookIsActive == true)
-            {
-                KeyStatesHandler.StopHook(); // Stop the keyboard hook 
-            }
-        }
 
         // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
         private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
@@ -499,7 +301,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorSetter.SetCurrentDevice(null);
             }
 
-            LampArrayInfo? selectedLampArrayInfo = await AttachAndGetSelectedDeviceAsync();
+            LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDevice_Async();
 
             if (selectedLampArrayInfo != null)
             {
