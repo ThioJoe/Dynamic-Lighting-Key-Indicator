@@ -39,6 +39,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // GUI Related
         List<string> devicesListForDropdown = [];
+        UserConfig currentConfig = new UserConfig();
 
         // Currently attached LampArrays
         private readonly List<LampArrayInfo> m_attachedLampArrays = new List<LampArrayInfo>();
@@ -46,8 +47,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private DeviceWatcher m_deviceWatcher;
         private Dictionary<int, string> deviceIndexDict = new Dictionary<int, string>();
-
         private readonly object _lock = new object();
+        
 
         public MainWindow()
         {
@@ -57,9 +58,10 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
             ViewModel.ColorSettings = new ColorSettings();
 
-            // TODO: Add check for user config to load here
-            UserConfig currentConfig = new UserConfig();
+            // Load the user config from file
+            currentConfig = currentConfig.ReadConfigurationFile() ?? new UserConfig();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
+            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor.R, currentConfig.StandardKeyColor.G, currentConfig.StandardKeyColor.B);
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -67,8 +69,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 new MonitoredKey(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
-
-            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor.R, currentConfig.StandardKeyColor.G, currentConfig.StandardKeyColor.B);
 
         }
 
@@ -206,7 +206,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private async void ShowErrorMessage(string message)
+        public async void ShowErrorMessage(string message)
         {
             ContentDialog errorDialog = new ContentDialog
             {
@@ -313,7 +313,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private void buttonSaveColors_Click(object sender, RoutedEventArgs e)
+        private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
             // Save the current color settings to the ViewModel
             ViewModel.ColorSettings.SetAllColorsFromGUI(ViewModel);
@@ -348,6 +348,13 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ColorSetter.SetInitialDefaultKeyboardColor(ColorSetter.CurrentDevice);
                 ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys, ColorSetter.CurrentDevice);
+            }
+
+            // Save the color settings to the configuration file
+            bool result = await currentConfig.WriteConfigurationFile_Async();
+            if (!result)
+            {
+                ShowErrorMessage("Failed to save the color settings to the configuration file.");
             }
         }
 

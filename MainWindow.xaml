@@ -134,10 +134,10 @@
         <Button Grid.Row="12" 
                 Margin="0,20,0,0"
                 HorizontalAlignment="Center"
-                Click="buttonSaveColors_Click">
+                Click="buttonSaveSettings_Click">
             <StackPanel Orientation="Horizontal">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" Margin="0,0,8,0"/>
-                <TextBlock Text="Save Color Settings"/>
+                <TextBlock Text="Save Settings"/>
             </StackPanel>
         </Button>
     </Grid>

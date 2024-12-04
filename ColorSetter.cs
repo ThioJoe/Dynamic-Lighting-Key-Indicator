@@ -85,9 +85,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 VirtualKey vkCode = (VirtualKey)key.key;
                 Windows.UI.Color color;
 
-                if (key.IsOn)
+                if (key.IsOn())
                 {
-                    if (key.IsOn)
+                    if (key.IsOn())
                     {
                         if (key.onColor != default)
                             color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);

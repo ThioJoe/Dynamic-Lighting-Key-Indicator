@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.UI;
 
@@ -12,7 +13,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
     internal static class KeyStatesHandler
     {
-
         // Keyboard hook constants
         private const int WH_KEYBOARD_LL = 13;
         private const int WM_KEYDOWN = 0x0100;
@@ -47,10 +47,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public class MonitoredKey
         {
+            // ------ Properties ------
+            [JsonInclude]
             public ToggleAbleKeys key;
+            [JsonInclude]
             public (int R, int G, int B) offColor;
+            [JsonInclude]
             public (int R, int G, int B) onColor;
+            public bool IsOn() => FetchKeyState((int)key);
 
+            // ------ Constructors ------
+            [JsonConstructor]
             public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B) onColor, (int R, int G, int B) offColor)
             {
                 this.key = key;
@@ -61,16 +68,14 @@ namespace Dynamic_Lighting_Key_Indicator
             public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor)
             {
                 this.key = key;
+                this.onColor = (onColor.R, onColor.G, onColor.B);
+                this.offColor = (offColor.R, offColor.G, offColor.B);
             }
 
-            public bool IsOn
-            {
-                get => FetchKeyState((int)key);
-            }
-
+            //------ Methods ------
             public Windows.UI.Color? GetColorObjCurrent()
-                    {
-                return Windows.UI.Color.FromArgb(255, (byte)(IsOn ? onColor.R : offColor.R), (byte)(IsOn ? onColor.G : offColor.G), (byte)(IsOn ? onColor.B : offColor.B));
+            {
+                return Windows.UI.Color.FromArgb(255, (byte)(IsOn() ? onColor.R : offColor.R), (byte)(IsOn() ? onColor.G : offColor.G), (byte)(IsOn() ? onColor.B : offColor.B));
             }
 
             public Windows.UI.Color GetColorObjOff()
@@ -90,7 +95,6 @@ namespace Dynamic_Lighting_Key_Indicator
             CapsLock = 0x14,
             ScrollLock = 0x91
         }
-
 
         // Win32 API imports
         [DllImport("user32.dll")]
@@ -163,7 +167,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private static bool FetchKeyState(int vkCode)
         {
             return (GetKeyState((int)vkCode) & 1) == 1;
-
         }
 
         // Function to stop the hook
