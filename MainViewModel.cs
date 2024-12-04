@@ -453,16 +453,22 @@ namespace Dynamic_Lighting_Key_Indicator
             switch (colorPropertyName)
             {
                 case "NumLockOnColor":
+                case "buttonNumLockOn":
                     return SyncNumLockOnColor;
                 case "NumLockOffColor":
+                case "buttonNumLockOff":
                     return SyncNumLockOffColor;
                 case "CapsLockOnColor":
+                case "buttonCapsLockOn":
                     return SyncCapsLockOnColor;
                 case "CapsLockOffColor":
+                case "buttonCapsLockOff":
                     return SyncCapsLockOffColor;
                 case "ScrollLockOnColor":
+                case "buttonScrollLockOn":
                     return SyncScrollLockOnColor;
                 case "ScrollLockOffColor":
+                case "buttonScrollLockOff":
                     return SyncScrollLockOffColor;
                 default:
                     return false;

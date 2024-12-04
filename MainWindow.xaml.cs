@@ -300,23 +300,6 @@ namespace Dynamic_Lighting_Key_Indicator
             buttonDefaultColor.Background = new SolidColorBrush(ViewModel.ColorSettings.DefaultColor);
         }
 
-        private void TemporarilyHideLinkedGlyph(Button button)
-        {
-            if (button == null)
-                return;
-
-            string glyph = MainViewModel.UnlinkedGlyph;
-            FontIcon? fontIcon = GetButtonGlyphObject(button);
-
-            if (fontIcon != null)
-            {
-                Microsoft.UI.Xaml.Media.FontFamily glyphFont = new Microsoft.UI.Xaml.Media.FontFamily("Segoe MDL2 Assets");
-                fontIcon.FontFamily = glyphFont;
-                fontIcon.Glyph = glyph;
-            }
-
-        }
-
         private void ForceUpdateAllButtonGlyphs()
         {
             // Update the sync glpyhs
@@ -325,7 +308,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (button == null)
                     return;
 
-                string glyph = ManuallyGetGlyph((string)button.Tag);
+                //string glyph = ManuallyGetGlyph((string)button.Tag);
+                string glyph = ViewModel.GetSyncGlyph_ByButtonObject(button);
                 FontIcon? fontIcon = GetButtonGlyphObject(button);
 
                 if (fontIcon != null)
@@ -335,39 +319,6 @@ namespace Dynamic_Lighting_Key_Indicator
                     fontIcon.Glyph = glyph;
                 }
             }
-        }
-
-        // Instead of using viewmodel methods, determine the glyphs here
-        private string ManuallyGetGlyph(string colorPropertyName)
-        {
-            bool syncSetting;
-            string glyph;
-            switch (colorPropertyName)
-            {
-                case "NumLockOnColor":
-                    syncSetting = ViewModel.ColorSettings.SyncNumLockOnColor;
-                    break;
-                case "NumLockOffColor":
-                    syncSetting = ViewModel.ColorSettings.SyncNumLockOffColor;
-                    break;
-                case "CapsLockOnColor":
-                    syncSetting = ViewModel.ColorSettings.SyncCapsLockOnColor;
-                    break;
-                case "CapsLockOffColor":
-                    syncSetting = ViewModel.ColorSettings.SyncCapsLockOffColor;
-                    break;
-                case "ScrollLockOnColor":
-                    syncSetting = ViewModel.ColorSettings.SyncScrollLockOnColor;
-                    break;
-                case "ScrollLockOffColor":
-                    syncSetting = ViewModel.ColorSettings.SyncScrollLockOffColor;
-                    break;
-                default:
-                    syncSetting = false;
-                    break;
-            }
-            glyph = syncSetting ? MainViewModel.LinkedGlyph : MainViewModel.UnlinkedGlyph;
-            return glyph;
         }
 
         private FontIcon? GetButtonGlyphObject(Button button)
