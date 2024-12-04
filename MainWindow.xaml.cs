@@ -321,9 +321,10 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        // Find the FontIcon object within the button, which has the glyph
         private FontIcon? GetButtonGlyphObject(Button button)
         {
-            // Find the FontIcon within the button and update its Glyph property
+            // If the FontIcon is nested in the button, find it
             if (button.Content is StackPanel stackPanel)
             {
                 foreach (var child in stackPanel.Children)
@@ -334,6 +335,13 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
             }
+            // If the FontIcon is set directly as the button content
+            else if (button.Content is FontIcon fontIcon)
+            {
+                return fontIcon;
+            }
+
+            // Otherwise not found
             return null;
         }
 
