@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml;
 using System;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Controls;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -291,14 +292,14 @@ namespace Dynamic_Lighting_Key_Indicator
     public class ColorSettings
     {
         // Properties as strings to store hex values for colors
-        public Windows.UI.Color ScrollLockOnColor { get; set; } = Windows.UI.Color.FromArgb(255, 255, 0, 0);
-        public Windows.UI.Color ScrollLockOffColor { get; set; } = Windows.UI.Color.FromArgb(255, 0, 0, 255);
-        public Windows.UI.Color CapsLockOnColor { get; set; } = Windows.UI.Color.FromArgb(255, 255, 0, 0);
-        public Windows.UI.Color CapsLockOffColor { get; set; } = Windows.UI.Color.FromArgb(255, 0, 0, 255);
-        public Windows.UI.Color NumLockOnColor { get; set; } = Windows.UI.Color.FromArgb(255, 255, 0, 0);
-        public Windows.UI.Color NumLockOffColor { get; set; } = Windows.UI.Color.FromArgb(255, 0, 0, 255);
-        public Windows.UI.Color DefaultColor { get; set; } = Windows.UI.Color.FromArgb(255, 0, 0, 255);
-        public int Brightness { get; set; } = 100;
+        public Windows.UI.Color ScrollLockOnColor { get; set; }
+        public Windows.UI.Color ScrollLockOffColor { get; set; }
+        public Windows.UI.Color CapsLockOnColor { get; set; }
+        public Windows.UI.Color CapsLockOffColor { get; set; }
+        public Windows.UI.Color NumLockOnColor { get; set; }
+        public Windows.UI.Color NumLockOffColor { get; set; }
+        public Windows.UI.Color DefaultColor { get; set; }
+        public int Brightness { get; set; }
 
         public Windows.UI.Color GetColorFromString(string color)
         {

@@ -70,6 +70,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
 
+            UpdateButtonBackgrounds();
+
             // If there's a device ID in the config, try to attach to it on startup, otherwise user will have to select a device
             if (!string.IsNullOrEmpty(currentConfig.DeviceId))
             {
@@ -283,6 +285,19 @@ namespace Dynamic_Lighting_Key_Indicator
             KeyStatesHandler.UpdateKeyStatus();
         }
 
+        // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
+        // This doesn't work when put in the viewmodel class for some reason
+        private void UpdateButtonBackgrounds()
+        {
+            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOnColor);
+            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOffColor);
+            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.CapsLockOnColor);
+            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.CapsLockOffColor);
+            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOnColor);
+            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOffColor);
+            buttonDefaultColor.Background = new SolidColorBrush(ViewModel.ColorSettings.DefaultColor);
+        }
+
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
         internal class LampArrayInfo
         {
@@ -423,19 +438,23 @@ namespace Dynamic_Lighting_Key_Indicator
             var button = sender as Button;
             var colorPropertyName = button.Tag as string;
 
+            // Update the button color from the settings as soon as the button is clicked. Also will be updated later
+            button.Background = new SolidColorBrush((Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel)); 
+
             var flyout = new Flyout();
             var colorPicker = new ColorPicker
             {
                 MinWidth = 300,
                 MinHeight = 400
             };
-
             var currentColor = (Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel);
             colorPicker.Color = currentColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {
                 ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
+
+                button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
             };
 
             flyout.Content = colorPicker;
