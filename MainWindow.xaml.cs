@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -402,26 +403,27 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            // Save the current color settings to the ViewModel
-            ViewModel.ColorSettings.SetAllColorsFromGUI(ViewModel);
+            ColorSettings colorSettings = ViewModel.ColorSettings;
 
-            ColorSetter.DefineKeyboardMainColor_FromName(ViewModel.ColorSettings.DefaultColor);
+            // Save the current color settings to the ViewModel
+            colorSettings.SetAllColorsFromGUI(ViewModel);
+            ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
 
             // Update the key states to reflect the new color settings
-            var scrollOnColor = (ViewModel.ColorSettings.ScrollLockOnColor.R, ViewModel.ColorSettings.ScrollLockOnColor.G, ViewModel.ColorSettings.ScrollLockOnColor.B);
-            var capsOnColor = (ViewModel.ColorSettings.CapsLockOnColor.R, ViewModel.ColorSettings.CapsLockOnColor.G, ViewModel.ColorSettings.CapsLockOnColor.B);
-            var numOnColor = (ViewModel.ColorSettings.NumLockOnColor.R, ViewModel.ColorSettings.NumLockOnColor.G, ViewModel.ColorSettings.NumLockOnColor.B);
-            var numOffColor = (ViewModel.ColorSettings.NumLockOffColor.R, ViewModel.ColorSettings.NumLockOffColor.G, ViewModel.ColorSettings.NumLockOffColor.B);
-            var capsOffColor = (ViewModel.ColorSettings.CapsLockOffColor.R, ViewModel.ColorSettings.CapsLockOffColor.G, ViewModel.ColorSettings.CapsLockOffColor.B);
-            var scrollOffColor = (ViewModel.ColorSettings.ScrollLockOffColor.R, ViewModel.ColorSettings.ScrollLockOffColor.G, ViewModel.ColorSettings.ScrollLockOffColor.B);
+            var scrollOnColor = (colorSettings.ScrollLockOnColor.R, colorSettings.ScrollLockOnColor.G, colorSettings.ScrollLockOnColor.B);
+            var capsOnColor = (colorSettings.CapsLockOnColor.R, colorSettings.CapsLockOnColor.G, colorSettings.CapsLockOnColor.B);
+            var numOnColor = (colorSettings.NumLockOnColor.R, colorSettings.NumLockOnColor.G, colorSettings.NumLockOnColor.B);
+            var numOffColor = (colorSettings.NumLockOffColor.R, colorSettings.NumLockOffColor.G, colorSettings.NumLockOffColor.B);
+            var capsOffColor = (colorSettings.CapsLockOffColor.R, colorSettings.CapsLockOffColor.G, colorSettings.CapsLockOffColor.B);
+            var scrollOffColor = (colorSettings.ScrollLockOffColor.R, colorSettings.ScrollLockOffColor.G, colorSettings.ScrollLockOffColor.B);
 
-            var defaultColor = (ViewModel.ColorSettings.DefaultColor.R, ViewModel.ColorSettings.DefaultColor.G, ViewModel.ColorSettings.DefaultColor.B);
+            var defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
 
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredKeysList = new List<MonitoredKey> {
-                new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor),
-                new MonitoredKey(VK.CapsLock, onColor: capsOnColor, offColor: capsOffColor),
-                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor)
+                new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor, onColorTiedToStandard: colorSettings.SyncNumLockOnColor, offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
+                new MonitoredKey(VK.CapsLock, onColor: capsOnColor, offColor: capsOffColor, onColorTiedToStandard: colorSettings.SyncCapsLockOnColor, offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
+                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor, onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
             };
 
             KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
@@ -444,15 +446,37 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        // This is the button within the flyout  menu
+        private void SyncToStandardColor_Click(string colorPropertyName, ColorPicker colorPicker, Button parentButton, Flyout colorPickerFlyout)
+        {
+            string defaultColorPropertyName = "DefaultColor";
+            var defaultColor = (Windows.UI.Color)ViewModel.GetType().GetProperty(defaultColorPropertyName).GetValue(ViewModel);
+            colorPicker.Color = defaultColor;
+
+            colorPicker.ColorChanged += (s, args) =>
+            {
+                ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
+                parentButton.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the default color
+            };
+
+            ViewModel.UpdateSyncSetting(syncSetting: true, colorPropertyName: colorPropertyName);
+
+            // Close the flyout
+            colorPickerFlyout.Hide();
+        }
+
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
             var colorPropertyName = button.Tag as string;
+            ViewModel.UpdateSyncSetting(syncSetting: false, colorPropertyName: colorPropertyName); // Disabling syncing if the user opens the color picker
 
             // Update the button color from the settings as soon as the button is clicked. Also will be updated later
-            button.Background = new SolidColorBrush((Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel)); 
+            button.Background = new SolidColorBrush((Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel));
 
             var flyout = new Flyout();
+            var stackPanel = new StackPanel();
+
             var colorPicker = new ColorPicker
             {
                 MinWidth = 300,
@@ -464,11 +488,44 @@ namespace Dynamic_Lighting_Key_Indicator
             colorPicker.ColorChanged += (s, args) =>
             {
                 ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
-
                 button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
+
+                // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
+                if (colorPropertyName == "DefaultColor")
+                {
+                    // This janky, should be refactored to a loop with a list of keys but this will work for now
+                    if (ViewModel.ColorSettings.SyncNumLockOnColor)
+                        buttonNumLockOn.Background = new SolidColorBrush(args.NewColor);
+                    if (ViewModel.ColorSettings.SyncNumLockOffColor)
+                        buttonNumLockOff.Background = new SolidColorBrush(args.NewColor);
+                    if (ViewModel.ColorSettings.SyncCapsLockOnColor)
+                        buttonCapsLockOn.Background = new SolidColorBrush(args.NewColor);
+                    if (ViewModel.ColorSettings.SyncCapsLockOffColor)
+                        buttonCapsLockOff.Background = new SolidColorBrush(args.NewColor);
+                    if (ViewModel.ColorSettings.SyncScrollLockOnColor)
+                        buttonScrollLockOn.Background = new SolidColorBrush(args.NewColor);
+                    if (ViewModel.ColorSettings.SyncScrollLockOffColor)
+                        buttonScrollLockOff.Background = new SolidColorBrush(args.NewColor);
+                }
             };
 
-            flyout.Content = colorPicker;
+            // Create a button in the flyout to sync the color setting to the default/standard color
+            var syncButton = new Button
+            {
+                Content = "Sync to default color",
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            // Attach the event handler to the button's Click event
+            syncButton.Click += (s, args) => SyncToStandardColor_Click(colorPropertyName, colorPicker, button, flyout);
+
+            stackPanel.Children.Add(colorPicker);
+
+            // Add the sync button if it's not the default color button
+            if (colorPropertyName != "DefaultColor")
+                stackPanel.Children.Add(syncButton);
+
+            flyout.Content = stackPanel;
             flyout.ShowAt(button);
         }
 

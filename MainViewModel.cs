@@ -173,6 +173,43 @@ namespace Dynamic_Lighting_Key_Indicator
             set => ColorSettings.DefaultColor = ColorSettings.GetColorFromString(value);
         }
 
+        public bool SyncScrollLockOnColor
+        {
+            get => ColorSettings.SyncScrollLockOnColor;
+            set => ColorSettings.SyncScrollLockOnColor = value;
+        }
+
+        public bool SyncScrollLockOffColor
+        {
+            get => ColorSettings.SyncScrollLockOffColor;
+            set => ColorSettings.SyncScrollLockOffColor = value;
+        }
+
+        public bool SyncCapsLockOnColor
+        {
+            get => ColorSettings.SyncCapsLockOnColor;
+            set => ColorSettings.SyncCapsLockOnColor = value;
+        }
+
+        public bool SyncCapsLockOffColor
+        {
+            get => ColorSettings.SyncCapsLockOffColor;
+            set => ColorSettings.SyncCapsLockOffColor = value;
+        }
+
+        public bool SyncNumLockOnColor
+        {
+            get => ColorSettings.SyncNumLockOnColor;
+            set => ColorSettings.SyncNumLockOnColor = value;
+        }
+
+        public bool SyncNumLockOffColor
+        {
+            get => ColorSettings.SyncNumLockOffColor;
+            set => ColorSettings.SyncNumLockOffColor = value;
+        }
+
+
         // Color properties
         public Windows.UI.Color ScrollLockOnColor
         {
@@ -286,6 +323,35 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public string DefaultColorHex => ColorSettings.AsString(ColorSettings.DefaultColor);
 
+        // ------ Other methods ------
+        public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
+        {
+            // Update the relevant sync setting in ViewModel based on the colorPropertyName
+            switch (colorPropertyName)
+            {
+                case "NumLockOnColor":
+                    SyncNumLockOnColor = syncSetting;
+                    break;
+                case "NumLockOffColor":
+                    SyncScrollLockOffColor = syncSetting;
+                    break;
+                case "CapsLockOnColor":
+                    SyncScrollLockOffColor = syncSetting;
+                    break;
+                case "CapsLockOffColor":
+                    SyncScrollLockOffColor = syncSetting;
+                    break;
+                case "ScrollLockOnColor":
+                    SyncScrollLockOffColor = syncSetting;
+                    break;
+                case "ScrollLockOffColor":
+                    SyncScrollLockOffColor = syncSetting;
+                    break;
+                default:
+                    break;
+            }
+        }
+
 
     } // ----------------------- End of MainViewModel -----------------------
 
@@ -300,6 +366,15 @@ namespace Dynamic_Lighting_Key_Indicator
         public Windows.UI.Color NumLockOffColor { get; set; }
         public Windows.UI.Color DefaultColor { get; set; }
         public int Brightness { get; set; }
+
+        // Settings to sync keys to default
+        public bool SyncScrollLockOnColor { get; set; }
+        public bool SyncScrollLockOffColor { get; set; }
+        public bool SyncCapsLockOnColor { get; set; }
+        public bool SyncCapsLockOffColor { get; set; }
+        public bool SyncNumLockOnColor { get; set; }
+        public bool SyncNumLockOffColor { get; set; }
+
 
         public Windows.UI.Color GetColorFromString(string color)
         {
@@ -324,58 +399,24 @@ namespace Dynamic_Lighting_Key_Indicator
             return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
         }
 
-        // Methods to set the colors. Accepts hex strings with or without the # symbol
-        public void SetScrollLockOnColor(string color)
-        {
-            ScrollLockOnColor = GetColorFromString(color);
-        }
-
-        public void SetScrollLockOffColor(string color)
-        {
-            ScrollLockOffColor = GetColorFromString(color);
-        }
-
-        public void SetCapsLockOnColor(string color)
-        {
-            CapsLockOnColor = GetColorFromString(color);
-        }
-
-        public void SetCapsLockOffColor(string color)
-        {
-            CapsLockOffColor = GetColorFromString(color);
-        }
-
-        public void SetNumLockOnColor(string color)
-        {
-            NumLockOnColor = GetColorFromString(color);
-        }
-
-        public void SetNumLockOffColor(string color)
-        {
-            NumLockOffColor = GetColorFromString(color);
-        }
-
-        public void SetDefaultColor(string color)
-        {
-            DefaultColor = GetColorFromString(color);
-        }
-
-        public void SetBrightness(int brightness)
-        {
-            Brightness = brightness;
-        }
-
         // Set all the colors from the text boxes in the GUI
         public void SetAllColorsFromGUI(MainViewModel viewModel)
         {
-            SetScrollLockOnColor(viewModel.TextScrollLockOnColor);
-            SetScrollLockOffColor(viewModel.TextScrollLockOffColor);
-            SetCapsLockOnColor(viewModel.TextCapsLockOnColor);
-            SetCapsLockOffColor(viewModel.TextCapsLockOffColor);
-            SetNumLockOnColor(viewModel.TextNumLockOnColor);
-            SetNumLockOffColor(viewModel.TextNumLockOffColor);
-            SetDefaultColor(viewModel.TextDefaultColor);
-            SetBrightness(viewModel.ColorSettings.Brightness);
+            ScrollLockOnColor = GetColorFromString(viewModel.TextScrollLockOnColor);
+            ScrollLockOffColor = GetColorFromString(viewModel.TextScrollLockOffColor);
+            CapsLockOnColor = GetColorFromString(viewModel.TextCapsLockOnColor);
+            CapsLockOffColor = GetColorFromString(viewModel.TextCapsLockOffColor);
+            NumLockOnColor = GetColorFromString(viewModel.TextNumLockOnColor);
+            NumLockOffColor = GetColorFromString(viewModel.TextNumLockOffColor);
+            DefaultColor = GetColorFromString(viewModel.TextDefaultColor);
+            Brightness = viewModel.ColorSettings.Brightness;
+
+            SyncScrollLockOnColor = viewModel.SyncScrollLockOnColor;
+            SyncScrollLockOffColor = viewModel.SyncScrollLockOffColor;
+            SyncCapsLockOnColor = viewModel.SyncCapsLockOnColor;
+            SyncCapsLockOffColor = viewModel.SyncCapsLockOffColor;
+            SyncNumLockOnColor = viewModel.SyncNumLockOnColor;
+            SyncNumLockOffColor = viewModel.SyncNumLockOffColor;
         }
 
         internal void SetAllColorsFromUserConfig(UserConfig userConfig)
