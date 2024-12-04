@@ -392,17 +392,29 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 Windows.UI.Color onColor;
                 Windows.UI.Color offColor;
+                bool onColorTiedToStandard = monitoredKey.onColorTiedToStandard;
+                bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
 
+                // Sync colors to default if applicable
+                if (onColorTiedToStandard)
+                    onColor = DefaultColor;
+
+                if (offColorTiedToStandard)
+                    offColor = DefaultColor;
+
+                // On color
                 if (monitoredKey.onColor.Equals(default((int, int, int))))
                     onColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
                 else
                     onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
 
+                // Off color
                 if (monitoredKey.offColor.Equals(default((int, int, int))))
                     offColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
                 else
                     offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
 
+                // Apply the colors to the correct properties
                 switch (monitoredKey.key)
                 {
                     case VK.NumLock:

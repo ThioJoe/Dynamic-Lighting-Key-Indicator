@@ -35,15 +35,16 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void UpdateMonitoredKeyColors(Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)> keys)
+        public static void UpdateMonitoredKeyColors((int R, int G, int B) standardColor, List<MonitoredKey> keys)
         {
-            foreach (var key in keys)
+            foreach (var keyObj in keys)
             {
-                if (monitoredKeys.Any(mk => (int)mk.key == (int)key.Key))
+                // Loop through to find the matching key from the monitored keys list, vs the one passed in
+                if (monitoredKeys.Any(mk => (int)mk.key == (int)keyObj.key))
                 {
-                    var mk = monitoredKeys.First(mk => (int)mk.key == (int)key.Key);
-                    mk.onColor = (key.Value.onColor.R, key.Value.onColor.G, key.Value.onColor.B);
-                    mk.offColor = (key.Value.offColor.R, key.Value.offColor.G, key.Value.offColor.B);
+                    var mk = monitoredKeys.First(mk => (int)mk.key == (int)keyObj.key);
+                    mk.onColor = (keyObj.onColor.R, keyObj.onColor.G, keyObj.onColor.B);
+                    mk.offColor = (keyObj.offColor.R, keyObj.offColor.G, keyObj.offColor.B);
                 }
             }
         }
@@ -57,22 +58,30 @@ namespace Dynamic_Lighting_Key_Indicator
             public (int R, int G, int B) offColor;
             [JsonInclude]
             public (int R, int G, int B) onColor;
+            [JsonInclude]
+            public bool onColorTiedToStandard = false;
+            [JsonInclude]
+            public bool offColorTiedToStandard = false;
             public bool IsOn() => FetchKeyState((int)key);
 
             // ------ Constructors ------
             [JsonConstructor]
-            public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B) onColor, (int R, int G, int B) offColor)
+            public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B) onColor, (int R, int G, int B) offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
             {
                 this.key = key;
                 this.offColor = offColor;
                 this.onColor = onColor;
+                this.onColorTiedToStandard = onColorTiedToStandard;
+                this.offColorTiedToStandard = offColorTiedToStandard;
             }
 
-            public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor)
+            public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
             {
                 this.key = key;
                 this.onColor = (onColor.R, onColor.G, onColor.B);
                 this.offColor = (offColor.R, offColor.G, offColor.B);
+                this.onColorTiedToStandard = onColorTiedToStandard;
+                this.offColorTiedToStandard = offColorTiedToStandard;
             }
 
             //------ Methods ------

@@ -417,21 +417,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
             var defaultColor = (ViewModel.ColorSettings.DefaultColor.R, ViewModel.ColorSettings.DefaultColor.G, ViewModel.ColorSettings.DefaultColor.B);
 
-            KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
+            // TODO: Add binding to new settings to link on/off colors to standard color
+            List<MonitoredKey> monitoredKeysList = new List<MonitoredKey> {
                 new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor),
                 new MonitoredKey(VK.CapsLock, onColor: capsOnColor, offColor: capsOffColor),
                 new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor)
-            });
-
-            Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)> colorUpdateDict = new Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)>
-            {
-                { VK.NumLock,       (onColor: ViewModel.ColorSettings.NumLockOnColor,       offColor: ViewModel.ColorSettings.NumLockOffColor)      },
-                { VK.CapsLock,      (onColor: ViewModel.ColorSettings.CapsLockOnColor,      offColor: ViewModel.ColorSettings.CapsLockOffColor)     },
-                { VK.ScrollLock,    (onColor: ViewModel.ColorSettings.ScrollLockOnColor,    offColor: ViewModel.ColorSettings.ScrollLockOffColor)   }
             };
 
-            KeyStatesHandler.UpdateMonitoredKeyColors(colorUpdateDict);
-            currentConfig = new UserConfig(defaultColor, colorUpdateDict);
+            KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
+
+            KeyStatesHandler.UpdateMonitoredKeyColors(defaultColor, monitoredKeysList);
+            currentConfig = new UserConfig(defaultColor, monitoredKeysList);
 
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
