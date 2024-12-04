@@ -80,6 +80,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public UserConfig? ReadConfigurationFile()
         {
+            UserConfig? config;
             try
             {
                 var configFileTask = localFolder.GetFileAsync(configFileName).AsTask();
@@ -90,14 +91,36 @@ namespace Dynamic_Lighting_Key_Indicator
                 configStringTask.Wait();
                 var configString = configStringTask.Result;
 
-                var config = System.Text.Json.JsonSerializer.Deserialize<UserConfig>(json: configString, options: jsonSerializerOptions);
-                return config;
+                config = System.Text.Json.JsonSerializer.Deserialize<UserConfig>(json: configString, options: jsonSerializerOptions);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 return null;
             }
+
+            if (config == null)
+                return null;
+            else
+                return ValidateConfigSettings(config);
+        }
+
+        private static UserConfig ValidateConfigSettings(UserConfig config)
+        {
+            // Loop through each key
+            if (config.MonitoredKeysAndColors != null)
+            {
+                foreach (var key in config.MonitoredKeysAndColors)
+                {
+                    // If the key is tied to the standard color, set the color to the standard color
+                    if (key.onColorTiedToStandard)
+                        key.onColor = config.StandardKeyColor;
+
+                    if (key.offColorTiedToStandard)
+                        key.offColor = config.StandardKeyColor;
+                }
+            }
+            return config;
         }
 
         // ----------------- General Methods ------------------

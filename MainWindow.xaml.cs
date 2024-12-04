@@ -479,6 +479,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
             ForceUpdateAllButtonGlyphs();
 
+            if (ColorSetter.CurrentDevice != null) {
+                currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
+            }
+
             // Save the color settings to the configuration file
             bool result = await currentConfig.WriteConfigurationFile_Async();
             if (!result)
