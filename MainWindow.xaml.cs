@@ -418,6 +418,31 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private void ColorButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var colorPropertyName = button.Tag as string;
+
+            var flyout = new Flyout();
+            var colorPicker = new ColorPicker
+            {
+                MinWidth = 300,
+                MinHeight = 400
+            };
+
+            var currentColor = (Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel);
+            colorPicker.Color = currentColor;
+
+            colorPicker.ColorChanged += (s, args) =>
+            {
+                ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
+            };
+
+            flyout.Content = colorPicker;
+            flyout.ShowAt(button);
+        }
+
+
         // ---------------------------------------------------------------------------------------------------
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml;
 using System;
+using Microsoft.UI.Xaml.Media;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -170,7 +171,122 @@ namespace Dynamic_Lighting_Key_Indicator
             get => ColorSettings.AsString(ColorSettings.DefaultColor);
             set => ColorSettings.DefaultColor = ColorSettings.GetColorFromString(value);
         }
-    }
+
+        // Color properties
+        public Windows.UI.Color ScrollLockOnColor
+        {
+            get => ColorSettings.ScrollLockOnColor;
+            set
+            {
+                if (ColorSettings.ScrollLockOnColor != value)
+                {
+                    ColorSettings.ScrollLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ScrollLockOnColorHex));
+                }
+            }
+        }
+
+        public string ScrollLockOnColorHex => ColorSettings.AsString(ColorSettings.ScrollLockOnColor);
+
+        public Windows.UI.Color ScrollLockOffColor
+        {
+            get => ColorSettings.ScrollLockOffColor;
+            set
+            {
+                if (ColorSettings.ScrollLockOffColor != value)
+                {
+                    ColorSettings.ScrollLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ScrollLockOffColorHex));
+                }
+            }
+        }
+
+        public string ScrollLockOffColorHex => ColorSettings.AsString(ColorSettings.ScrollLockOffColor);
+
+        public Windows.UI.Color CapsLockOnColor
+        {
+            get => ColorSettings.CapsLockOnColor;
+            set
+            {
+                if (ColorSettings.CapsLockOnColor != value)
+                {
+                    ColorSettings.CapsLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CapsLockOnColorHex));
+                }
+            }
+        }
+
+        public string CapsLockOnColorHex => ColorSettings.AsString(ColorSettings.CapsLockOnColor);
+
+        public Windows.UI.Color CapsLockOffColor
+        {
+            get => ColorSettings.CapsLockOffColor;
+            set
+            {
+                if (ColorSettings.CapsLockOffColor != value)
+                {
+                    ColorSettings.CapsLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CapsLockOffColorHex));
+                }
+            }
+        }
+
+        public string CapsLockOffColorHex => ColorSettings.AsString(ColorSettings.CapsLockOffColor);
+
+        public Windows.UI.Color NumLockOnColor
+        {
+            get => ColorSettings.NumLockOnColor;
+            set
+            {
+                if (ColorSettings.NumLockOnColor != value)
+                {
+                    ColorSettings.NumLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(NumLockOnColorHex));
+                }
+            }
+        }
+
+        public string NumLockOnColorHex => ColorSettings.AsString(ColorSettings.NumLockOnColor);
+
+        public Windows.UI.Color NumLockOffColor
+        {
+            get => ColorSettings.NumLockOffColor;
+            set
+            {
+                if (ColorSettings.NumLockOffColor != value)
+                {
+                    ColorSettings.NumLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(NumLockOffColorHex));
+                }
+            }
+        }
+
+        public string NumLockOffColorHex => ColorSettings.AsString(ColorSettings.NumLockOffColor);
+
+        public Windows.UI.Color DefaultColor
+        {
+            get => ColorSettings.DefaultColor;
+            set
+            {
+                if (ColorSettings.DefaultColor != value)
+                {
+                    ColorSettings.DefaultColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(DefaultColorHex));
+                }
+            }
+        }
+
+        public string DefaultColorHex => ColorSettings.AsString(ColorSettings.DefaultColor);
+
+
+    } // ----------------------- End of MainViewModel -----------------------
 
     public class ColorSettings
     {
