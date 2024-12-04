@@ -393,7 +393,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Save the current color settings to the ViewModel
             ViewModel.ColorSettings.SetAllColorsFromGUI(ViewModel);
 
-            ColorSetter.DefineKeyboardMainColor_FromNameAndBrightness(ViewModel.ColorSettings.DefaultColor, ViewModel.ColorSettings.Brightness);
+            ColorSetter.DefineKeyboardMainColor_FromName(ViewModel.ColorSettings.DefaultColor);
 
             // Update the key states to reflect the new color settings
             var scrollOnColor = (ViewModel.ColorSettings.ScrollLockOnColor.R, ViewModel.ColorSettings.ScrollLockOnColor.G, ViewModel.ColorSettings.ScrollLockOnColor.B);
@@ -402,6 +402,8 @@ namespace Dynamic_Lighting_Key_Indicator
             var numOffColor = (ViewModel.ColorSettings.NumLockOffColor.R, ViewModel.ColorSettings.NumLockOffColor.G, ViewModel.ColorSettings.NumLockOffColor.B);
             var capsOffColor = (ViewModel.ColorSettings.CapsLockOffColor.R, ViewModel.ColorSettings.CapsLockOffColor.G, ViewModel.ColorSettings.CapsLockOffColor.B);
             var scrollOffColor = (ViewModel.ColorSettings.ScrollLockOffColor.R, ViewModel.ColorSettings.ScrollLockOffColor.G, ViewModel.ColorSettings.ScrollLockOffColor.B);
+
+            var defaultColor = (ViewModel.ColorSettings.DefaultColor.R, ViewModel.ColorSettings.DefaultColor.G, ViewModel.ColorSettings.DefaultColor.B);
 
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
                 new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor),
@@ -417,6 +419,7 @@ namespace Dynamic_Lighting_Key_Indicator
             };
 
             KeyStatesHandler.UpdateMonitoredKeyColors(colorUpdateDict);
+            currentConfig = new UserConfig(defaultColor, colorUpdateDict);
 
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)

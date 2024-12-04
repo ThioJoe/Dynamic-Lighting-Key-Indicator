@@ -26,6 +26,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void SetMonitoredKeys(List<MonitoredKey> keys)
         {
+            // Clear the list and add the new keys
+            monitoredKeys.Clear();
+
             foreach (var key in keys)
             {
                 monitoredKeys.Add(key);

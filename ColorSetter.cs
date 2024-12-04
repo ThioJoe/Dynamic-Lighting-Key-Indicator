@@ -24,31 +24,9 @@ namespace Dynamic_Lighting_Key_Indicator
             _keyboardMainColor = Windows.UI.Color.FromArgb(255, (byte)R, (byte)G, (byte)B);
         }
 
-        public static void DefineKeyboardMainColor_FromNameAndBrightness(Windows.UI.Color color, int brightnessPercent)
+        public static void DefineKeyboardMainColor_FromName(Windows.UI.Color color)
         {
-            if (brightnessPercent < 0 || brightnessPercent > 100)
-            {
-                throw new ArgumentOutOfRangeException("Brightness must be between 0 and 100.");
-            }
-
-            int CalcNewChannelValue(int channelValue)
-            {
-                float newVal = channelValue * brightnessPercent / 100;
-                int newValInt = (int)Math.Round(newVal); // Round to ensure within valid range to pass in to Color.FromArgb
-
-                if (newValInt < 0)
-                    return 0;
-                else if (newValInt > 255)
-                    return 255;
-                else
-                    return newValInt;
-            }
-
-            int r = CalcNewChannelValue(color.R);
-            int g = CalcNewChannelValue(color.G);
-            int b = CalcNewChannelValue(color.B);
-
-            _keyboardMainColor = brightnessPercent == 100 ? color : Windows.UI.Color.FromArgb(255, (byte)r, (byte)g, (byte)b);
+            _keyboardMainColor = color;
         }
 
         public static void SetCurrentDevice(LampArray device)

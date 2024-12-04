@@ -136,10 +136,6 @@
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
             <Button x:Name="buttonDefaultColor" Grid.Row="4" Grid.Column="1" Width="40" Height="40" Background="{Binding DefaultColor, Converter={StaticResource ColorToBrushConverter}}" Click="ColorButton_Click" Tag="DefaultColor"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
-
-            <!-- Brightness -->
-            <TextBlock Grid.Row="5" Grid.Column="0" Text="Brightness:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Slider Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="4" Minimum="0" Maximum="100" Value="{x:Bind ViewModel.ColorSettings.Brightness, Mode=TwoWay}" Margin="5,2"/>
         </Grid>
 
         <!-- Save Button -->

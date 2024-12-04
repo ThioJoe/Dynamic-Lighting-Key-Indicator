@@ -62,6 +62,25 @@ namespace Dynamic_Lighting_Key_Indicator
             MonitoredKeysAndColors = monitoredKeysAndColors;
         }
 
+        // Constructor that takes same format as KeyStatesHandler.UpdateMonitoredKeyColors for easy simultaneous update
+        public UserConfig((int R, int G, int B) standardKeyColor, Dictionary<ToggleAbleKeys, (Windows.UI.Color onColor, Windows.UI.Color offColor)> colorUpdateDict)
+        {
+            Brightness = DefaultBrightness; // Remnant from old code
+            StandardKeyColor = standardKeyColor;
+
+            MonitoredKeysAndColors = new List<MonitoredKey>();
+            foreach (var key in colorUpdateDict)
+            {
+                MonitoredKeysAndColors.Add(
+                    new MonitoredKey(
+                            key: key.Key, 
+                            onColor: (key.Value.onColor.R, key.Value.onColor.G, key.Value.onColor.B), 
+                            offColor: (key.Value.offColor.R, key.Value.offColor.G, key.Value.offColor.B)
+                    )
+                );
+            }
+        }
+
         // --------------------------- Read / Write Methods ---------------------------
         public async Task<bool> WriteConfigurationFile_Async()
         {
