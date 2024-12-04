@@ -47,6 +47,22 @@ namespace Dynamic_Lighting_Key_Indicator
             AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
 
             appWindow.Resize(new SizeInt32(1200, 1200));
+
+            // Handle command line arguments
+            string arguments = args.Arguments;
+            if (!string.IsNullOrEmpty(arguments))
+            {
+                ProcessArguments(arguments);
+            }
+        }
+
+        private void ProcessArguments(string arguments)
+        {
+            string[] argsArray = arguments.Split(' ');
+            foreach (string arg in argsArray)
+            {
+                // Nothing here yet
+            }
         }
 
         private Window? m_window;
