@@ -466,11 +466,25 @@ namespace Dynamic_Lighting_Key_Indicator
 
             var defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
 
+            // Sync to defaults if set to do so. Janky but whatever
+            if (colorSettings.SyncNumLockOnColor)
+                numOnColor = defaultColor;
+            if (colorSettings.SyncNumLockOffColor)
+                numOffColor = defaultColor;
+            if (colorSettings.SyncCapsLockOnColor)
+                capsOnColor = defaultColor;
+            if (colorSettings.SyncCapsLockOffColor)
+                capsOffColor = defaultColor;
+            if (colorSettings.SyncScrollLockOnColor)
+                scrollOnColor = defaultColor;
+            if (colorSettings.SyncScrollLockOffColor)
+                scrollOffColor = defaultColor;
+
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredKeysList = new List<MonitoredKey> {
-                new MonitoredKey(VK.NumLock, onColor: numOnColor, offColor: numOffColor, onColorTiedToStandard: colorSettings.SyncNumLockOnColor, offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
-                new MonitoredKey(VK.CapsLock, onColor: capsOnColor, offColor: capsOffColor, onColorTiedToStandard: colorSettings.SyncCapsLockOnColor, offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
-                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor, onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
+                new MonitoredKey(VK.NumLock,    onColor: numOnColor,    offColor: numOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
+                new MonitoredKey(VK.CapsLock,   onColor: capsOnColor,   offColor: capsOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
+                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
             };
 
             KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);

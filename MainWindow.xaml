@@ -13,11 +13,11 @@
         <Grid.Resources>
             <!-- Style for color selection buttons -->
             <Style x:Key="ColorButtonStyle" TargetType="Button">
-                <Setter Property="Width" Value="40"/>
-                <Setter Property="Height" Value="40"/>
+                <Setter Property="Width" Value="45"/>
+                <Setter Property="Height" Value="45"/>
                 <Setter Property="HorizontalAlignment" Value="Center"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Margin" Value="3"/>
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="4"/>
             </Style>
