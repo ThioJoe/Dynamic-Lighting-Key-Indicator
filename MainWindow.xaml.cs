@@ -71,7 +71,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
 
-            UpdateButtonBackgrounds();
+            ForceUpdateButtonBackgrounds();
+            ForceUpdateAllButtonGlyphs();
 
             // If there's a device ID in the config, try to attach to it on startup, otherwise user will have to select a device
             if (!string.IsNullOrEmpty(currentConfig.DeviceId))
@@ -288,7 +289,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
         // This doesn't work when put in the viewmodel class for some reason
-        private void UpdateButtonBackgrounds()
+        private void ForceUpdateButtonBackgrounds()
         {
             buttonNumLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOnColor);
             buttonNumLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOffColor);
@@ -297,6 +298,92 @@ namespace Dynamic_Lighting_Key_Indicator
             buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOnColor);
             buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOffColor);
             buttonDefaultColor.Background = new SolidColorBrush(ViewModel.ColorSettings.DefaultColor);
+        }
+
+        private void TemporarilyHideLinkedGlyph(Button button)
+        {
+            if (button == null)
+                return;
+
+            string glyph = MainViewModel.UnlinkedGlyph;
+            FontIcon? fontIcon = GetButtonGlyphObject(button);
+
+            if (fontIcon != null)
+            {
+                Microsoft.UI.Xaml.Media.FontFamily glyphFont = new Microsoft.UI.Xaml.Media.FontFamily("Segoe MDL2 Assets");
+                fontIcon.FontFamily = glyphFont;
+                fontIcon.Glyph = glyph;
+            }
+
+        }
+
+        private void ForceUpdateAllButtonGlyphs()
+        {
+            // Update the sync glpyhs
+            foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
+            {
+                if (button == null)
+                    return;
+
+                string glyph = ManuallyGetGlyph((string)button.Tag);
+                FontIcon? fontIcon = GetButtonGlyphObject(button);
+
+                if (fontIcon != null)
+                {
+                    Microsoft.UI.Xaml.Media.FontFamily glyphFont = new Microsoft.UI.Xaml.Media.FontFamily("Segoe MDL2 Assets");
+                    fontIcon.FontFamily = glyphFont;
+                    fontIcon.Glyph = glyph;
+                }
+            }
+        }
+
+        // Instead of using viewmodel methods, determine the glyphs here
+        private string ManuallyGetGlyph(string colorPropertyName)
+        {
+            bool syncSetting;
+            string glyph;
+            switch (colorPropertyName)
+            {
+                case "NumLockOnColor":
+                    syncSetting = ViewModel.ColorSettings.SyncNumLockOnColor;
+                    break;
+                case "NumLockOffColor":
+                    syncSetting = ViewModel.ColorSettings.SyncNumLockOffColor;
+                    break;
+                case "CapsLockOnColor":
+                    syncSetting = ViewModel.ColorSettings.SyncCapsLockOnColor;
+                    break;
+                case "CapsLockOffColor":
+                    syncSetting = ViewModel.ColorSettings.SyncCapsLockOffColor;
+                    break;
+                case "ScrollLockOnColor":
+                    syncSetting = ViewModel.ColorSettings.SyncScrollLockOnColor;
+                    break;
+                case "ScrollLockOffColor":
+                    syncSetting = ViewModel.ColorSettings.SyncScrollLockOffColor;
+                    break;
+                default:
+                    syncSetting = false;
+                    break;
+            }
+            glyph = syncSetting ? MainViewModel.LinkedGlyph : MainViewModel.UnlinkedGlyph;
+            return glyph;
+        }
+
+        private FontIcon? GetButtonGlyphObject(Button button)
+        {
+            // Find the FontIcon within the button and update its Glyph property
+            if (button.Content is StackPanel stackPanel)
+            {
+                foreach (var child in stackPanel.Children)
+                {
+                    if (child is FontIcon fontIcon)
+                    {
+                        return fontIcon;
+                    }
+                }
+            }
+            return null;
         }
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
@@ -398,7 +485,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             currentConfig.RestoreDefault();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
-            UpdateButtonBackgrounds();
+            ForceUpdateButtonBackgrounds();
+            ForceUpdateAllButtonGlyphs();
         }
 
         private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
@@ -438,6 +526,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys, ColorSetter.CurrentDevice);
             }
 
+            ForceUpdateAllButtonGlyphs();
+
             // Save the color settings to the configuration file
             bool result = await currentConfig.WriteConfigurationFile_Async();
             if (!result)
@@ -461,6 +551,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             ViewModel.UpdateSyncSetting(syncSetting: true, colorPropertyName: colorPropertyName);
 
+            ForceUpdateAllButtonGlyphs();
+
             // Close the flyout
             colorPickerFlyout.Hide();
         }
@@ -470,6 +562,7 @@ namespace Dynamic_Lighting_Key_Indicator
             var button = sender as Button;
             var colorPropertyName = button.Tag as string;
             ViewModel.UpdateSyncSetting(syncSetting: false, colorPropertyName: colorPropertyName); // Disabling syncing if the user opens the color picker
+            ForceUpdateAllButtonGlyphs();
 
             // Update the button color from the settings as soon as the button is clicked. Also will be updated later
             button.Background = new SolidColorBrush((Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel));

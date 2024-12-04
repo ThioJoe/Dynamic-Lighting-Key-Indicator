@@ -29,11 +29,10 @@ namespace Dynamic_Lighting_Key_Indicator
         public readonly static (int R, int G, int B) DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
         public readonly static (int R, int G, int B) DefaultMonitoredKeyActiveColor = (R: 255, G: 0, B: 0);
         public readonly static List<MonitoredKey> DefaultMonitoredKeysAndColors = new List<MonitoredKey> {
-                new MonitoredKey(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor),
-                new MonitoredKey(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor),
-                new MonitoredKey(ToggleAbleKeys.ScrollLock, onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor)
+                new MonitoredKey(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new MonitoredKey(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new MonitoredKey(ToggleAbleKeys.ScrollLock, onColor : DefaultMonitoredKeyActiveColor, offColor : DefaultStandardKeyColor, onColorTiedToStandard : false, offColorTiedToStandard : true)
         };
-
 
         // ------------ Private Variables ------------
         private const string configFileName = "Key_Indicator_Config.json";

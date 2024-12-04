@@ -176,37 +176,127 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool SyncScrollLockOnColor
         {
             get => ColorSettings.SyncScrollLockOnColor;
-            set => ColorSettings.SyncScrollLockOnColor = value;
+            set
+            {
+                if (ColorSettings.SyncScrollLockOnColor != value)
+                {
+                    ColorSettings.SyncScrollLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ScrollLockOnGlyph));
+                }
+            }
         }
 
         public bool SyncScrollLockOffColor
         {
             get => ColorSettings.SyncScrollLockOffColor;
-            set => ColorSettings.SyncScrollLockOffColor = value;
+            set
+            {
+                if (ColorSettings.SyncScrollLockOffColor != value)
+                {
+                    ColorSettings.SyncScrollLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(ScrollLockOffGlyph));
+                }
+            }
         }
 
         public bool SyncCapsLockOnColor
         {
             get => ColorSettings.SyncCapsLockOnColor;
-            set => ColorSettings.SyncCapsLockOnColor = value;
+            set
+            {
+                if (ColorSettings.SyncCapsLockOnColor != value)
+                {
+                    ColorSettings.SyncCapsLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CapsLockOnGlyph));
+                }
+            }
         }
 
         public bool SyncCapsLockOffColor
         {
             get => ColorSettings.SyncCapsLockOffColor;
-            set => ColorSettings.SyncCapsLockOffColor = value;
+            set
+            {
+                if (ColorSettings.SyncCapsLockOffColor != value)
+                {
+                    ColorSettings.SyncCapsLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(CapsLockOffGlyph));
+                }
+            }
         }
 
         public bool SyncNumLockOnColor
         {
             get => ColorSettings.SyncNumLockOnColor;
-            set => ColorSettings.SyncNumLockOnColor = value;
+            set
+            {
+                if (ColorSettings.SyncNumLockOnColor != value)
+                {
+                    ColorSettings.SyncNumLockOnColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(NumLockOnGlyph));
+                }
+            }
         }
 
         public bool SyncNumLockOffColor
         {
             get => ColorSettings.SyncNumLockOffColor;
-            set => ColorSettings.SyncNumLockOffColor = value;
+            set
+            {
+                if (ColorSettings.SyncNumLockOffColor != value)
+                {
+                    ColorSettings.SyncNumLockOffColor = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(NumLockOffGlyph));
+                }
+            }
+        }
+
+        private string _scrollLockOnGlyph;
+        public string ScrollLockOnGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("ScrollLockOnColor");
+            private set => SetProperty(ref _scrollLockOnGlyph, value);
+        }
+
+        private string _scrollLockOffGlyph;
+        public string ScrollLockOffGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("ScrollLockOffColor");
+            private set => SetProperty(ref _scrollLockOffGlyph, value);
+        }
+
+        private string _capsLockOnGlyph;
+        public string CapsLockOnGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("CapsLockOnColor");
+            private set => SetProperty(ref _capsLockOnGlyph, value);
+        }
+
+        private string _capsLockOffGlyph;
+        public string CapsLockOffGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("CapsLockOffColor");
+            private set => SetProperty(ref _capsLockOffGlyph, value);
+        }
+
+        private string _numLockOnGlyph;
+        public string NumLockOnGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("NumLockOnColor");
+            private set => SetProperty(ref _numLockOnGlyph, value);
+        }
+
+        private string _numLockOffGlyph;
+        public string NumLockOffGlyph
+        {
+            get => GetSyncGlyph_ByPropertyName("NumLockOffColor");
+            private set => SetProperty(ref _numLockOffGlyph, value);
         }
 
 
@@ -331,26 +421,77 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 case "NumLockOnColor":
                     SyncNumLockOnColor = syncSetting;
+                    OnPropertyChanged(nameof(NumLockOnGlyph));
                     break;
                 case "NumLockOffColor":
-                    SyncScrollLockOffColor = syncSetting;
+                    SyncNumLockOffColor = syncSetting;
+                    OnPropertyChanged(nameof(NumLockOffGlyph));
                     break;
                 case "CapsLockOnColor":
-                    SyncScrollLockOffColor = syncSetting;
+                    SyncCapsLockOnColor = syncSetting;
+                    OnPropertyChanged(nameof(CapsLockOnGlyph));
                     break;
                 case "CapsLockOffColor":
-                    SyncScrollLockOffColor = syncSetting;
+                    SyncCapsLockOffColor = syncSetting;
+                    OnPropertyChanged(nameof(CapsLockOffGlyph));
                     break;
                 case "ScrollLockOnColor":
-                    SyncScrollLockOffColor = syncSetting;
+                    SyncScrollLockOnColor = syncSetting;
+                    OnPropertyChanged(nameof(ScrollLockOnGlyph));
                     break;
                 case "ScrollLockOffColor":
                     SyncScrollLockOffColor = syncSetting;
+                    OnPropertyChanged(nameof(ScrollLockOffGlyph));
                     break;
                 default:
                     break;
             }
         }
+
+        public bool GetSyncSettingByPropertyName(string colorPropertyName)
+        {
+            switch (colorPropertyName)
+            {
+                case "NumLockOnColor":
+                    return SyncNumLockOnColor;
+                case "NumLockOffColor":
+                    return SyncNumLockOffColor;
+                case "CapsLockOnColor":
+                    return SyncCapsLockOnColor;
+                case "CapsLockOffColor":
+                    return SyncCapsLockOffColor;
+                case "ScrollLockOnColor":
+                    return SyncScrollLockOnColor;
+                case "ScrollLockOffColor":
+                    return SyncScrollLockOffColor;
+                default:
+                    return false;
+            }
+        }
+
+        public bool GetSyncSetting_ByButtonObject(Button button)
+        {
+            return GetSyncSettingByPropertyName(button.Name);
+        }
+
+        //--------------------------------------------------------------
+
+        public const string LinkedGlyph = "\uE71B";
+        public const string UnlinkedGlyph = ""; // TESTING
+
+        public string GetSyncGlyph_ByPropertyName(string colorPropertyName)
+        {
+            var glyph = GetSyncSettingByPropertyName(colorPropertyName) ? LinkedGlyph : UnlinkedGlyph;
+            System.Diagnostics.Debug.WriteLine($"GetSyncGlyph_ByPropertyName({colorPropertyName}): {glyph}");
+            return glyph;
+        }
+
+        public string GetSyncGlyph_ByButtonObject(Button button)
+        {
+            return GetSyncSetting_ByButtonObject(button) ? LinkedGlyph : UnlinkedGlyph;
+        }
+
+        
 
 
     } // ----------------------- End of MainViewModel -----------------------
@@ -374,7 +515,6 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool SyncCapsLockOffColor { get; set; }
         public bool SyncNumLockOnColor { get; set; }
         public bool SyncNumLockOffColor { get; set; }
-
 
         public Windows.UI.Color GetColorFromString(string color)
         {
@@ -455,20 +595,26 @@ namespace Dynamic_Lighting_Key_Indicator
                 else
                     offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
 
-                // Apply the colors to the correct properties
+                // Actually apply the colors to the correct properties in the view model after processing
                 switch (monitoredKey.key)
                 {
                     case VK.NumLock:
                         NumLockOnColor = onColor;
                         NumLockOffColor = offColor;
+                        SyncNumLockOnColor = onColorTiedToStandard;
+                        SyncNumLockOffColor = offColorTiedToStandard;
                         break;
                     case VK.CapsLock:
                         CapsLockOnColor = onColor;
                         CapsLockOffColor = offColor;
+                        SyncCapsLockOnColor = onColorTiedToStandard;
+                        SyncCapsLockOffColor = offColorTiedToStandard;
                         break;
                     case VK.ScrollLock:
                         ScrollLockOnColor = onColor;
                         ScrollLockOffColor = offColor;
+                        SyncScrollLockOnColor = onColorTiedToStandard;
+                        SyncScrollLockOffColor = offColorTiedToStandard;
                         break;
                 }
             }
