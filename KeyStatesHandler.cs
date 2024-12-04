@@ -173,6 +173,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void StopHook()
         {
             UnhookWindowsHookEx(_hookID);
+            _hookID = IntPtr.Zero;
             hookIsActive = false;
         }
 

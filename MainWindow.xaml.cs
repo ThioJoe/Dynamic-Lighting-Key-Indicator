@@ -70,6 +70,27 @@ namespace Dynamic_Lighting_Key_Indicator
                 new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
 
+            // If there's a device ID in the config, try to attach to it on startup, otherwise user will have to select a device
+            if (!string.IsNullOrEmpty(currentConfig.DeviceId))
+            {
+                StartWatchingForLampArrays();
+                // After this, the OnEnumerationCompleted event will try to attach to the saved device
+            }
+        }
+
+        private async void AttachToSavedDevice()
+        {
+            var device = availableDevices.Find(d => d.Id == currentConfig.DeviceId);
+
+            if (device != null)
+            {
+                LampArrayInfo? lampArrayInfo = await Attach_To_DeviceAsync(device);
+                if (lampArrayInfo != null)
+                {
+                    ApplyLightingToDevice(lampArrayInfo);
+                    UpdateSelectedDeviceDropdown();
+                }
+            }
         }
 
         private async void StartWatchingForLampArrays()
@@ -93,8 +114,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Started.";
                 ViewModel.IsWatcherRunning = true;
-                // Initialize the keyboard hook and callback to monitor key states
-                KeyStatesHandler.InitializeHookAndCallback();
             }
             else
             {
@@ -115,12 +134,26 @@ namespace Dynamic_Lighting_Key_Indicator
                 ViewModel.IsWatcherRunning = false;
             }
 
+            ColorSetter.SetCurrentDevice(null);
             ViewModel.HasAttachedDevices = false;
+            currentConfig.DeviceId = "";
+
+            UpdatAvailableLampArrayDisplayList();
         }
 
         private void UpdatAvailableLampArrayDisplayList()
         {
-            string message = $"Available LampArrays: {availableDevices.Count}";
+            string message;
+
+            if (availableDevices.Count == 0)
+            {
+                message = "Status: Waiting - Start device watcher to list available devices.";
+            }
+            else
+            {
+                message = $"Available LampArrays: {availableDevices.Count}";
+            }
+
             int deviceIndex = 0;
 
             lock (_lock)
@@ -160,7 +193,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private void UpdateAttachedLampArrayDisplayList()
         {
             string message = $"Attached LampArrays: {m_attachedLampArrays.Count}";
-            int deviceIndex = 0;
 
             lock (_lock)
             {
@@ -206,6 +238,27 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private void UpdateSelectedDeviceDropdown()
+        {
+            // Get the index of the device that matches the current device ID
+            int deviceIndex = availableDevices.FindIndex(device => device.Id == currentConfig.DeviceId);
+
+            if (deviceIndex == -1 || deviceIndex > availableDevices.Count)
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ViewModel.SelectedDeviceIndex = -1;
+                });
+            }
+            else
+            {
+                DispatcherQueue.TryEnqueue(() =>
+                {
+                    ViewModel.SelectedDeviceIndex = deviceIndex;
+                });
+            }
+        }
+
         public async void ShowErrorMessage(string message)
         {
             ContentDialog errorDialog = new ContentDialog
@@ -223,6 +276,8 @@ namespace Dynamic_Lighting_Key_Indicator
         private void ApplyLightingToDevice(LampArrayInfo lampArrayInfo)
         {
             LampArray lampArray = lampArrayInfo.lampArray;
+
+            currentConfig.DeviceId = lampArrayInfo.id;
             ColorSetter.SetCurrentDevice(lampArray);
             ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
             KeyStatesHandler.UpdateKeyStatus();
@@ -288,12 +343,17 @@ namespace Dynamic_Lighting_Key_Indicator
             // Clear the current list of attached devices
             m_attachedLampArrays.Clear();
             availableDevices.Clear();
+            UpdateAttachedLampArrayDisplayList();
 
             StartWatchingForLampArrays();
         }
 
         private void buttonStopWatch_Click(object sender, RoutedEventArgs e)
         {
+            m_attachedLampArrays.Clear();
+            availableDevices.Clear();
+            UpdateAttachedLampArrayDisplayList();
+            UpdatAvailableLampArrayDisplayList();
             StopWatchingForLampArrays();
         }
 

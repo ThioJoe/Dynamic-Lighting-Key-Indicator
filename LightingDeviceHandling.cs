@@ -42,6 +42,12 @@ namespace Dynamic_Lighting_Key_Indicator
                 UpdateAttachedLampArrayDisplayList();
             });
 
+            // Set user config device ID
+            currentConfig.DeviceId = device.Id;
+
+            // Initialize the keyboard hook and callback to monitor key states
+            KeyStatesHandler.InitializeHookAndCallback();
+
             return info;
         }
 
@@ -141,8 +147,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 UpdateAttachedLampArrayDisplayList();
                 UpdatAvailableLampArrayDisplayList();
             });
-
-
         }
 
         private async void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
@@ -166,7 +170,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
-            //DispatcherQueue.TryEnqueue(() => CheckForCurrentDeviceAndApply());
+            DispatcherQueue.TryEnqueue(() => AttachToSavedDevice());
         }
 
         private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)

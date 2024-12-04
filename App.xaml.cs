@@ -46,7 +46,7 @@ namespace Dynamic_Lighting_Key_Indicator
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
 
-            appWindow.Resize(new SizeInt32(700, 600));
+            appWindow.Resize(new SizeInt32(1000, 1000));
         }
 
         private Window? m_window;

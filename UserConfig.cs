@@ -22,6 +22,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public (int R, int G, int B) StandardKeyColor { get; set; }
         [JsonInclude]
         public List<MonitoredKey>? MonitoredKeysAndColors { get; set; }
+        [JsonInclude]
+        public string DeviceId { get; set; } = string.Empty;
 
         public readonly static int DefaultBrightness = 100;
         public readonly static (int R, int G, int B) DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
