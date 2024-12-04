@@ -388,6 +388,18 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
+        {
+            currentConfig.OpenConfigFolder();
+        }
+
+        private void restoreDefaults_Click(object sender, RoutedEventArgs e)
+        {
+            currentConfig.RestoreDefault();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
+            UpdateButtonBackgrounds();
+        }
+
         private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
             // Save the current color settings to the ViewModel

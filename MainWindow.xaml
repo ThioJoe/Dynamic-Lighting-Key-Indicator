@@ -24,6 +24,8 @@
             <!-- Color settings section -->
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Existing controls -->
@@ -148,5 +150,26 @@
                 <TextBlock Text="Save Settings"/>
             </StackPanel>
         </Button>
+
+        <!-- Config Buttons -->
+        <StackPanel Orientation="Horizontal" 
+                    Grid.Row="13" 
+                    HorizontalAlignment="Center">
+            <Button x:Name="buttonOpenConfigFolder" 
+                    Click="openConfigFolder_Click"
+                    Margin="0,0,10,0">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Open Config Folder"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="buttonRestoreDefaults" 
+                    Click="restoreDefaults_Click">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72B;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Restore Default Colors"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
     </Grid>
 </Window>

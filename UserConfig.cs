@@ -141,6 +141,11 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).offColor;
         }
 
+        public async void OpenConfigFolder()
+        {
+            await Launcher.LaunchFolderPathAsync(localFolder.Path);
+        }
+
         public void RestoreDefault()
         {
             Brightness = DefaultBrightness;
