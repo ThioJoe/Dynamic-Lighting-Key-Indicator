@@ -13,6 +13,8 @@ using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
+    using RGBTuple = (int R, int G, int B);
+
     internal class UserConfig
     {
         // --------------------------- Properties ---------------------------
@@ -21,7 +23,7 @@ namespace Dynamic_Lighting_Key_Indicator
         [JsonInclude]
         public (int R, int G, int B) StandardKeyColor { get; set; }
         [JsonInclude]
-        public List<MonitoredKey>? MonitoredKeysAndColors { get; set; }
+        public List<MonitoredKey> MonitoredKeysAndColors { get; set; }
         [JsonInclude]
         public string DeviceId { get; set; } = string.Empty;
 
@@ -144,6 +146,13 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).offColor;
         }
 
+        public MonitoredKey? GetMonitoredKey(ToggleAbleKeys key)
+        {
+            if (MonitoredKeysAndColors == null)
+                return null;
+            return MonitoredKeysAndColors.FirstOrDefault(mk => mk.key == key);
+        }
+
         public async void OpenConfigFolder()
         {
             await Launcher.LaunchFolderPathAsync(localFolder.Path);
@@ -154,6 +163,76 @@ namespace Dynamic_Lighting_Key_Indicator
             Brightness = DefaultBrightness;
             StandardKeyColor = DefaultStandardKeyColor;
             MonitoredKeysAndColors = DefaultMonitoredKeysAndColors;
+        }
+
+        // Scale brightness of all key settings based on a brightness level
+        public void UpdateBrightnessForAllKeys(int brightnessLevel)
+        {
+            UserConfig config = this; // Applies to the object on which the method is called
+
+            if (brightnessLevel < 0)
+                brightnessLevel = 0;
+            if (brightnessLevel > 100)
+                brightnessLevel = 100;
+
+            config.Brightness = brightnessLevel; // Remnant from old code
+
+            // -------- Local Function --------
+            // Set the absolute scale of a color based on a brightness level. 100 is full brightness, 0 is off
+            // Will use relative scaling of the largest or smallest value in the color
+            RGBTuple ScaleColor(RGBTuple color, int brightness)
+            {
+                // Clamp brightness to the 0-100 range
+                brightness = Math.Max(0, Math.Min(100, brightness));
+
+                int R = color.R;
+                int G = color.G;
+                int B = color.B;
+
+                // Find the maximum RGB component
+                int maxComponent = Math.Max(R, Math.Max(G, B));
+
+                if (maxComponent == 0)
+                {
+                    return (0, 0, 0);
+                }
+
+                // Calculate the relative proportions of each component
+                double rProportion = R / (double)maxComponent;
+                double gProportion = G / (double)maxComponent;
+                double bProportion = B / (double)maxComponent;
+
+                // Calculate the desired maximum component value based on brightness
+                double desiredMaxComponent = (brightness / 100.0) * 255.0;
+
+                // Compute new RGB values by scaling the proportions
+                int newR = (int)Math.Round(rProportion * desiredMaxComponent);
+                int newG = (int)Math.Round(gProportion * desiredMaxComponent);
+                int newB = (int)Math.Round(bProportion * desiredMaxComponent);
+
+                // Clamp the values to the 0-255 range
+                newR = Math.Min(255, Math.Max(0, newR));
+                newG = Math.Min(255, Math.Max(0, newG));
+                newB = Math.Min(255, Math.Max(0, newB));
+
+                // Update the color tuple
+                color = (newR, newG, newB);
+                return color;
+            }
+
+            List<MonitoredKey> keysList = KeyStatesHandler.monitoredKeys;
+            foreach (var key in keysList)
+            {
+                RGBTuple onColor = ScaleColor(key.onColor, brightnessLevel);
+                RGBTuple offColor = ScaleColor(key.offColor, brightnessLevel);
+
+                key.onColor = onColor;
+                key.offColor = offColor;
+            }
+
+            // Update the standard key color
+            RGBTuple standardColor = ScaleColor(config.StandardKeyColor, brightnessLevel);
+            config.StandardKeyColor = standardColor;
         }
 
     } // ----------------- End of UserConfig class ------------------

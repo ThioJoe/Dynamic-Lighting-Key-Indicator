@@ -48,6 +48,11 @@
 	      <uap3:Extension Category="windows.appExtension">
 	        <uap3:AppExtension Name="com.microsoft.windows.lighting" Id="Id" PublicFolder="public" DisplayName="Id" />
 	      </uap3:Extension>
+	      <uap:Extension Category="windows.protocol">
+	       <uap:Protocol Name="key-lighting-indicator">
+	        <uap:DisplayName>Dynamic Lighting Key Indicator</uap:DisplayName>
+	       </uap:Protocol>
+	      </uap:Extension>
       </Extensions>
     </Application>
   </Applications>

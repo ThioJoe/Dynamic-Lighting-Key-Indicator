@@ -39,21 +39,26 @@ namespace Dynamic_Lighting_Key_Indicator
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            // Handle command line arguments
+            string arguments = args.Arguments;
+            if (!string.IsNullOrEmpty(arguments))
+                ProcessArguments(arguments);
+
+            // ----------------------------------------
+
             m_window = new MainWindow();
             m_window.Activate();
+
+            // Initialize the URL handler to be able to accept external commands
+            URLHandler.Initialize();
+
+            // -------- Resize -----------
 
             IntPtr hWnd = WindowNative.GetWindowHandle(m_window);
             WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
 
             appWindow.Resize(new SizeInt32(1200, 1200));
-
-            // Handle command line arguments
-            string arguments = args.Arguments;
-            if (!string.IsNullOrEmpty(arguments))
-            {
-                ProcessArguments(arguments);
-            }
         }
 
         private void ProcessArguments(string arguments)

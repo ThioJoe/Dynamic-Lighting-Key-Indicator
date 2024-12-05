@@ -3,12 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Lights;
 using Windows.System;
+using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
+    using RGBTuple = (int R, int G, int B);
+
     internal static class ColorSetter
     {
         private static Windows.UI.Color _keyboardMainColor;
@@ -19,9 +23,10 @@ namespace Dynamic_Lighting_Key_Indicator
         public static LampArray CurrentDevice => _currentDevice;
         public static List<int> MonitoredIndices => _monitoredIndices;
 
-        public static void DefineKeyboardMainColor_FromRGB(int R, int G, int B)
+        public static void DefineKeyboardMainColor_FromRGB(RGBTuple color)
         {
-            _keyboardMainColor = Windows.UI.Color.FromArgb(255, (byte)R, (byte)G, (byte)B);
+
+            _keyboardMainColor = Windows.UI.Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
         }
 
         public static void DefineKeyboardMainColor_FromName(Windows.UI.Color color)

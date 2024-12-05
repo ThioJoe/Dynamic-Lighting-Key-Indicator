@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -38,6 +39,8 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         public MainViewModel ViewModel { get; set; }
 
+        public bool DEBUGMODE = false;
+
         // GUI Related
         List<string> devicesListForDropdown = [];
         UserConfig currentConfig = new UserConfig();
@@ -53,6 +56,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public MainWindow()
         {
+            #if DEBUG
+                DEBUGMODE = true;
+            #endif
+
             InitializeComponent();
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
@@ -62,7 +69,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Load the user config from file
             currentConfig = currentConfig.ReadConfigurationFile() ?? new UserConfig();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
-            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor.R, currentConfig.StandardKeyColor.G, currentConfig.StandardKeyColor.B);
+            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -80,6 +87,16 @@ namespace Dynamic_Lighting_Key_Indicator
                 StartWatchingForLampArrays();
                 // After this, the OnEnumerationCompleted event will try to attach to the saved device
             }
+
+            URLHandler.ProvideUserConfig(currentConfig);
+            URLHandler.ProvideWindow(this);
+        }
+
+        // Getter and setter for user config
+        internal UserConfig CurrentConfig
+        {
+            get => currentConfig;
+            set => currentConfig = value;
         }
 
         private async void AttachToSavedDevice()
@@ -448,13 +465,20 @@ namespace Dynamic_Lighting_Key_Indicator
             ForceUpdateAllButtonGlyphs();
         }
 
-        private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
+        internal async void ApplyAndSaveSettings(bool saveFile = true, UserConfig? newConfig = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;
 
             // Save the current color settings to the ViewModel
-            colorSettings.SetAllColorsFromGUI(ViewModel);
-            ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
+            if (newConfig == null) {
+                colorSettings.SetAllColorsFromGUI(ViewModel);
+                ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
+            }
+            else
+            {
+                colorSettings.SetAllColorsFromUserConfig(newConfig);
+                ColorSetter.DefineKeyboardMainColor_FromRGB(newConfig.StandardKeyColor);
+            }
 
             // Update the key states to reflect the new color settings
             var scrollOnColor = (colorSettings.ScrollLockOnColor.R, colorSettings.ScrollLockOnColor.G, colorSettings.ScrollLockOnColor.B);
@@ -501,16 +525,24 @@ namespace Dynamic_Lighting_Key_Indicator
 
             ForceUpdateAllButtonGlyphs();
 
-            if (ColorSetter.CurrentDevice != null) {
+            if (ColorSetter.CurrentDevice != null)
+            {
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
-            // Save the color settings to the configuration file
-            bool result = await currentConfig.WriteConfigurationFile_Async();
-            if (!result)
+            if (saveFile)
             {
-                ShowErrorMessage("Failed to save the color settings to the configuration file.");
+                bool result = await currentConfig.WriteConfigurationFile_Async();
+                if (!result)
+                {
+                    ShowErrorMessage("Failed to save the color settings to the configuration file.");
+                }
             }
+        }
+
+        private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
+        {
+            ApplyAndSaveSettings(saveFile: true);  
         }
 
         // This is the button within the flyout  menu

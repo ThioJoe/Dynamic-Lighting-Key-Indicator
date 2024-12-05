@@ -84,6 +84,16 @@ namespace Dynamic_Lighting_Key_Indicator
                 this.offColorTiedToStandard = offColorTiedToStandard;
             }
 
+            // Default constructor
+            public MonitoredKey(ToggleAbleKeys key)
+            {
+                this.key = key;
+                this.offColor = UserConfig.DefaultStandardKeyColor;
+                this.onColor = UserConfig.DefaultMonitoredKeyActiveColor;
+                this.onColorTiedToStandard = false;
+                this.offColorTiedToStandard = true;
+            }
+
             //------ Methods ------
             public Windows.UI.Color? GetColorObjCurrent()
             {
