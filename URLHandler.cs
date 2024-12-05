@@ -2,6 +2,7 @@
 using Microsoft.Windows.AppNotifications;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
@@ -20,7 +21,23 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void Initialize()
         {
-            // Register for protocol activation
+            // Get the current instance
+            //var instance = AppInstance.GetCurrent();
+            //// Register for activation redirection
+            //AppInstance.FindOrRegisterForKey("mainInstance");
+
+            //// If this isn't the main instance, redirect and exit
+            //if (!instance.IsCurrent)
+            //{
+            //    // Redirect activation to the main instance
+            //    var mainInstance = AppInstance.GetInstances()[0];
+            //    var args = mainInstance.GetActivatedEventArgs();
+            //    instance.RedirectActivationToAsync(args).GetAwaiter().GetResult();
+            //    Process.GetCurrentProcess().Kill();
+            //    return;
+            //}
+
+            // Register for protocol activation (existing code)
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Cleanup();
             RegisterForProtocolActivation();
         }
@@ -29,6 +46,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             try
             {
+                // Debug that received command
+                System.Diagnostics.Debug.WriteLine($"Here1");
                 // Get the current activation arguments
                 var args = AppInstance.GetCurrent().GetActivatedEventArgs();
                 if (args != null)
@@ -70,16 +89,16 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         public static readonly List<string> Commands = new List<string>
-        {
-            "set",
-        };
+            {
+                "set",
+            };
 
         public static class ParameterNames
         {
             // Integer values from 0 to 100
-            public const string GlobalBrightness = "global_brightness";    
+            public const string GlobalBrightness = "global_brightness";
             // Tuples of RGB values comma separated with no spaces
-            public const string ScrollLockOnColor = "scrollLockOnColor";   
+            public const string ScrollLockOnColor = "scrollLockOnColor";
             public const string ScrollLockOffColor = "scrollLockOffColor";
             public const string NumLockOnColor = "numLockOnColor";
             public const string NumLockOffColor = "numLockOffColor";
@@ -97,6 +116,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     // Extract the command from the URI
                     string command = uri.Host;
+
+                    // Debug that received command
+                    System.Diagnostics.Debug.WriteLine($"Received Command: {command}");
 
                     if (!Commands.Contains(command))
                     {
@@ -128,7 +150,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        
+
 
         // Example command handlers
         private static void HandleSetCommand(System.Collections.Specialized.NameValueCollection queryParams)
@@ -194,7 +216,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         break;
 
                     case ParameterNames.ScrollLockOnColor:
-                        SetKeyColor(key_vk: VK.ScrollLock, on: true , value: value);
+                        SetKeyColor(key_vk: VK.ScrollLock, on: true, value: value);
                         break;
                     case ParameterNames.ScrollLockOffColor:
                         SetKeyColor(key_vk: VK.ScrollLock, on: false, value: value);

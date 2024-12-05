@@ -32,6 +32,25 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
+	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    </PropertyGroup>
+
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget
