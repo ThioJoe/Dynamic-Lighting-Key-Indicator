@@ -47,7 +47,10 @@ namespace Dynamic_Lighting_Key_Indicator
             try
             {
                 // Debug that received command
-                System.Diagnostics.Debug.WriteLine($"Here1");
+                string currentTime = DateTime.Now.ToString("HH:mm:ss");
+                System.Diagnostics.Debug.WriteLine($"Inside RegisterForProtocolActivation at" + currentTime);
+
+
                 // Get the current activation arguments
                 var args = AppInstance.GetCurrent().GetActivatedEventArgs();
                 if (args != null)
@@ -65,12 +68,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void HandleActivation(AppActivationArguments args)
         {
+            string currentTime = DateTime.Now.ToString("HH:mm:ss");
+            System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (1) at" + currentTime);
+
             if (args.Kind == ExtendedActivationKind.Protocol)
             {
+                System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (2) at" + currentTime);
                 var protocolArgs = args.Data as IProtocolActivatedEventArgs;
                 if (protocolArgs != null)
                 {
                     // Process the URI
+                    System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (3) at" + currentTime);
                     ProcessUri(protocolArgs.Uri);
                 }
             }
@@ -111,6 +119,9 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             try
             {
+                string currentTime = DateTime.Now.ToString("HH:mm:ss");
+                System.Diagnostics.Debug.WriteLine($"Inside ProcessUri at" + currentTime);
+
                 // Example URI format: key-lighting-indicator://whateverCommand?param1=value1&param2=value2
                 if (uri.Scheme.Equals(PROTOCOL_NAME, StringComparison.OrdinalIgnoreCase))
                 {
