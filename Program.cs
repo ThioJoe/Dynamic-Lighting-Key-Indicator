@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-
-// Custom Program.cs file to prevent multiple instances of the app from running
-// See: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/applifecycle/applifecycle-single-instance
+using Windows.ApplicationModel.Activation;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -18,83 +15,49 @@ namespace Dynamic_Lighting_Key_Indicator
         static int Main(string[] args)
         {
             WinRT.ComWrappersSupport.InitializeComWrappers();
-            bool isRedirect = DecideRedirection();
 
-            if (!isRedirect)
+            var currentInstance = AppInstance.GetCurrent();
+            var activatedEventArgs = currentInstance.GetActivatedEventArgs();
+            var mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
+
+            // If this isn't the main instance and it's a protocol activation
+            if (!mainInstance.IsCurrent && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
             {
-                Application.Start((p) =>
+                Debug.WriteLine("Secondary instance with protocol - sending via WM");
+
+                var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
+                if (protocolArgs?.Uri != null)
                 {
-                    var context = new DispatcherQueueSynchronizationContext(
-                        DispatcherQueue.GetForCurrentThread());
-                    SynchronizationContext.SetSynchronizationContext(context);
-                    _ = new App();
-                });
+                    // Send the protocol data via Windows Message
+                    ProtocolMessage.SendProtocolData(protocolArgs.Uri.ToString());
+                }
+
+                // Redirect activation (for window focus)
+                Task.Run(() => mainInstance.RedirectActivationToAsync(activatedEventArgs)).Wait();
+                return 0;
             }
 
-            return 0;
-        }
-
-        private static bool DecideRedirection()
-        {
-            bool isRedirect = false;
-            AppActivationArguments args = AppInstance.GetCurrent().GetActivatedEventArgs();
-            ExtendedActivationKind kind = args.Kind;
-            AppInstance keyInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
-
-            if (keyInstance.IsCurrent)
+            // Main instance
+            Application.Start((p) =>
             {
-                keyInstance.Activated += OnActivated;
-            }
-            else
-            {
-                isRedirect = true;
-                RedirectActivationTo(args, keyInstance);
-            }
+                var context = new DispatcherQueueSynchronizationContext(
+                    DispatcherQueue.GetForCurrentThread());
+                SynchronizationContext.SetSynchronizationContext(context);
 
-            return isRedirect;
-        }
-        private static void OnActivated(object sender, AppActivationArguments args)
-        {
-            ExtendedActivationKind kind = args.Kind;
-        }
+                var app = new App();
 
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        private static extern IntPtr CreateEvent(IntPtr lpEventAttributes, bool bManualReset, bool bInitialState, string lpName);
-
-        [DllImport("kernel32.dll")]
-        private static extern bool SetEvent(IntPtr hEvent);
-
-        [DllImport("ole32.dll")]
-        private static extern uint CoWaitForMultipleObjects(uint dwFlags, uint dwMilliseconds, ulong nHandles, IntPtr[] pHandles, out uint dwIndex);
-
-
-        [DllImport("user32.dll")]
-        static extern bool SetForegroundWindow(IntPtr hWnd);
-
-        private static IntPtr redirectEventHandle = IntPtr.Zero;
-
-        // Do the redirection on another thread, and use a non-blocking
-        // wait method to wait for the redirection to complete.
-        public static void RedirectActivationTo(AppActivationArguments args,
-                                                AppInstance keyInstance)
-        {
-            redirectEventHandle = CreateEvent(IntPtr.Zero, true, false, null);
-            Task.Run(() =>
-            {
-                keyInstance.RedirectActivationToAsync(args).AsTask().Wait();
-                SetEvent(redirectEventHandle);
+                // Handle direct protocol activation if present
+                if (activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+                {
+                    var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
+                    if (protocolArgs?.Uri != null)
+                    {
+                        URLHandler.ProcessUri(protocolArgs.Uri);
+                    }
+                }
             });
 
-            uint CWMO_DEFAULT = 0;
-            uint INFINITE = 0xFFFFFFFF;
-            _ = CoWaitForMultipleObjects(
-               CWMO_DEFAULT, INFINITE, 1,
-               [redirectEventHandle], out uint handleIndex);
-
-            // Bring the window to the foreground
-            Process process = Process.GetProcessById((int)keyInstance.ProcessId);
-            SetForegroundWindow(process.MainWindowHandle);
+            return 0;
         }
     }
 }

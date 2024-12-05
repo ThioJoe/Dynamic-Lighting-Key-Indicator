@@ -61,6 +61,10 @@ namespace Dynamic_Lighting_Key_Indicator
             #endif
 
             InitializeComponent();
+            ProtocolMessage.Initialize(this);
+            this.Activated += MainWindow_Activated;
+
+
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
@@ -90,6 +94,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
             URLHandler.ProvideUserConfig(currentConfig);
             URLHandler.ProvideWindow(this);
+        }
+
+        private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+        {
+            System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
         }
 
         // Getter and setter for user config

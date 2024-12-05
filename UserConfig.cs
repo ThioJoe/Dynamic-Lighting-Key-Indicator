@@ -220,7 +220,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 return color;
             }
 
-            List<MonitoredKey> keysList = KeyStatesHandler.monitoredKeys;
+            List<MonitoredKey> keysList = config.MonitoredKeysAndColors;
             foreach (var key in keysList)
             {
                 RGBTuple onColor = ScaleColor(key.onColor, brightnessLevel);

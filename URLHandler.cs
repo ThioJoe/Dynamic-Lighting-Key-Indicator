@@ -1,4 +1,5 @@
-﻿using Microsoft.Windows.AppLifecycle;
+﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.Windows.AppLifecycle;
 using Microsoft.Windows.AppNotifications;
 using System;
 using System.Collections.Generic;
@@ -21,22 +22,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void Initialize()
         {
-            // Get the current instance
-            //var instance = AppInstance.GetCurrent();
-            //// Register for activation redirection
-            //AppInstance.FindOrRegisterForKey("mainInstance");
-
-            //// If this isn't the main instance, redirect and exit
-            //if (!instance.IsCurrent)
-            //{
-            //    // Redirect activation to the main instance
-            //    var mainInstance = AppInstance.GetInstances()[0];
-            //    var args = mainInstance.GetActivatedEventArgs();
-            //    instance.RedirectActivationToAsync(args).GetAwaiter().GetResult();
-            //    Process.GetCurrentProcess().Kill();
-            //    return;
-            //}
-
             // Register for protocol activation (existing code)
             AppDomain.CurrentDomain.ProcessExit += (s, e) => Cleanup();
             RegisterForProtocolActivation();
@@ -106,16 +91,16 @@ namespace Dynamic_Lighting_Key_Indicator
             // Integer values from 0 to 100
             public const string GlobalBrightness = "global_brightness";
             // Tuples of RGB values comma separated with no spaces
-            public const string ScrollLockOnColor = "scrollLockOnColor";
-            public const string ScrollLockOffColor = "scrollLockOffColor";
-            public const string NumLockOnColor = "numLockOnColor";
-            public const string NumLockOffColor = "numLockOffColor";
-            public const string CapsLockOnColor = "capsLockOnColor";
-            public const string CapsLockOffColor = "capsLockOffColor";
-            public const string StandardKeyColor = "standardKeyColor";
+            public const string ScrollLockOnColor = "scrolllockcolor_on";
+            public const string ScrollLockOffColor = "scrolllockcolor_off";
+            public const string NumLockOnColor = "numlockcolor_on";
+            public const string NumLockOffColor = "numlockcolor_off";
+            public const string CapsLockOnColor = "capslockcolor_on";
+            public const string CapsLockOffColor = "capslockcolor_off";
+            public const string StandardKeyColor = "standardkeycolor";
         }
 
-        private static void ProcessUri(Uri uri)
+        public static void ProcessUri(Uri uri)
         {
             try
             {
@@ -183,6 +168,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 config = new UserConfig();
             }
 
+            RGBTuple standardColorFromConfig = config.StandardKeyColor;
+
             // ---------- Local Function -----------------
             void SetKeyColor(ToggleAbleKeys key_vk, bool on, string value)
             {
@@ -195,7 +182,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     addKeyToConfig = true;
                 }
 
-                if (ParseColor(value) is RGBTuple color)
+                if (ParseColor(value, standardColorFromConfig) is RGBTuple color)
                 {
                     if (on)
                         key.onColor = color;
@@ -209,23 +196,38 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             }
             // --------------------------------------
+
+            // First check for global brightness and process that first
             int setGlobalBrightness = -1;
+            if (queryParams[ParameterNames.GlobalBrightness] is string globalBrightness)
+            {
+                int? brightness = ParseBrightness(globalBrightness);
+                if (brightness.HasValue)
+                {
+                    setGlobalBrightness = brightness.Value;
+                }
+                // Remove the parameter from the collection
+                queryParams.Remove(ParameterNames.GlobalBrightness);
+            }
+
+            // Then check for standard / default key color
+            if (queryParams[ParameterNames.StandardKeyColor] is string standardColor)
+            {
+                if (ParseColor(standardColor, standardColorFromConfig) is RGBTuple color)
+                    config.StandardKeyColor = color;
+                // Remove the parameter from the collection
+                queryParams.Remove(ParameterNames.StandardKeyColor);
+            }
 
             foreach (string? paramKey in queryParams.AllKeys)
             {
-                if (queryParams[paramKey] is not string value)
+                if (paramKey == null || queryParams[paramKey] is not string value)
                     continue;
 
-                switch (paramKey)
-                {
-                    case ParameterNames.GlobalBrightness:
-                        int? brightness = ParseBrightness(value);
-                        if (brightness.HasValue)
-                        {
-                            setGlobalBrightness = brightness.Value;
-                        }
-                        break;
+                // Don't skip if value is empty, might add parameter-less commands in the future
 
+                switch (paramKey.ToLower())
+                {
                     case ParameterNames.ScrollLockOnColor:
                         SetKeyColor(key_vk: VK.ScrollLock, on: true, value: value);
                         break;
@@ -244,11 +246,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     case ParameterNames.CapsLockOffColor:
                         SetKeyColor(key_vk: VK.CapsLock, on: false, value: value);
                         break;
-                    case ParameterNames.StandardKeyColor:
-                        if (ParseColor(value) is RGBTuple color)
-                            config.StandardKeyColor = color;
-                        break;
                 }
+
             } // End foreach loop
 
             // Update the global brightness
@@ -267,16 +266,24 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (result < 0)
                     return 0;
-                if (result > 100)
+                else if (result > 100)
                     return 100;
+                else
+                    return result;
             }
 
             // If can't be parsed or is out of range, return null
             return null;
         }
 
-        private static RGBTuple? ParseColor(string color)
+        private static RGBTuple? ParseColor(string color, RGBTuple standardColor)
         {
+            // If the string says 'default'
+            if (color.ToLower() == "default")
+            {
+                return standardColor;
+            }
+
             // Require a string in the format "R,G,B" (3 values)
             string[] rgb = color.Split(',');
             if (rgb.Length != 3)
@@ -288,12 +295,15 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // If fail to parse, return null
-            return (0, 0, 0);
+            return null;
         }
 
         private static void Cleanup()
         {
             // Perform any necessary cleanup
         }
+
     }
+
+
 }
