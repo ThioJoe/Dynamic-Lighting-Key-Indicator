@@ -179,7 +179,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private void RestoreFromTray()
+        public void RestoreFromTray()
         {
             if (isMinimizedToTray)
             {
@@ -197,7 +197,7 @@ namespace Dynamic_Lighting_Key_Indicator
             MinimizeToTray();
         }
 
-        private void ExitApplication()
+        public void ExitApplication()
         {
             Shell_NotifyIcon(NIM_DELETE, ref notifyIcon);
 
@@ -225,7 +225,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
                 else if (lparam == WM_RBUTTONUP)
                 {
-                    ShowTrayContextMenu();
+                    //ShowTrayContextMenu();
+                    CustomContextMenu.CreateAndShowMenu(hwnd, this);
                     return IntPtr.Zero;
                 }
             }
