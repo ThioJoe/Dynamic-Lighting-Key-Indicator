@@ -64,6 +64,8 @@ namespace Dynamic_Lighting_Key_Indicator
             ProtocolMessage.Initialize(this);
             this.Activated += MainWindow_Activated;
 
+            SetWindowIcon();
+
             SystemTray systemTray = new SystemTray(this);
             systemTray.InitializeSystemTray();
 
@@ -101,6 +103,16 @@ namespace Dynamic_Lighting_Key_Indicator
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
             System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
+        }
+
+        // Set window icon -- TESTING REPLACE THIS WITH A BETTER ICON
+        private void SetWindowIcon()
+        {
+            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
+            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+            string iconPath = Path.Combine(Package.Current.InstalledLocation.Path, "Assets\\Icon.ico");
+            appWindow.SetIcon(iconPath);
         }
 
         // Getter and setter for user config

@@ -7,6 +7,9 @@ using System;
 using WinRT;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media.Imaging;
+using System.IO;
+using Windows.Storage.Streams;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -114,7 +117,7 @@ namespace Dynamic_Lighting_Key_Indicator
             });
         }
 
-        private void InitializeNotifyIcon()
+        public void InitializeNotifyIcon()
         {
             notifyIcon = new NOTIFYICONDATAW();
             notifyIcon.cbSize = (uint)Marshal.SizeOf(typeof(NOTIFYICONDATAW));
@@ -123,12 +126,30 @@ namespace Dynamic_Lighting_Key_Indicator
             notifyIcon.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
             notifyIcon.uCallbackMessage = WM_TRAYICON;
 
-            // Load default application icon
-            IntPtr hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
-            notifyIcon.hIcon = hIcon;
+            IntPtr hIcon = IntPtr.Zero;
+            // Gets the path to the current process
+            string? exePath = Environment.ProcessPath;
+            if (exePath != null)
+            {
+                BitmapImage bitmapImage = new BitmapImage(new Uri(exePath));
+                using (IRandomAccessStream stream = new InMemoryRandomAccessStream())
+                {
+                    bitmapImage.SetSource(stream);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        stream.AsStream().CopyTo(memoryStream);
+                        hIcon = CreateIconFromResource(memoryStream.ToArray(), (uint)memoryStream.Length, true, 0x00030000);
+                    }
+                }
+            }
+            // If it's still null, load the default icon
+            if (hIcon == IntPtr.Zero)
+            {
+                hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
+            }
 
             // Set tooltip
-            notifyIcon.szTip = "My WinUI3 App";
+            notifyIcon.szTip = "Dynamic Lighting Key Indicator";
 
             // Add the icon
             if (!Shell_NotifyIcon(NIM_ADD, ref notifyIcon))
