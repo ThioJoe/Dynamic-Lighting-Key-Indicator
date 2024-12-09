@@ -64,6 +64,8 @@ namespace Dynamic_Lighting_Key_Indicator
             ProtocolMessage.Initialize(this);
             this.Activated += MainWindow_Activated;
 
+            SystemTray systemTray = new SystemTray(this);
+            systemTray.InitializeSystemTray();
 
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
