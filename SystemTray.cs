@@ -10,6 +10,9 @@ using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media.Imaging;
 using System.IO;
 using Windows.Storage.Streams;
+using Windows.Storage.FileProperties;
+using System.Threading.Tasks;
+using Windows.ApplicationModel;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -60,6 +63,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll")]
         static extern IntPtr CreateIconFromResource(byte[] presbits, uint dwResSize, bool fIcon, uint dwVer);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr LoadImage(IntPtr hInst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT
@@ -117,6 +123,25 @@ namespace Dynamic_Lighting_Key_Indicator
             });
         }
 
+        public IntPtr GethIcon()
+        {
+            uint IMAGE_ICON = 1;
+            uint LR_LOADFROMFILE = 0x00000010;
+            uint LR_DEFAULTSIZE = 0x00000040;
+
+            IntPtr hIcon = IntPtr.Zero;
+            string iconPath = MainWindow.GetIconPathFromAssets(MainWindow.MainIconFileName);
+
+            if (File.Exists(iconPath))
+                hIcon = LoadImage(IntPtr.Zero, iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+
+            // If it's still null, load the default icon
+            if (hIcon == IntPtr.Zero)
+                hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
+
+            return hIcon;
+        }
+
         public void InitializeNotifyIcon()
         {
             notifyIcon = new NOTIFYICONDATAW();
@@ -126,27 +151,8 @@ namespace Dynamic_Lighting_Key_Indicator
             notifyIcon.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP;
             notifyIcon.uCallbackMessage = WM_TRAYICON;
 
-            IntPtr hIcon = IntPtr.Zero;
-            // Gets the path to the current process
-            string? exePath = Environment.ProcessPath;
-            if (exePath != null)
-            {
-                BitmapImage bitmapImage = new BitmapImage(new Uri(exePath));
-                using (IRandomAccessStream stream = new InMemoryRandomAccessStream())
-                {
-                    bitmapImage.SetSource(stream);
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        stream.AsStream().CopyTo(memoryStream);
-                        hIcon = CreateIconFromResource(memoryStream.ToArray(), (uint)memoryStream.Length, true, 0x00030000);
-                    }
-                }
-            }
-            // If it's still null, load the default icon
-            if (hIcon == IntPtr.Zero)
-            {
-                hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
-            }
+            IntPtr hIcon = GethIcon();
+            notifyIcon.hIcon = hIcon;
 
             // Set tooltip
             notifyIcon.szTip = "Dynamic Lighting Key Indicator";

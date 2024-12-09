@@ -52,7 +52,9 @@ namespace Dynamic_Lighting_Key_Indicator
         private DeviceWatcher m_deviceWatcher;
         private Dictionary<int, string> deviceIndexDict = new Dictionary<int, string>();
         private readonly object _lock = new object();
-        
+
+        public const string MainIconFileName = "Icon.ico";
+
 
         public MainWindow()
         {
@@ -64,7 +66,8 @@ namespace Dynamic_Lighting_Key_Indicator
             ProtocolMessage.Initialize(this);
             this.Activated += MainWindow_Activated;
 
-            SetWindowIcon();
+            // Set the window title bar icon
+            this.AppWindow.SetIcon(GetIconPathFromAssets());
 
             SystemTray systemTray = new SystemTray(this);
             systemTray.InitializeSystemTray();
@@ -105,14 +108,9 @@ namespace Dynamic_Lighting_Key_Indicator
             System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
         }
 
-        // Set window icon -- TESTING REPLACE THIS WITH A BETTER ICON
-        private void SetWindowIcon()
+        public static string GetIconPathFromAssets(string specificName = MainIconFileName)
         {
-            IntPtr windowHandle = WinRT.Interop.WindowNative.GetWindowHandle(this);
-            WindowId windowId = Win32Interop.GetWindowIdFromWindow(windowHandle);
-            var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-            string iconPath = Path.Combine(Package.Current.InstalledLocation.Path, "Assets\\Icon.ico");
-            appWindow.SetIcon(iconPath);
+            return Path.Combine(Package.Current.InstalledLocation.Path, $"Assets\\{specificName}");
         }
 
         // Getter and setter for user config
