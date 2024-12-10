@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -501,6 +502,15 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ForceUpdateButtonBackgrounds();
             ForceUpdateAllButtonGlyphs();
+        }
+        private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "ms-settings:personalization-lighting",
+                UseShellExecute = true
+            };
+            Process.Start(processStartInfo);
         }
 
         internal async void ApplyAndSaveSettings(bool saveFile = true, UserConfig? newConfig = null)

@@ -1,4 +1,4 @@
-<Window
+﻿<Window
     x:Class="Dynamic_Lighting_Key_Indicator.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Dynamic-Lighting-Key-Indicator">
+    Title="Dynamic Lighting Key Indicator">
 
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20">
         <Grid.Resources>
@@ -208,7 +208,7 @@
 
         <!-- Save Button -->
         <Button Grid.Row="12" 
-                Margin="0,20,0,0"
+                Margin="0,20,0,10"
                 HorizontalAlignment="Center"
                 Click="buttonSaveSettings_Click">
             <StackPanel Orientation="Horizontal">
@@ -232,10 +232,29 @@
             <Button x:Name="buttonRestoreDefaults" 
                     Click="restoreDefaults_Click">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE72B;" Margin="0,0,8,0"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7A7;" Margin="0,0,8,0"/>
                     <TextBlock Text="Restore Default Colors"/>
                 </StackPanel>
             </Button>
         </StackPanel>
+        <!-- Informational TextBlock -->
+        <TextBlock Grid.Row="14"
+           TextWrapping="Wrap"
+           Margin="20"
+           HorizontalAlignment="Center">
+            <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Red"/><Run Text=": Follow these steps to set up Dynamic Lighting:"/>
+            <LineBreak/>
+            <Run Text="      1. Click here to open "/>
+            <Hyperlink NavigateUri="ms-settings:personalization-lighting" Click="OpenLightingSettings_Click">Settings > Personalization > Dynamic Lighting</Hyperlink>
+            <LineBreak/>
+            <Run Text="      2. Find and click on your keyboard device in the list to open its specific settings"/>
+            <LineBreak/>
+            <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top"/>
+            <LineBreak/>
+            <LineBreak/>
+            <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/><LineBreak/>
+            <Run Text="The setting in the top level 'Dynamic Lighting' menu is the global setting that will affect all devices."/>
+        </TextBlock>
+
     </Grid>
 </Window>
