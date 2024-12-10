@@ -340,19 +340,21 @@ namespace Dynamic_Lighting_Key_Indicator
             buttonDefaultColor.Background = new SolidColorBrush(ViewModel.ColorSettings.DefaultColor);
         }
 
+        // Determine whether to use white or black text based on the background color
+        SolidColorBrush DetermineGlyphColor(Button button)
+        {
+            var buttonBackgroundColorBruh = button.Background as SolidColorBrush;
+            Windows.UI.Color bgColor = buttonBackgroundColorBruh.Color;
+
+            double luminance = (0.299 * bgColor.R + 0.587 * bgColor.G + 0.114 * bgColor.B) / 255;
+            bool useWhite = luminance < 0.5;
+            SolidColorBrush newGlyphColor = useWhite ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
+
+            return newGlyphColor;
+        }
+
         private void ForceUpdateAllButtonGlyphs()
         {
-            //----------------  Local function ----------------
-            // Determine whether to use white or black text based on the background color
-            SolidColorBrush DetermineGlyphColor(Windows.UI.Color color)
-            {
-                double luminance = (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255;
-                bool useWhite = luminance < 0.5;
-                return useWhite ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
-            }
-
-            // ------------------------------------------------
-
             // Update the sync glpyhs
             foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
             {
@@ -362,9 +364,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 //string glyph = ManuallyGetGlyph((string)button.Tag);
                 string glyph = ViewModel.GetSyncGlyph_ByButtonObject(button);
                 FontIcon? fontIcon = GetButtonGlyphObject(button);
-
-                var buttonBackgroundColor = button.Background as SolidColorBrush;
-                SolidColorBrush iconColor = DetermineGlyphColor(buttonBackgroundColor.Color);
+                SolidColorBrush iconColor = DetermineGlyphColor(button);
 
                 if (fontIcon != null)
                 {
@@ -633,19 +633,45 @@ namespace Dynamic_Lighting_Key_Indicator
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
                 if (colorPropertyName == "DefaultColor")
                 {
+                    FontIcon fontIcon;
+                    SolidColorBrush iconColor;
                     // This janky, should be refactored to a loop with a list of keys but this will work for now
                     if (ViewModel.ColorSettings.SyncNumLockOnColor)
+                    { 
                         buttonNumLockOn.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonNumLockOn);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonNumLockOn);
+                    }
                     if (ViewModel.ColorSettings.SyncNumLockOffColor)
+                    { 
                         buttonNumLockOff.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonNumLockOff);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonNumLockOff);
+                    }
                     if (ViewModel.ColorSettings.SyncCapsLockOnColor)
+                    {
                         buttonCapsLockOn.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonCapsLockOn);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonCapsLockOn);
+                    }
                     if (ViewModel.ColorSettings.SyncCapsLockOffColor)
+                    { 
                         buttonCapsLockOff.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonCapsLockOff);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonCapsLockOff);
+                    }
                     if (ViewModel.ColorSettings.SyncScrollLockOnColor)
+                    { 
                         buttonScrollLockOn.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonScrollLockOn);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonScrollLockOn);
+                    }
                     if (ViewModel.ColorSettings.SyncScrollLockOffColor)
+                    { 
                         buttonScrollLockOff.Background = new SolidColorBrush(args.NewColor);
+                        fontIcon = GetButtonGlyphObject(buttonScrollLockOff);
+                        fontIcon.Foreground = DetermineGlyphColor(buttonScrollLockOff);
+                    }
                 }
             };
 
