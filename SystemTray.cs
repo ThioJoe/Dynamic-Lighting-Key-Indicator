@@ -240,51 +240,10 @@ namespace Dynamic_Lighting_Key_Indicator
             return DefWindowProc(hwnd, msg, wParam, lParam);
         }
 
-        private void ShowTrayContextMenu()
-        {
-            var menu = new MenuFlyout();
-            var restoreItem = new MenuFlyoutItem { Text = "Restore" };
-            restoreItem.Click += (s, e) => RestoreFromTray();
-            var exitItem = new MenuFlyoutItem { Text = "Exit" };
-            exitItem.Click += (s, e) => ExitApplication();
-
-            menu.Items.Add(restoreItem);
-            menu.Items.Add(exitItem);
-
-            // Get cursor position
-            GetCursorPos(out POINT mousePoint);
-
-            // Get the window's content as XamlRoot
-            UIElement? rootElement = this.mainWindow.Content as UIElement;
-            if (rootElement != null)
-            {
-                menu.XamlRoot = rootElement.XamlRoot;
-
-                // Convert screen coordinates to XamlRoot coordinates
-                var transform = rootElement.TransformToVisual(null);
-                var pointInApp = transform.TransformPoint(new Point(mousePoint.X, mousePoint.Y));
-
-                menu.ShowAt(null, pointInApp);
-                menu.ShouldConstrainToRootBounds = false;
-                menu.Placement = FlyoutPlacementMode.Bottom;
-            }
-        }
-
-
         private IntPtr GetWindowHandle()
         {
             var windowNative = this.mainWindow.As<IWindowNative>();
             return windowNative.WindowHandle;
-        }
-
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            MinimizeToTray();
-        }
-
-        private void myButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Your existing button click handler
         }
     }
 

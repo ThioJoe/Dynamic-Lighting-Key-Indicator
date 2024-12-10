@@ -54,6 +54,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private readonly object _lock = new object();
 
         public const string MainIconFileName = "Icon.ico";
+        public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
 
 
         public MainWindow()
@@ -68,6 +69,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Set the window title bar icon
             this.AppWindow.SetIcon(GetIconPathFromAssets());
+            this.Title = MainWindowTitle;
 
             SystemTray systemTray = new SystemTray(this);
             systemTray.InitializeSystemTray();

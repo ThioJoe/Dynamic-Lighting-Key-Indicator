@@ -72,8 +72,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine($"Registered message ID: {WM_PROTOCOL_DATA}");
 
             // Create shared memory
-            sharedMemHandle = CreateFileMapping(new IntPtr(-1), IntPtr.Zero, PAGE_READWRITE,
-                0, MAX_URI_LENGTH, "DLKI_SharedMem");
+            sharedMemHandle = CreateFileMapping(new IntPtr(-1), IntPtr.Zero, PAGE_READWRITE, 0, MAX_URI_LENGTH, "DLKI_SharedMem");
 
             if (sharedMemHandle == IntPtr.Zero)
             {
