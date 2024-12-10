@@ -16,7 +16,7 @@
   <mp:PhoneIdentity PhoneProductId="d0c925b6-90d6-4ee7-a5c8-d9b08b62723e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Dynamic-Lighting-Key-Indicator</DisplayName>
+    <DisplayName>Dynamic Lighting Key Indicator</DisplayName>
     <PublisherDisplayName>ThioJoe</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
