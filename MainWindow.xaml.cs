@@ -342,6 +342,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ForceUpdateAllButtonGlyphs()
         {
+            //----------------  Local function ----------------
+            // Determine whether to use white or black text based on the background color
+            SolidColorBrush DetermineGlyphColor(Windows.UI.Color color)
+            {
+                double luminance = (0.299 * color.R + 0.587 * color.G + 0.114 * color.B) / 255;
+                bool useWhite = luminance < 0.5;
+                return useWhite ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
+            }
+
+            // ------------------------------------------------
+
             // Update the sync glpyhs
             foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
             {
@@ -352,10 +363,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 string glyph = ViewModel.GetSyncGlyph_ByButtonObject(button);
                 FontIcon? fontIcon = GetButtonGlyphObject(button);
 
+                var buttonBackgroundColor = button.Background as SolidColorBrush;
+                SolidColorBrush iconColor = DetermineGlyphColor(buttonBackgroundColor.Color);
+
                 if (fontIcon != null)
                 {
                     Microsoft.UI.Xaml.Media.FontFamily glyphFont = new Microsoft.UI.Xaml.Media.FontFamily("Segoe MDL2 Assets");
                     fontIcon.FontFamily = glyphFont;
+                    fontIcon.Foreground = iconColor;
                     fontIcon.Glyph = glyph;
                 }
             }
