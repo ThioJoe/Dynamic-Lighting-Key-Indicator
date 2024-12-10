@@ -49,12 +49,6 @@ namespace Dynamic_Lighting_Key_Indicator
         static extern bool Shell_NotifyIcon(uint dwMessage, ref NOTIFYICONDATAW lpData);
 
         [DllImport("user32.dll")]
-        static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
-
-        [DllImport("user32.dll")]
-        static extern bool GetCursorPos(out POINT lpPoint);
-
-        [DllImport("user32.dll")]
         static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
@@ -62,34 +56,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll")]
         static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr CreateIconFromResource(IntPtr presbits, uint dwResSize, uint fIcon, uint dwVer);
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern IntPtr LoadImage(IntPtr hInst, string lpszName, uint uType, int cxDesired, int cyDesired, uint fuLoad);
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern IntPtr CreateIconFromResourceEx(
-            IntPtr pbIconBits, // Pointer to icon data
-            uint cbIconBits,  // Size of icon data
-            uint fIcon,      // TRUE for icon, FALSE for cursor
-            uint dwVersion,  // Icon/cursor version
-            int cxDesired,   // Desired width (0 for system default)
-            int cyDesired,   // Desired height (0 for system default)
-            uint uFlags      // Flags (see documentation)
-        );
-
-        // Add the following P/Invoke declaration for GetSystemMetrics
-        [DllImport("user32.dll")]
-        static extern int GetSystemMetrics(int nIndex);
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct POINT
-        {
-            public int X;
-            public int Y;
-        }
 
         private const uint NIM_ADD = 0x00000000;
         private const uint NIM_MODIFY = 0x00000001;
@@ -101,7 +67,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private const int WM_RBUTTONUP = 0x0205;
         private const int WM_TRAYICON = 0x800;
         private const int GWLP_WNDPROC = -4;
-        private const uint NOTIFYICON_VERSION = 4; // Was set to 3 but I think we should use 4
+        private const uint NOTIFYICON_VERSION = 3; // Do not use 4, or else the context menu will not work
         private const uint NIM_SETVERSION = 4;
 
         private NOTIFYICONDATAW notifyIcon;
@@ -140,26 +106,6 @@ namespace Dynamic_Lighting_Key_Indicator
             });
         }
 
-        public IntPtr GethIcon()
-        {
-            uint IMAGE_ICON = 1;
-            uint LR_LOADFROMFILE = 0x00000010;
-            uint LR_DEFAULTSIZE = 0x00000040;
-
-            IntPtr hIcon = IntPtr.Zero;
-            string iconPath = MainWindow.GetIconPathFromAssets(MainWindow.MainIconFileName);
-
-            if (File.Exists(iconPath))
-                hIcon = LoadImage(IntPtr.Zero, iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
-
-            // If it's still null, load the default icon
-            if (hIcon == IntPtr.Zero)
-                hIcon = LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
-
-            return hIcon;
-        }
-
-
         [Flags]
         public enum NOTIFY_ICON_DATA_FLAGS : uint
         {
@@ -173,19 +119,6 @@ namespace Dynamic_Lighting_Key_Indicator
             NIF_SHOWTIP = 0x00000080
         }
 
-        public enum SYSTEM_METRICS_INDEX : int
-        {
-            SM_CXSMICON = 49,
-            SM_CYSMICON = 50
-        }
-
-        // Enum for DWORD type bool used by windows API, which is 4 bytes long, but 1 is true and 0 is false
-        public enum BOOL : uint
-        {
-            FALSE = 0,
-            TRUE = 1
-        }
-
         // See: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw
         public enum NOTIFY_ICON_MESSAGE
         {
@@ -194,33 +127,6 @@ namespace Dynamic_Lighting_Key_Indicator
             NIM_DELETE = 0x00000002,
             NIM_SETFOCUS = 0x00000003,
             NIM_SETVERSION = 0x00000004
-        }
-
-        public enum NotifyIconVersion: uint
-        {
-            /// <summary>
-            /// Default version.
-            /// </summary>
-            NOTIFYICON_VERSION_0 = 0,
-
-            /// <summary>
-            /// Version 3 of the notification icon API.
-            /// </summary>
-            NOTIFYICON_VERSION = 3,
-
-            /// <summary>
-            /// Version 4 of the notification icon API, introduced in Windows Vista.
-            /// </summary>
-            NOTIFYICON_VERSION_4 = 4
-        }
-
-        [Flags]
-        public enum LoadResourceFlags : uint
-        {
-            LR_DEFAULTCOLOR = 0x00000000,
-            LR_DEFAULTSIZE = 0x00000040,
-            LR_MONOCHROME = 0x00000001,
-            LR_SHARED = 0x00008000
         }
 
         public IntPtr LoadhIconFromResource(string resourceName)
@@ -241,67 +147,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return hIcon;
         }
 
-
-        //public IntPtr LoadIconFromResource(string resourceName)
-        //{
-        //    // Get the assembly containing the resource
-        //    Assembly assembly = typeof(MainWindow).Assembly;
-
-        //    // Get the resource stream
-        //    using Stream iconStream = assembly.GetManifestResourceStream(resourceName);
-        //    if (iconStream == null)
-        //    {
-        //        throw new Exception("Icon resource not found.");
-        //    }
-
-        //    // Read the icon data into a byte array
-        //    byte[] iconBytes = new byte[iconStream.Length];
-        //    iconStream.Read(iconBytes, 0, iconBytes.Length);
-
-        //    // Pin the byte array in memory using GCHandle
-        //    GCHandle handle = GCHandle.Alloc(iconBytes, GCHandleType.Pinned);
-        //    try
-        //    {
-        //        // Get the address of the pinned array
-        //        IntPtr iconData = handle.AddrOfPinnedObject();
-
-        //        // NOTE - This won't work as is, because iconData is in the file ico format, but it expects RT_ICON format like it would appear in a .exe or .dll
-
-        //        // Load the icon from the byte array
-        //        IntPtr hIcon = CreateIconFromResourceEx(
-        //            iconData,
-        //            (uint)iconBytes.Length,
-        //            (uint)BOOL.TRUE, // This is an icon, not a cursor
-        //            0x00030000, // Version 3.0 of the format
-        //            GetSystemMetrics(49),
-        //            GetSystemMetrics(50),
-        //            (uint)(0) // Flags, currently none
-        //        );
-
-        //        //IntPtr hIcon = CreateIconFromResource(
-        //        //    iconData,
-        //        //    (uint)iconBytes.Length,
-        //        //    (uint)BOOL.TRUE, // This is an icon, not a cursor
-        //        //    0x00030000 // Version 3.0 of the format
-        //        //    );
-
-        //        if (hIcon == IntPtr.Zero)
-        //        {
-        //            // Handle error
-        //            var error = Marshal.GetLastWin32Error();
-        //            System.Diagnostics.Debug.WriteLine($"Failed to load icon from resource. Error: {error}");
-        //            return IntPtr.Zero;
-        //        }
-
-        //        return hIcon;
-        //    }
-        //    finally
-        //    {
-        //        // Free the pinned array
-        //        handle.Free();
-        //    }
-        //}
-
         public void InitializeNotifyIcon()
         {
             notifyIcon = new NOTIFYICONDATAW();
@@ -313,11 +158,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Set tooltip - using Marshal to avoid unsafe code
             string tip = "Dynamic Lighting Key Indicator";
-            notifyIcon.szTip = tip; // Testing without tooltip for now
+            notifyIcon.szTip = tip;
 
             // Load icon from embedded resource
-            IntPtr hICON = LoadhIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
-            notifyIcon.hIcon = hICON;
+            IntPtr hIcon = LoadhIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            notifyIcon.hIcon = hIcon;
 
             // Add the icon
             if (!Shell_NotifyIcon((uint)NOTIFY_ICON_MESSAGE.NIM_ADD, ref notifyIcon))
