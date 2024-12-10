@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -57,6 +59,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
 
         public MainWindow()
         {
@@ -67,14 +71,17 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeComponent();
             ProtocolMessage.Initialize(this);
             this.Activated += MainWindow_Activated;
-
-            // Set the window title bar icon
-            this.AppWindow.SetIcon(GetIconPathFromAssets());
             this.Title = MainWindowTitle;
 
+            // Initialize the system tray
             SystemTray systemTray = new SystemTray(this);
             systemTray.InitializeSystemTray();
 
+            // Use WM_SETICON message to set the window title bar icon
+            Icon icon = systemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, icon.Handle); // WM_SETICON = 0x0080, ICON_BIG = 1
+
+            // Initialize the ViewModel
             ViewModel = new MainViewModel();
             ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";

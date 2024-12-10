@@ -129,7 +129,7 @@ namespace Dynamic_Lighting_Key_Indicator
             NIM_SETVERSION = 0x00000004
         }
 
-        public IntPtr LoadhIconFromResource(string resourceName)
+        public System.Drawing.Icon LoadIconFromResource(string resourceName)
         {
             // Get the assembly containing the resource
             Assembly assembly = typeof(MainWindow).Assembly;
@@ -142,9 +142,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             System.Drawing.Icon icon = new Icon(iconStream);
-            IntPtr hIcon = icon.Handle; // This gives you the HICON handle
 
-            return hIcon;
+            return icon;
         }
 
         public void InitializeNotifyIcon()
@@ -161,7 +160,9 @@ namespace Dynamic_Lighting_Key_Indicator
             notifyIcon.szTip = tip;
 
             // Load icon from embedded resource
-            IntPtr hIcon = LoadhIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            Icon icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            IntPtr hIcon = icon.Handle; // This gives you the HICON handle
+            
             notifyIcon.hIcon = hIcon;
 
             // Add the icon
