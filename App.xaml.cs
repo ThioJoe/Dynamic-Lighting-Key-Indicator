@@ -21,12 +21,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Create and activate window first
             m_window = new MainWindow();
 
-            // Initialize ProtocolMessage before activation
-            if (m_window != null)
-            {
-                ProtocolMessage.Initialize(m_window);
-            }
-
             // Now activate the window
             m_window.Activate();
 

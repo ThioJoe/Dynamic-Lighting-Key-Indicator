@@ -20,20 +20,13 @@ namespace Dynamic_Lighting_Key_Indicator
             var activatedEventArgs = currentInstance.GetActivatedEventArgs();
             var mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
 
-            // If this isn't the main instance and it's a protocol activation
+            // If this isn't the main instance and it's a protocol activation, redirect it to the main instance.
+            // It will be captured by the MainInstance_Activated handler we created in MainWindow.xaml.cs attached to the main instance.
             if (!mainInstance.IsCurrent && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
             {
-                Debug.WriteLine("Secondary instance with protocol - sending via WM");
-
-                var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
-                if (protocolArgs?.Uri != null)
-                {
-                    // Send the protocol data via Windows Message
-                    ProtocolMessage.SendProtocolData(protocolArgs.Uri.ToString());
-                }
-
                 // Redirect activation (for window focus)
                 Task.Run(() => mainInstance.RedirectActivationToAsync(activatedEventArgs)).Wait();
+
                 return 0;
             }
 

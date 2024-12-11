@@ -1,31 +1,17 @@
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Documents;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.ApplicationModel;
+using Windows.ApplicationModel.Activation;
 using Windows.Devices.Enumeration;
-using Windows.Devices.HumanInterfaceDevice;
 using Windows.Devices.Lights;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Core;
-using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 #nullable enable
 
@@ -69,9 +55,11 @@ namespace Dynamic_Lighting_Key_Indicator
             #endif
 
             InitializeComponent();
-            ProtocolMessage.Initialize(this);
             this.Activated += MainWindow_Activated;
             this.Title = MainWindowTitle;
+
+            AppInstance thisInstance = AppInstance.GetCurrent();
+            thisInstance.Activated += MainInstance_Activated;
 
             // Initialize the system tray
             SystemTray systemTray = new SystemTray(this);
@@ -113,14 +101,35 @@ namespace Dynamic_Lighting_Key_Indicator
             URLHandler.ProvideWindow(this);
         }
 
+        // This will handle the redirected activation from the protocol (URL) activation of further instances
+        private void MainInstance_Activated(object? sender, AppActivationArguments args)
+        {
+            // Capture the relevant data immediately
+            var isProtocol = args.Kind == ExtendedActivationKind.Protocol;
+            Uri? protocolUri = null;
+
+            if (isProtocol)
+            {
+                var protocolArgs = args.Data as IProtocolActivatedEventArgs;
+                if (protocolArgs?.Uri != null)
+                {
+                    protocolUri = protocolArgs.Uri;
+                }
+            }
+
+            // Now use the dispatcher with our captured data
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
+            {
+                if (isProtocol && protocolUri != null)
+                {
+                    URLHandler.ProcessUri(protocolUri);
+                }
+            });
+        }
+
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
             System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
-        }
-
-        public static string GetIconPathFromAssets(string specificName = MainIconFileName)
-        {
-            return Path.Combine(Package.Current.InstalledLocation.Path, $"Assets\\{specificName}");
         }
 
         // Getter and setter for user config
@@ -525,7 +534,8 @@ namespace Dynamic_Lighting_Key_Indicator
             ColorSettings colorSettings = ViewModel.ColorSettings;
 
             // Save the current color settings to the ViewModel
-            if (newConfig == null) {
+            if (newConfig == null)
+            {
                 colorSettings.SetAllColorsFromGUI(ViewModel);
                 ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
             }
@@ -597,7 +607,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            ApplyAndSaveSettings(saveFile: true);  
+            ApplyAndSaveSettings(saveFile: true);
         }
 
         // This is the button within the flyout  menu
