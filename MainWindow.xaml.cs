@@ -252,7 +252,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
             else
             {
-                message = $"Available LampArrays: {availableDevices.Count}";
+                message = $"Available Devices: {availableDevices.Count}";
             }
 
             int deviceIndex = 0;
@@ -293,16 +293,25 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void UpdateAttachedLampArrayDisplayList()
         {
-            string message = $"Attached LampArrays: {m_attachedLampArrays.Count}";
+            string message = "";
 
             lock (_lock)
             {
                 lock (m_attachedLampArrays)
                 {
-                    foreach (LampArrayInfo info in m_attachedLampArrays)
+                    if (m_attachedLampArrays.Count == 0)
                     {
-                        message += $"\n - {info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lamps, " + $"{(info.lampArray.IsAvailable ? "Available" : "Unavailable")})";
+                        message = "Attached To: None";
                     }
+                    else
+                    {
+                        message = $"Attached To: ";
+                        foreach (LampArrayInfo info in m_attachedLampArrays)
+                        {
+                            message += $"{info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lights)";
+                        }
+                    }
+                    
                 }
 
                 // Update ViewModel on UI thread
