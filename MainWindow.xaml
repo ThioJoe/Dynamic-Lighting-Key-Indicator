@@ -24,25 +24,29 @@
         </Grid.Resources>
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="10" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />     <!-- Row 0 -->
+            <RowDefinition Height="20" />       <!-- Row 1 Spacer -->
+            <RowDefinition Height="Auto" />     <!-- Row 2 -->
+            <RowDefinition Height="20" />       <!-- Row 3 Spacer -->
+            <RowDefinition Height="Auto" />     <!-- Row 4 -->
+            <RowDefinition Height="10" />       <!-- Row 5 Spacer -->
+            <RowDefinition Height="Auto" />     <!-- Row 6 -->
+            <RowDefinition Height="20" />       <!-- Row 7 Spacer -->
+            <RowDefinition Height="Auto" />     <!-- Row 8 -->
+            <RowDefinition Height="Auto" />     <!-- Row 9 -->
+            <RowDefinition Height="20" />       <!-- Row 10 Spacer -->
+            <RowDefinition Height="Auto" />     <!-- Row 11 -->
+            <RowDefinition Height="Auto" />     <!-- Row 12 -->
+            <RowDefinition Height="Auto" />     <!-- Row 13 -->
+            <RowDefinition Height="Auto" />     <!-- Row 14 -->
+            <RowDefinition Height="Auto" />     <!-- Row 15 -->
+            <RowDefinition Height="Auto" />     <!-- Row 16 -->
+            <RowDefinition Height="Auto" />     <!-- Row 17 -->
+            <RowDefinition Height="Auto" />     <!-- Row 18 -->
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="watcherStatusText" 
-                   Grid.Row="0" 
+                   Grid.Row="0"
                    Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"/>
 
@@ -98,12 +102,6 @@
                    Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
                    Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
-        <ToggleSwitch x:Name="toggleStartupWithWindows"
-              Grid.Row="13"
-              Header="Start with Windows"
-              IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
-              HorizontalAlignment="Center"
-              Margin="0,20,0,0"/>
 
         <!-- Color Settings Grid -->
         <Grid Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center">
@@ -243,10 +241,41 @@
                 </StackPanel>
             </Button>
         </StackPanel>
-        <!-- Informational TextBlock -->
-        <TextBlock Grid.Row="14"
+
+        <!-- Startup Setting Toggle and Message -->
+        <TextBlock Grid.Row="14" 
+              Text="Start with Windows:" 
+              HorizontalAlignment="Center"
+              Margin="0,20,0,0"
+            />
+                <!-- Set toggle switch MinWidth to zero otherwise it isn't properly centered -->
+        <ToggleSwitch x:Name="toggleStartupWithWindows"
+              Grid.Row="15"
+              IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
+              IsEnabled="{x:Bind ViewModel.StartupSettingCanBeChanged, Mode=OneWay}"
+              HorizontalAlignment="Center"
+              MinWidth="0" 
+              Margin="0,0,0,0"
+            />
+        <TextBlock Grid.Row="16" 
+              Text="{x:Bind ViewModel.StartupSettingReason, Mode=OneWay}" 
+              Foreground="Red"  
+              Margin="0,0,0,0"
+              TextWrapping="Wrap"
+              Visibility="{x:Bind ViewModel.StartupSettingCanBeChanged_VisibilityBool, Mode=OneWay}"
+            />
+
+        <!-- Divider Line and Informational TextBlock -->
+        <Line Grid.Row="17" 
+              X2="1000" 
+              Stroke="Black" 
+              StrokeThickness="1" 
+              HorizontalAlignment="Center"
+              Margin="0,10,0,0"
+            />
+        <TextBlock Grid.Row="18"
            TextWrapping="Wrap"
-           Margin="20"
+           Margin="0,10,0,0"
            HorizontalAlignment="Center">
             <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Red"/><Run Text=": Follow these steps to set up Dynamic Lighting:"/>
             <LineBreak/>

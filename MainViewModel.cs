@@ -45,7 +45,14 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool StartupSettingCanBeChanged
         {
             get => _startupSettingCanBeChanged;
-            set => SetProperty(ref _startupSettingCanBeChanged, value);
+            set
+            {
+                if (SetProperty(ref _startupSettingCanBeChanged, value))
+                {
+                    OnPropertyChanged(nameof(StartupSettingCanBeChanged));
+                    OnPropertyChanged(nameof(StartupSettingCanBeChanged_VisibilityBool));
+                }
+            }
         }
 
         private string _startupSettingReason;
@@ -129,9 +136,21 @@ namespace Dynamic_Lighting_Key_Indicator
                 case StartupTaskState.DisabledByPolicy:
                     return "Warning: This setting (Startup with Windows disabled) is currently managed by group policy and can't be changed.";
                 case StartupTaskState.DisabledByUser:
-                    return "Warning: This setting has been manually disabled elsewhere like the Task Manager or Startup settings, and therefore cannot be enabled from within the app, you must manually enable it again.";
+                    return "Warning: Startup setting has been manually disabled elsewhere like the Task Manager or Startup settings, and therefore cannot be enabled from within the app, you must manually enable it again.";
                 default:
                     return "";
+            }
+        }
+
+        public Visibility StartupSettingCanBeChanged_VisibilityBool
+        {
+            get
+            {
+                // If the startup setting can't be changed, show the warning message, so set to visible
+                if (!StartupSettingCanBeChanged) 
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
             }
         }
 
@@ -139,8 +158,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             var startupState = await MainWindow.GetStartupTaskState_Async();
             IsStartupEnabled = (startupState == StartupTaskState.Enabled || startupState == StartupTaskState.EnabledByPolicy);
-            _startupSettingCanBeChanged = (startupState != StartupTaskState.EnabledByPolicy && startupState != StartupTaskState.DisabledByPolicy && startupState != StartupTaskState.DisabledByUser);
-            _startupSettingReason = GetReason(startupState);
+            StartupSettingCanBeChanged = (startupState != StartupTaskState.EnabledByPolicy && startupState != StartupTaskState.DisabledByPolicy && startupState != StartupTaskState.DisabledByUser);
+            StartupSettingReason = GetReason(startupState);
         }
 
         private string _deviceStatusMessage;
