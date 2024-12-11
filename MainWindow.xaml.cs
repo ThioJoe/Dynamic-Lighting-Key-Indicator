@@ -102,6 +102,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             URLHandler.ProvideUserConfig(currentConfig);
             URLHandler.ProvideWindow(this);
+
+
         }
 
         // ------------------------------- Getters / Setters -------------------------------
@@ -114,43 +116,67 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ------------------------------- Methods -------------------------------
 
-        private static async Task<StartupTaskState> ChangWindowsStartupState(bool enableAtStartup)
+        public static async Task<StartupTaskState> ChangWindowsStartupState_Async(bool enableAtStartupRequestedState)
         {
             // TaskId is set in the Package.appxmanifest file under <uap5:StartupTask> extension
-            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId); 
+            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId);
+            Debug.WriteLine("Original startup state: {0}", startupTask.State);
 
-            switch (startupTask.State)
+            List<StartupTaskState> possibleEnabledStates = [StartupTaskState.Enabled, StartupTaskState.EnabledByPolicy];
+            List<StartupTaskState> possibleDisabledStates = [StartupTaskState.Disabled, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
+
+            // If the startup state already matches the desired state, return the current state
+            if (await MatchesStartupState(enableAtStartupRequestedState))
             {
-                case StartupTaskState.Disabled:
-                    // Task is disabled but can be enabled.
-                    StartupTaskState newState = await startupTask.RequestEnableAsync(); // ensure that you are on a UI thread when you call RequestEnableAsync()
-                    Debug.WriteLine("Request to enable startup, result = {0}", newState);
-                    break;
-                case StartupTaskState.DisabledByUser:
-                    // Task is disabled and user must enable it manually.
-                    MessageDialog dialog = new MessageDialog(
-                        "You have disabled this app's ability to run " +
-                        "as soon as you sign in, but if you change your mind, " +
-                        "you can enable this in the Startup tab in Task Manager.",
-                        "TestStartup");
-                    await dialog.ShowAsync();
-                    break;
-                case StartupTaskState.DisabledByPolicy:
-                    Debug.WriteLine("Startup disabled by group policy, or not supported on this device");
-                    break;
-                case StartupTaskState.Enabled:
-                    Debug.WriteLine("Startup is enabled.");
-                    break;
+                Debug.WriteLine($"Startup state ({startupTask.State}) already matches the desired state.");
+                return startupTask.State;
             }
 
-            // Check again to see if the state changed
+            // Change the startup state based on input parameter
+            StartupTaskState newDesiredState;
+            if (enableAtStartupRequestedState == true)
+            {
+                newDesiredState = StartupTaskState.Enabled;
+                _ = await startupTask.RequestEnableAsync(); // ensure that you are on a UI thread when you call RequestEnableAsync()
+            }
+            else
+            {
+                newDesiredState = StartupTaskState.Disabled;
+                startupTask.Disable(); // ensure that you are on a UI thread when you call DisableAsync()
+            }
+
+            // Check again to see if it matches and print a debug message
+            if (startupTask.State == newDesiredState)
+                Debug.WriteLine($"Success: New startup state: {startupTask.State}");
+            else
+                Debug.WriteLine($"Failed to change the startup state to {newDesiredState}. Current state: {startupTask.State}");
+
             return startupTask.State;
         }
 
-        public static StartupTaskState GetStartupTaskState()
+        public static async Task<StartupTaskState> GetStartupTaskState_Async()
         {
-            StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).AsTask().GetAwaiter().GetResult();
+            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId);
             return startupTask.State;
+        }
+
+        public static async Task<bool> MatchesStartupState(bool desiredStartupState)
+        {
+            StartupTaskState currentStartupState = await GetStartupTaskState_Async();
+            List<StartupTaskState> possibleEnabledStates = [StartupTaskState.Enabled, StartupTaskState.EnabledByPolicy];
+            List<StartupTaskState> possibleDisabledStates = [StartupTaskState.Disabled, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
+
+            if (
+                   (desiredStartupState == true && possibleEnabledStates.Contains(currentStartupState))
+                || (desiredStartupState == false && possibleDisabledStates.Contains(currentStartupState))
+            )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         private async void AttachToSavedDevice()
@@ -565,6 +591,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
             System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
+
         }
 
         // This will handle the redirected activation from the protocol (URL) activation of further instances

@@ -98,6 +98,12 @@
                    Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
                    Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+        <ToggleSwitch x:Name="toggleStartupWithWindows"
+              Grid.Row="13"
+              Header="Start with Windows"
+              IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
+              HorizontalAlignment="Center"
+              Margin="0,20,0,0"/>
 
         <!-- Color Settings Grid -->
         <Grid Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center">

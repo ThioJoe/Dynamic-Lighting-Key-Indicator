@@ -7,6 +7,8 @@ using Microsoft.UI.Xaml;
 using System;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Controls;
+using System.Threading.Tasks;
+using Windows.ApplicationModel;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -19,6 +21,126 @@ namespace Dynamic_Lighting_Key_Indicator
         public MainViewModel()
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
+
+            _ = InitializeStartupTaskStateAsync();
+        }
+
+        private bool _isStartupEnabled;
+        public bool IsStartupEnabled
+        {
+            get => _isStartupEnabled;
+            set
+            {
+                if (SetProperty(ref _isStartupEnabled, value))
+                {
+                    // Change the startup task state when the property changes
+                    _ = UpdateStartupTaskStateAsync(value);
+                }
+            }
+        }
+
+        // Whether to show a special message if the startup setting is set by policy, or was manually disabled by the user and therefore can't be toggled.
+        // Also whether to disable the toggle switch if it won't work because of the above reasons.
+        private bool _startupSettingCanBeChanged;
+        public bool StartupSettingCanBeChanged
+        {
+            get => _startupSettingCanBeChanged;
+            set => SetProperty(ref _startupSettingCanBeChanged, value);
+        }
+
+        private string _startupSettingReason;
+        public string StartupSettingReason
+        {
+            get => _startupSettingReason;
+            set => SetProperty(ref _startupSettingReason, value);
+        }
+
+        private async Task UpdateStartupTaskStateAsync(bool newDesiredStateBool)
+        {
+            StartupTaskState updatedState;
+
+            // Get the original state of the startup task
+            StartupTaskState originalState = await MainWindow.GetStartupTaskState_Async();
+
+            // Simple bool to represent the original state
+            bool originalStateBool = (originalState == StartupTaskState.Enabled || originalState == StartupTaskState.EnabledByPolicy);
+
+            // If the the new desired state matches the original state, just make sure the toggle is set to the correct value
+            if (await MainWindow.MatchesStartupState(newDesiredStateBool) == true)
+            {
+                updatedState = originalState;
+
+                // Only update the property if it doesn't already match the new desired state
+                if (IsStartupEnabled != newDesiredStateBool)
+                {
+                    _isStartupEnabled = newDesiredStateBool;
+                    OnPropertyChanged(nameof(IsStartupEnabled));
+                }
+            }
+            // Otherwise update the state of the startup task
+            else
+            {
+                updatedState = await MainWindow.ChangWindowsStartupState_Async(newDesiredStateBool);
+
+                // Check again if the new desired state matches the updated state. If it does, update the property
+                if (await MainWindow.MatchesStartupState(newDesiredStateBool) == true)
+                {
+                    _isStartupEnabled = newDesiredStateBool;
+                    OnPropertyChanged(nameof(IsStartupEnabled));
+                }
+                // If it failed to update, ensure the property is set to the correct value if not already
+                else
+                {
+                    if (IsStartupEnabled != originalStateBool)
+                    {
+                        _isStartupEnabled = originalStateBool;
+                        OnPropertyChanged(nameof(IsStartupEnabled));
+                    }
+                }
+            }
+
+            List<StartupTaskState> statesNotAbleToChange = [StartupTaskState.EnabledByPolicy, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
+
+            if (statesNotAbleToChange.Contains(updatedState))
+            {
+                _startupSettingCanBeChanged = false;
+                _startupSettingReason = GetReason(updatedState);
+            }
+            else
+            {
+                _startupSettingCanBeChanged = true;
+                _startupSettingReason = "";
+            }
+
+            // Update the startup setting can be changed property if necessary
+            if (StartupSettingCanBeChanged != _startupSettingCanBeChanged)
+            {
+                OnPropertyChanged(nameof(StartupSettingCanBeChanged));
+                OnPropertyChanged(nameof(StartupSettingReason));
+            }
+        }
+
+        public static string GetReason(StartupTaskState startupTaskState)
+        {
+            switch (startupTaskState)
+            {
+                case StartupTaskState.EnabledByPolicy:
+                    return "Warning: This setting (Startup with Windows enabled) is currently managed by group policy and can't be changed.";
+                case StartupTaskState.DisabledByPolicy:
+                    return "Warning: This setting (Startup with Windows disabled) is currently managed by group policy and can't be changed.";
+                case StartupTaskState.DisabledByUser:
+                    return "Warning: This setting has been manually disabled elsewhere like the Task Manager or Startup settings, and therefore cannot be enabled from within the app, you must manually enable it again.";
+                default:
+                    return "";
+            }
+        }
+
+        public async Task InitializeStartupTaskStateAsync()
+        {
+            var startupState = await MainWindow.GetStartupTaskState_Async();
+            IsStartupEnabled = (startupState == StartupTaskState.Enabled || startupState == StartupTaskState.EnabledByPolicy);
+            _startupSettingCanBeChanged = (startupState != StartupTaskState.EnabledByPolicy && startupState != StartupTaskState.DisabledByPolicy && startupState != StartupTaskState.DisabledByUser);
+            _startupSettingReason = GetReason(startupState);
         }
 
         private string _deviceStatusMessage;
