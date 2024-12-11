@@ -26,6 +26,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public List<MonitoredKey> MonitoredKeysAndColors { get; set; }
         [JsonInclude]
         public string DeviceId { get; set; } = string.Empty;
+        [JsonInclude]
+        public bool StartMinimizedToTray { get; set; } = false;
 
         public readonly static int DefaultBrightness = 100;
         public readonly static (int R, int G, int B) DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
@@ -45,8 +47,10 @@ namespace Dynamic_Lighting_Key_Indicator
             MaxDepth = 10,
             IncludeFields = true // This is needed for tuples to be serialized
         };
+        private static bool defaultMinimizedToTray = false;
 
         // --------------------------- Constructors ---------------------------
+        // Constructors must set default values for all properties that aren't set at declaration
         // Default constructor
         public UserConfig()
         {
@@ -93,6 +97,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 configStringTask.Wait();
                 var configString = configStringTask.Result;
 
+                // Deserializer will automatically set the default values for any missing properties
                 config = System.Text.Json.JsonSerializer.Deserialize<UserConfig>(json: configString, options: jsonSerializerOptions);
             }
             catch (Exception ex)
@@ -163,6 +168,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Brightness = DefaultBrightness;
             StandardKeyColor = DefaultStandardKeyColor;
             MonitoredKeysAndColors = DefaultMonitoredKeysAndColors;
+            StartMinimizedToTray = defaultMinimizedToTray;
         }
 
         // Scale brightness of all key settings based on a brightness level

@@ -7,7 +7,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Dynamic Lighting Key Indicator">
+    Title="Dynamic Lighting Key Indicator"
+    >
 
     <Grid Padding="40">
         <Grid.Resources>
@@ -232,27 +233,41 @@
         </StackPanel>
 
         <!-- Startup Setting Toggle and Message -->
-        <TextBlock Grid.Row="7" 
-              Text="Start with Windows:" 
-              HorizontalAlignment="Center"
-              Margin="0,20,0,0"
-            />
-                <!-- Set toggle switch MinWidth to zero otherwise it isn't properly centered -->
-        <ToggleSwitch x:Name="toggleStartupWithWindows"
-              Grid.Row="8"
-              IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
-              IsEnabled="{x:Bind ViewModel.StartupSettingCanBeChanged, Mode=OneWay}"
-              HorizontalAlignment="Center"
-              MinWidth="0" 
-              Margin="0,0,0,0"
-            />
-        <TextBlock Grid.Row="9" 
-              Text="{x:Bind ViewModel.StartupSettingReason, Mode=OneWay}" 
-              Foreground="Red"  
-              Margin="0,0,0,0"
-              TextWrapping="Wrap"
-              Visibility="{x:Bind ViewModel.StartupSettingCanBeChanged_VisibilityBool, Mode=OneWay}"
-            />
+        <Grid Grid.Row="7" Margin="0,20,0,0" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Start with Windows Label and Toggle -->
+            <TextBlock Grid.Row="0" Grid.Column="0" 
+               Text="Start with Windows:" 
+               HorizontalAlignment="Center"
+               Margin="0,0,10,0"/>
+            <ToggleSwitch x:Name="toggleStartupWithWindows"
+                  Grid.Row="1" Grid.Column="0"
+                  IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
+                  IsEnabled="{x:Bind ViewModel.StartupSettingCanBeChanged, Mode=OneWay}"
+                  HorizontalAlignment="Center"
+                  MinWidth="0" 
+                  Margin="0,0,10,0"/>
+
+            <!-- Start Minimized to Tray Label and Toggle -->
+            <TextBlock Grid.Row="0" Grid.Column="1" 
+               Text="Start Minimized to Tray:" 
+               HorizontalAlignment="Center"
+               Margin="10,0,0,0"/>
+            <ToggleSwitch x:Name="toggleStartMinimizedToTray"
+                  Grid.Row="1" Grid.Column="1"
+                  IsOn="{x:Bind ViewModel.StartMinimizedToTray, Mode=TwoWay}"
+                  HorizontalAlignment="Center"
+                  MinWidth="0" 
+                  Margin="10,0,0,0"/>
+        </Grid>
 
         <!-- Divider Line and Informational TextBlock -->
         <Line Grid.Row="10" 

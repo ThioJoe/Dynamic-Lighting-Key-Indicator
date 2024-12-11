@@ -15,10 +15,11 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using System.Reflection;
 using System.Drawing;
+using System.Diagnostics;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal class SystemTray
+    public class SystemTray
     {
         private readonly MainWindow mainWindow;
 
@@ -49,13 +50,18 @@ namespace Dynamic_Lighting_Key_Indicator
         static extern bool Shell_NotifyIcon(uint dwMessage, ref NOTIFYICONDATAW lpData);
 
         [DllImport("user32.dll")]
-        static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, IntPtr wParam, IntPtr lParam);
+        static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, UIntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
         static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         [DllImport("user32.dll")]
         static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+        // Using this to pass on messages to the original default window procedure if not being processed by the custom one
+        [DllImport("user32.dll")]
+        static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint uMsg, UIntPtr wParam, IntPtr lParam);
+
 
         private const uint NIM_ADD = 0x00000000;
         private const uint NIM_MODIFY = 0x00000001;
@@ -83,7 +89,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.mainWindow = mainWindow;
         }
 
-        public void InitializeSystemTray() // Whatever your main window class is called, in this case MainWindow
+        public void InitializeSystemTray()
         {
             // Get the window handle
             hwnd = GetWindowHandle();
@@ -96,14 +102,11 @@ namespace Dynamic_Lighting_Key_Indicator
             // Handle window closing
             this.mainWindow.AppWindow.Closing += AppWindow_Closing;
 
-            // Set up window message handling
-            Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread().TryEnqueue(() =>
-            {
-                newWndProc = new WndProcDelegate(WndProc);
-                defaultWndProc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-                SetWindowLongPtr(hwnd, GWLP_WNDPROC,
-                    Marshal.GetFunctionPointerForDelegate(newWndProc));
-            });
+            // Set up custom WndProc to intercept windows messages, process tray window closing and tray icon clicks, and forward the rest to the default window procedure
+            Debug.WriteLine("Setting up WndProc");
+            newWndProc = new WndProcDelegate(WndProc);
+            defaultWndProc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+            SetWindowLongPtr(hwnd, GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(newWndProc));
         }
 
         [Flags]
@@ -180,20 +183,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public void MinimizeToTray()
         {
-            if (!isMinimizedToTray)
-            {
-                appWindow.Hide();
-                isMinimizedToTray = true;
-            }
+            Debug.WriteLine("Minimizing To Tray");
+            appWindow.Hide();
         }
 
         public void RestoreFromTray()
         {
-            if (isMinimizedToTray)
-            {
-                appWindow.Show();
-                isMinimizedToTray = false;
-            }
+            appWindow.Show();
         }
 
         private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
@@ -217,12 +213,14 @@ namespace Dynamic_Lighting_Key_Indicator
             Application.Current.Exit();
         }
 
-        private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam);
-
+        private delegate IntPtr WndProcDelegate(IntPtr hwnd, uint msg, UIntPtr wParam, IntPtr lParam);
         private const int WM_CLOSE = 0x0010;  // Add this to the constants
 
-        private IntPtr WndProc(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam)
+        private IntPtr WndProc(IntPtr hwnd, uint msg, UIntPtr wParam, IntPtr lParam)
         {
+            // Look up the debug in WinEnums.WM_MESSAGE for the name
+            //Debug.WriteLine($"WndProc: {Enum.GetName(typeof(WinEnums.WM_MESSAGE), msg)} ({msg:X4})");
+
             if (msg == WM_TRAYICON)
             {
                 uint lparam = (uint)lParam.ToInt64();
@@ -245,7 +243,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 return IntPtr.Zero;
             }
 
-            return DefWindowProc(hwnd, msg, wParam, lParam);
+            // Pass on the other messages to the original window procedure if we didn't handle it ourselves
+            // Important otherwise the window will not behave as expected
+            return CallWindowProc(defaultWndProc, hwnd, msg, wParam, lParam);
         }
 
         private IntPtr GetWindowHandle()

@@ -31,7 +31,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Main instance
-            Application.Start((p) =>
+            Application.Start((application_Initialization_Callback_Params) =>
             {
                 var context = new DispatcherQueueSynchronizationContext(
                     DispatcherQueue.GetForCurrentThread());

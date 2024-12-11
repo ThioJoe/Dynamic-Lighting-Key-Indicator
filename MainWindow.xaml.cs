@@ -1,4 +1,5 @@
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -13,7 +14,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
-using Windows.UI.Popups;
+using Windows.Graphics;
 
 #nullable enable
 
@@ -67,6 +68,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Initialize the system tray
             SystemTray systemTray = new SystemTray(this);
             systemTray.InitializeSystemTray();
+            Debug.WriteLine("System tray initialized.");
 
             // Use WM_SETICON message to set the window title bar icon
             Icon icon = systemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
@@ -81,7 +83,8 @@ namespace Dynamic_Lighting_Key_Indicator
             // Load the user config from file
             currentConfig = currentConfig.ReadConfigurationFile() ?? new UserConfig();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
-            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
+            ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
+            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);           
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
@@ -103,6 +106,16 @@ namespace Dynamic_Lighting_Key_Indicator
             URLHandler.ProvideUserConfig(currentConfig);
             URLHandler.ProvideWindow(this);
 
+            // Set initial window size, and check if it should start minimized
+            this.AppWindow.Resize(new SizeInt32(1200, 1250));
+            if (currentConfig.StartMinimizedToTray)
+            {
+                systemTray.MinimizeToTray();
+            }
+            else
+            {
+                this.Activate();
+            }
 
         }
 
@@ -116,17 +129,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ------------------------------- Methods -------------------------------
 
-        public static async Task<StartupTaskState> ChangWindowsStartupState_Async(bool enableAtStartupRequestedState)
+        public static StartupTaskState ChangWindowsStartupState(bool enableAtStartupRequestedState)
         {
             // TaskId is set in the Package.appxmanifest file under <uap5:StartupTask> extension
-            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId);
+            StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
             Debug.WriteLine("Original startup state: {0}", startupTask.State);
 
             List<StartupTaskState> possibleEnabledStates = [StartupTaskState.Enabled, StartupTaskState.EnabledByPolicy];
             List<StartupTaskState> possibleDisabledStates = [StartupTaskState.Disabled, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
 
             // If the startup state already matches the desired state, return the current state
-            if (await MatchesStartupState(enableAtStartupRequestedState))
+            if (MatchesStartupState(enableAtStartupRequestedState))
             {
                 Debug.WriteLine($"Startup state ({startupTask.State}) already matches the desired state.");
                 return startupTask.State;
@@ -137,7 +150,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (enableAtStartupRequestedState == true)
             {
                 newDesiredState = StartupTaskState.Enabled;
-                _ = await startupTask.RequestEnableAsync(); // ensure that you are on a UI thread when you call RequestEnableAsync()
+                _ = startupTask.RequestEnableAsync(); // ensure that you are on a UI thread when you call RequestEnableAsync()
             }
             else
             {
@@ -154,15 +167,21 @@ namespace Dynamic_Lighting_Key_Indicator
             return startupTask.State;
         }
 
-        public static async Task<StartupTaskState> GetStartupTaskState_Async()
+        public static StartupTaskState GetStartupTaskState_Async()
         {
-            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId);
+            StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
             return startupTask.State;
         }
 
-        public static async Task<bool> MatchesStartupState(bool desiredStartupState)
+        public static StartupTaskState GetStartupTaskState()
         {
-            StartupTaskState currentStartupState = await GetStartupTaskState_Async();
+            StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
+            return startupTask.State;
+        }
+
+        public static bool MatchesStartupState(bool desiredStartupState)
+        {
+            StartupTaskState currentStartupState = GetStartupTaskState_Async();
             List<StartupTaskState> possibleEnabledStates = [StartupTaskState.Enabled, StartupTaskState.EnabledByPolicy];
             List<StartupTaskState> possibleDisabledStates = [StartupTaskState.Disabled, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
 
@@ -532,6 +551,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
+            currentConfig.StartMinimizedToTray = ViewModel.StartMinimizedToTray;
+
             if (saveFile)
             {
                 bool result = await currentConfig.WriteConfigurationFile_Async();
@@ -599,8 +620,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
-            System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
-
+            System.Diagnostics.Debug.WriteLine($"Window activation state: {args.WindowActivationState}");
         }
 
         // This will handle the redirected activation from the protocol (URL) activation of further instances
@@ -630,6 +650,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
+
         private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
         {
             // Clear the current list of attached devices

@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Controls;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
+using System.Diagnostics;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -22,7 +23,9 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
-            _ = InitializeStartupTaskStateAsync();
+            InitializeStartupTaskStateAsync();
+
+            Debug.WriteLine("MainViewModel created.");
         }
 
         private bool _isStartupEnabled;
@@ -34,7 +37,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _isStartupEnabled, value))
                 {
                     // Change the startup task state when the property changes
-                    _ = UpdateStartupTaskStateAsync(value);
+                    UpdateStartupTaskStateAsync(value);
                 }
             }
         }
@@ -62,18 +65,18 @@ namespace Dynamic_Lighting_Key_Indicator
             set => SetProperty(ref _startupSettingReason, value);
         }
 
-        private async Task UpdateStartupTaskStateAsync(bool newDesiredStateBool)
+        private void UpdateStartupTaskStateAsync(bool newDesiredStateBool)
         {
             StartupTaskState updatedState;
 
             // Get the original state of the startup task
-            StartupTaskState originalState = await MainWindow.GetStartupTaskState_Async();
+            StartupTaskState originalState = MainWindow.GetStartupTaskState_Async();
 
             // Simple bool to represent the original state
             bool originalStateBool = (originalState == StartupTaskState.Enabled || originalState == StartupTaskState.EnabledByPolicy);
 
             // If the the new desired state matches the original state, just make sure the toggle is set to the correct value
-            if (await MainWindow.MatchesStartupState(newDesiredStateBool) == true)
+            if (MainWindow.MatchesStartupState(newDesiredStateBool) == true)
             {
                 updatedState = originalState;
 
@@ -87,10 +90,10 @@ namespace Dynamic_Lighting_Key_Indicator
             // Otherwise update the state of the startup task
             else
             {
-                updatedState = await MainWindow.ChangWindowsStartupState_Async(newDesiredStateBool);
+                updatedState = MainWindow.ChangWindowsStartupState(newDesiredStateBool);
 
                 // Check again if the new desired state matches the updated state. If it does, update the property
-                if (await MainWindow.MatchesStartupState(newDesiredStateBool) == true)
+                if (MainWindow.MatchesStartupState(newDesiredStateBool) == true)
                 {
                     _isStartupEnabled = newDesiredStateBool;
                     OnPropertyChanged(nameof(IsStartupEnabled));
@@ -154,9 +157,9 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public async Task InitializeStartupTaskStateAsync()
+        public void InitializeStartupTaskStateAsync()
         {
-            var startupState = await MainWindow.GetStartupTaskState_Async();
+            var startupState = MainWindow.GetStartupTaskState_Async();
             IsStartupEnabled = (startupState == StartupTaskState.Enabled || startupState == StartupTaskState.EnabledByPolicy);
             StartupSettingCanBeChanged = (startupState != StartupTaskState.EnabledByPolicy && startupState != StartupTaskState.DisabledByPolicy && startupState != StartupTaskState.DisabledByUser);
             StartupSettingReason = GetReason(startupState);
@@ -244,6 +247,13 @@ namespace Dynamic_Lighting_Key_Indicator
             set => SetProperty(ref _colorSettings, value);
         }
 
+        private bool _startMinimizedToTray;
+        public bool StartMinimizedToTray
+        {
+            get => _startMinimizedToTray;
+            set => SetProperty(ref _startMinimizedToTray, value);
+        }
+
         // ----------------------- Event Handlers -----------------------
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -271,7 +281,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return true;
         }
 
-        // ------------------------------------- Text Box Text -------------------------------------
+        // ------------------------------------- Color Values From GUI -------------------------------------
         public string TextScrollLockOnColor
         {
             get => ColorSettings.AsString(ColorSettings.ScrollLockOnColor);
@@ -638,7 +648,10 @@ namespace Dynamic_Lighting_Key_Indicator
             return GetSyncSetting_ByButtonObject(button) ? LinkedGlyph : UnlinkedGlyph;
         }
 
-        
+        internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig)
+        {
+            StartMinimizedToTray = userConfig.StartMinimizedToTray;
+        }
 
 
     } // ----------------------- End of MainViewModel -----------------------

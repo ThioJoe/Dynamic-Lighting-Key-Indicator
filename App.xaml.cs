@@ -9,7 +9,7 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     public partial class App : Application
     {
-        private Window? m_window;
+        private MainWindow? m_window;
 
         public App()
         {
@@ -21,9 +21,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Create and activate window first
             m_window = new MainWindow();
 
-            // Now activate the window
-            m_window.Activate();
-
             // Initialize URL handler after window is active
             URLHandler.Initialize();
 
@@ -32,15 +29,6 @@ namespace Dynamic_Lighting_Key_Indicator
             if (!string.IsNullOrEmpty(arguments))
             {
                 ProcessArguments(arguments);
-            }
-
-            // Handle window resizing
-            if (m_window != null)
-            {
-                IntPtr hWnd = WindowNative.GetWindowHandle(m_window);
-                WindowId windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-                AppWindow appWindow = AppWindow.GetFromWindowId(windowId);
-                appWindow.Resize(new SizeInt32(1200, 1400));
             }
         }
 
