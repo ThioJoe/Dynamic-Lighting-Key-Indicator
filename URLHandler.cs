@@ -12,7 +12,6 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
     using VK = KeyStatesHandler.ToggleAbleKeys;
-    using RGBTuple = (int R, int G, int B);
 
     internal static class URLHandler
     {

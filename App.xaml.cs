@@ -9,8 +9,6 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     public partial class App : Application
     {
-        private MainWindow? m_window;
-
         public App()
         {
             this.InitializeComponent();
@@ -19,7 +17,7 @@ namespace Dynamic_Lighting_Key_Indicator
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
             // Create and activate window first
-            m_window = new MainWindow();
+            _ = new MainWindow();
 
             // Initialize URL handler after window is active
             URLHandler.Initialize();

@@ -11,8 +11,6 @@ using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using RGBTuple = (int R, int G, int B);
-
     internal static class ColorSetter
     {
         private static Windows.UI.Color _keyboardMainColor;

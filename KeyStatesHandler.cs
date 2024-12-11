@@ -9,8 +9,6 @@ using Windows.UI;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using DWORD = System.UInt32;        // 4 Bytes, aka uint, uint32
-
     internal static class KeyStatesHandler
     {
         // Keyboard hook constants
@@ -35,7 +33,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void UpdateMonitoredKeyColors((int R, int G, int B) standardColor, List<MonitoredKey> keys)
+        public static void UpdateMonitoredKeyColors(RGBTuple standardColor, List<MonitoredKey> keys)
         {
             foreach (var keyObj in keys)
             {
@@ -55,9 +53,9 @@ namespace Dynamic_Lighting_Key_Indicator
             [JsonInclude]
             public ToggleAbleKeys key;
             [JsonInclude]
-            public (int R, int G, int B) offColor;
+            public RGBTuple offColor;
             [JsonInclude]
-            public (int R, int G, int B) onColor;
+            public RGBTuple onColor;
             [JsonInclude]
             public bool onColorTiedToStandard = false;
             [JsonInclude]
@@ -66,7 +64,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // ------ Constructors ------
             [JsonConstructor]
-            public MonitoredKey(ToggleAbleKeys key, (int R, int G, int B) onColor, (int R, int G, int B) offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+            public MonitoredKey(ToggleAbleKeys key, RGBTuple onColor, RGBTuple offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
             {
                 this.key = key;
                 this.offColor = offColor;

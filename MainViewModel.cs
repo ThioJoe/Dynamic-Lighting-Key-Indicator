@@ -601,29 +601,16 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public bool GetSyncSettingByPropertyName(string colorPropertyName)
         {
-            switch (colorPropertyName)
+            return colorPropertyName switch
             {
-                case "NumLockOnColor":
-                case "buttonNumLockOn":
-                    return SyncNumLockOnColor;
-                case "NumLockOffColor":
-                case "buttonNumLockOff":
-                    return SyncNumLockOffColor;
-                case "CapsLockOnColor":
-                case "buttonCapsLockOn":
-                    return SyncCapsLockOnColor;
-                case "CapsLockOffColor":
-                case "buttonCapsLockOff":
-                    return SyncCapsLockOffColor;
-                case "ScrollLockOnColor":
-                case "buttonScrollLockOn":
-                    return SyncScrollLockOnColor;
-                case "ScrollLockOffColor":
-                case "buttonScrollLockOff":
-                    return SyncScrollLockOffColor;
-                default:
-                    return false;
-            }
+                "NumLockOnColor" or "buttonNumLockOn" => SyncNumLockOnColor,
+                "NumLockOffColor" or "buttonNumLockOff" => SyncNumLockOffColor,
+                "CapsLockOnColor" or "buttonCapsLockOn" => SyncCapsLockOnColor,
+                "CapsLockOffColor" or "buttonCapsLockOff" => SyncCapsLockOffColor,
+                "ScrollLockOnColor" or "buttonScrollLockOn" => SyncScrollLockOnColor,
+                "ScrollLockOffColor" or "buttonScrollLockOff" => SyncScrollLockOffColor,
+                _ => false,
+            };
         }
 
         public bool GetSyncSetting_ByButtonObject(Button button)
@@ -737,23 +724,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
 
                 // Sync colors to default if applicable
-                if (onColorTiedToStandard)
-                    onColor = DefaultColor;
-
-                if (offColorTiedToStandard)
-                    offColor = DefaultColor;
-
-                // On color
-                if (monitoredKey.onColor.Equals(default((int, int, int))))
-                    onColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
-                else
-                    onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
-
-                // Off color
-                if (monitoredKey.offColor.Equals(default((int, int, int))))
-                    offColor = Windows.UI.Color.FromArgb(255, DefaultColor.R, DefaultColor.G, DefaultColor.B);
-                else
-                    offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
+                onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
+                offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
 
                 // Actually apply the colors to the correct properties in the view model after processing
                 switch (monitoredKey.key)

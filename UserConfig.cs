@@ -13,15 +13,13 @@ using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using RGBTuple = (int R, int G, int B);
-
     internal class UserConfig
     {
         // --------------------------- Properties ---------------------------
         [JsonInclude]
         public int Brightness { get; set; }
         [JsonInclude]
-        public (int R, int G, int B) StandardKeyColor { get; set; }
+        public RGBTuple StandardKeyColor { get; set; }
         [JsonInclude]
         public List<MonitoredKey> MonitoredKeysAndColors { get; set; }
         [JsonInclude]
@@ -30,8 +28,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool StartMinimizedToTray { get; set; } = false;
 
         public readonly static int DefaultBrightness = 100;
-        public readonly static (int R, int G, int B) DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
-        public readonly static (int R, int G, int B) DefaultMonitoredKeyActiveColor = (R: 255, G: 0, B: 0);
+        public readonly static RGBTuple DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
+        public readonly static RGBTuple DefaultMonitoredKeyActiveColor = (R: 255, G: 0, B: 0);
         public readonly static List<MonitoredKey> DefaultMonitoredKeysAndColors = new List<MonitoredKey> {
                 new MonitoredKey(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
                 new MonitoredKey(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
@@ -60,7 +58,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Constructor with RGB values for standard key color
-        public UserConfig((int R, int G, int B) standardKeyColor, List<MonitoredKey> monitoredKeysAndColors)
+        public UserConfig(RGBTuple standardKeyColor, List<MonitoredKey> monitoredKeysAndColors)
         {
             Brightness = DefaultBrightness; // Remnant from old code
             StandardKeyColor = standardKeyColor;
@@ -131,7 +129,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // ----------------- General Methods ------------------
-        public (int R, int G, int B) GetVKOnColor(KeyStatesHandler.ToggleAbleKeys key)
+        public RGBTuple GetVKOnColor(KeyStatesHandler.ToggleAbleKeys key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))
@@ -141,7 +139,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).onColor;
         }
 
-        public (int R, int G, int B) GetVKOffColor(KeyStatesHandler.ToggleAbleKeys key)
+        public RGBTuple GetVKOffColor(KeyStatesHandler.ToggleAbleKeys key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))
