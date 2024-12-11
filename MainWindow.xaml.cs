@@ -9,9 +9,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
+using Windows.UI.Popups;
 
 #nullable enable
 
@@ -44,6 +46,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
+        public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
@@ -58,7 +61,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.Activated += MainWindow_Activated;
             this.Title = MainWindowTitle;
 
-            AppInstance thisInstance = AppInstance.GetCurrent();
+            Microsoft.Windows.AppLifecycle.AppInstance thisInstance = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent();
             thisInstance.Activated += MainInstance_Activated;
 
             // Initialize the system tray
@@ -101,42 +104,53 @@ namespace Dynamic_Lighting_Key_Indicator
             URLHandler.ProvideWindow(this);
         }
 
-        // This will handle the redirected activation from the protocol (URL) activation of further instances
-        private void MainInstance_Activated(object? sender, AppActivationArguments args)
-        {
-            // Capture the relevant data immediately
-            var isProtocol = args.Kind == ExtendedActivationKind.Protocol;
-            Uri? protocolUri = null;
-
-            if (isProtocol)
-            {
-                var protocolArgs = args.Data as IProtocolActivatedEventArgs;
-                if (protocolArgs?.Uri != null)
-                {
-                    protocolUri = protocolArgs.Uri;
-                }
-            }
-
-            // Now use the dispatcher with our captured data
-            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
-            {
-                if (isProtocol && protocolUri != null)
-                {
-                    URLHandler.ProcessUri(protocolUri);
-                }
-            });
-        }
-
-        private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
-        {
-            System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
-        }
-
+        // ------------------------------- Getters / Setters -------------------------------
         // Getter and setter for user config
         internal UserConfig CurrentConfig
         {
             get => currentConfig;
             set => currentConfig = value;
+        }
+
+        // ------------------------------- Methods -------------------------------
+
+        private static async Task<StartupTaskState> ChangWindowsStartupState(bool enableAtStartup)
+        {
+            // TaskId is set in the Package.appxmanifest file under <uap5:StartupTask> extension
+            StartupTask startupTask = await StartupTask.GetAsync(StartupTaskId); 
+
+            switch (startupTask.State)
+            {
+                case StartupTaskState.Disabled:
+                    // Task is disabled but can be enabled.
+                    StartupTaskState newState = await startupTask.RequestEnableAsync(); // ensure that you are on a UI thread when you call RequestEnableAsync()
+                    Debug.WriteLine("Request to enable startup, result = {0}", newState);
+                    break;
+                case StartupTaskState.DisabledByUser:
+                    // Task is disabled and user must enable it manually.
+                    MessageDialog dialog = new MessageDialog(
+                        "You have disabled this app's ability to run " +
+                        "as soon as you sign in, but if you change your mind, " +
+                        "you can enable this in the Startup tab in Task Manager.",
+                        "TestStartup");
+                    await dialog.ShowAsync();
+                    break;
+                case StartupTaskState.DisabledByPolicy:
+                    Debug.WriteLine("Startup disabled by group policy, or not supported on this device");
+                    break;
+                case StartupTaskState.Enabled:
+                    Debug.WriteLine("Startup is enabled.");
+                    break;
+            }
+
+            // Check again to see if the state changed
+            return startupTask.State;
+        }
+
+        public static StartupTaskState GetStartupTaskState()
+        {
+            StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).AsTask().GetAwaiter().GetResult();
+            return startupTask.State;
         }
 
         private async void AttachToSavedDevice()
@@ -417,118 +431,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
-        // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
-        internal class LampArrayInfo
-        {
-            public LampArrayInfo(string id, string displayName, LampArray lampArray)
-            {
-                this.id = id;
-                this.displayName = displayName;
-                this.lampArray = lampArray;
-            }
-
-            public readonly string id;
-            public readonly string displayName;
-            public readonly LampArray lampArray;
-        }
-
-        // See: https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.lamparraykind
-        private enum LampArrayKind : int
-        {
-            Undefined = 0,
-            Keyboard = 1,
-            Mouse = 2,
-            GameController = 3,
-            Peripheral = 4,
-            Scene = 5,
-            Notification = 6,
-            Chassis = 7,
-            Wearable = 8,
-            Furniture = 9,
-            Art = 10,
-            Headset = 11,
-            Microphone = 12,
-            Speaker = 13
-        }
-
-        public enum HIDUsagePage : ushort
-        {
-            HID_USAGE_PAGE_GENERIC = 0x01,
-            HID_USAGE_PAGE_GAME = 0x05,
-            HID_USAGE_PAGE_LED = 0x08,
-            HID_USAGE_PAGE_BUTTON = 0x09
-        }
-
-        public enum HIDGenericDesktopUsage : ushort
-        {
-            HID_USAGE_GENERIC_POINTER = 0x01,
-            HID_USAGE_GENERIC_MOUSE = 0x02,
-            HID_USAGE_GENERIC_JOYSTICK = 0x04,
-            HID_USAGE_GENERIC_GAMEPAD = 0x05,
-            HID_USAGE_GENERIC_KEYBOARD = 0x06,
-            HID_USAGE_GENERIC_KEYPAD = 0x07,
-            HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
-        }
-
-
-        // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
-        private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
-        {
-            // Clear the current list of attached devices
-            m_attachedLampArrays.Clear();
-            availableDevices.Clear();
-            UpdateAttachedLampArrayDisplayList();
-
-            StartWatchingForLampArrays();
-        }
-
-        private void buttonStopWatch_Click(object sender, RoutedEventArgs e)
-        {
-            m_attachedLampArrays.Clear();
-            availableDevices.Clear();
-            UpdateAttachedLampArrayDisplayList();
-            UpdatAvailableLampArrayDisplayList();
-            StopWatchingForLampArrays();
-        }
-
-        private async void buttonApply_Click(object sender, RoutedEventArgs e)
-        {
-            // If there was a device attached, remove it
-            if (ColorSetter.CurrentDevice != null)
-            {
-                ColorSetter.SetCurrentDevice(null);
-            }
-
-            LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDevice_Async();
-
-            if (selectedLampArrayInfo != null)
-            {
-                ApplyLightingToDevice(selectedLampArrayInfo);
-            }
-        }
-
-        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
-        {
-            currentConfig.OpenConfigFolder();
-        }
-
-        private void restoreDefaults_Click(object sender, RoutedEventArgs e)
-        {
-            currentConfig.RestoreDefault();
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
-            ForceUpdateButtonBackgrounds();
-            ForceUpdateAllButtonGlyphs();
-        }
-        private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
-        {
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = "ms-settings:personalization-lighting",
-                UseShellExecute = true
-            };
-            Process.Start(processStartInfo);
-        }
-
         internal async void ApplyAndSaveSettings(bool saveFile = true, UserConfig? newConfig = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;
@@ -603,6 +505,150 @@ namespace Dynamic_Lighting_Key_Indicator
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
                 }
             }
+        }
+
+        // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
+        internal class LampArrayInfo
+        {
+            public LampArrayInfo(string id, string displayName, LampArray lampArray)
+            {
+                this.id = id;
+                this.displayName = displayName;
+                this.lampArray = lampArray;
+            }
+
+            public readonly string id;
+            public readonly string displayName;
+            public readonly LampArray lampArray;
+        }
+
+        // See: https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.lamparraykind
+        private enum LampArrayKind : int
+        {
+            Undefined = 0,
+            Keyboard = 1,
+            Mouse = 2,
+            GameController = 3,
+            Peripheral = 4,
+            Scene = 5,
+            Notification = 6,
+            Chassis = 7,
+            Wearable = 8,
+            Furniture = 9,
+            Art = 10,
+            Headset = 11,
+            Microphone = 12,
+            Speaker = 13
+        }
+
+        public enum HIDUsagePage : ushort
+        {
+            HID_USAGE_PAGE_GENERIC = 0x01,
+            HID_USAGE_PAGE_GAME = 0x05,
+            HID_USAGE_PAGE_LED = 0x08,
+            HID_USAGE_PAGE_BUTTON = 0x09
+        }
+
+        public enum HIDGenericDesktopUsage : ushort
+        {
+            HID_USAGE_GENERIC_POINTER = 0x01,
+            HID_USAGE_GENERIC_MOUSE = 0x02,
+            HID_USAGE_GENERIC_JOYSTICK = 0x04,
+            HID_USAGE_GENERIC_GAMEPAD = 0x05,
+            HID_USAGE_GENERIC_KEYBOARD = 0x06,
+            HID_USAGE_GENERIC_KEYPAD = 0x07,
+            HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
+        }
+
+        // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
+
+        private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
+        {
+            System.Diagnostics.Debug.WriteLine($"Window activated: {args.WindowActivationState}");
+        }
+
+        // This will handle the redirected activation from the protocol (URL) activation of further instances
+        private void MainInstance_Activated(object? sender, AppActivationArguments args)
+        {
+            // Capture the relevant data immediately
+            var isProtocol = args.Kind == ExtendedActivationKind.Protocol;
+            Uri? protocolUri = null;
+
+            if (isProtocol)
+            {
+                var protocolArgs = args.Data as IProtocolActivatedEventArgs;
+                if (protocolArgs?.Uri != null)
+                {
+                    protocolUri = protocolArgs.Uri;
+                }
+            }
+
+            // Now use the dispatcher with our captured data
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
+            {
+                if (isProtocol && protocolUri != null)
+                {
+                    URLHandler.ProcessUri(protocolUri);
+                }
+            });
+        }
+
+        // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
+        private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
+        {
+            // Clear the current list of attached devices
+            m_attachedLampArrays.Clear();
+            availableDevices.Clear();
+            UpdateAttachedLampArrayDisplayList();
+
+            StartWatchingForLampArrays();
+        }
+
+        private void buttonStopWatch_Click(object sender, RoutedEventArgs e)
+        {
+            m_attachedLampArrays.Clear();
+            availableDevices.Clear();
+            UpdateAttachedLampArrayDisplayList();
+            UpdatAvailableLampArrayDisplayList();
+            StopWatchingForLampArrays();
+        }
+
+        private async void buttonApply_Click(object sender, RoutedEventArgs e)
+        {
+            // If there was a device attached, remove it
+            if (ColorSetter.CurrentDevice != null)
+            {
+                ColorSetter.SetCurrentDevice(null);
+            }
+
+            LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDevice_Async();
+
+            if (selectedLampArrayInfo != null)
+            {
+                ApplyLightingToDevice(selectedLampArrayInfo);
+            }
+        }
+
+        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
+        {
+            currentConfig.OpenConfigFolder();
+        }
+
+        private void restoreDefaults_Click(object sender, RoutedEventArgs e)
+        {
+            currentConfig.RestoreDefault();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
+            ForceUpdateButtonBackgrounds();
+            ForceUpdateAllButtonGlyphs();
+        }
+        private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "ms-settings:personalization-lighting",
+                UseShellExecute = true
+            };
+            Process.Start(processStartInfo);
         }
 
         private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
