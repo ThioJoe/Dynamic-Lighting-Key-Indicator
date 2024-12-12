@@ -10,7 +10,7 @@
     Title="Dynamic Lighting Key Indicator"
     >
 
-    <Grid Padding="40">
+    <Grid Padding="40" Background="{ThemeResource WindowBackgroundColor}">
         <Grid.Resources>
             <!-- Style for color selection buttons -->
             <Style x:Key="ColorButtonStyle" TargetType="Button">
