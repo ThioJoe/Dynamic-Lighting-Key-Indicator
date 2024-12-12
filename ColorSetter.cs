@@ -68,32 +68,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
                 if (key.IsOn())
                 {
-                    if (key.IsOn())
-                    {
-                        if (key.onColor != default)
-                            color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
-                        else
-                            color = KeyboardMainColor;
-                    }
-                    else
-                    {
-                        if (key.offColor != default)
-                            color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
-                        else
-                            color = KeyboardMainColor;
-                    }
+                    color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
 
                 }
                 else
                 {
-                    if (key.offColor != default)
-                        color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
-                    else
-                        color = KeyboardMainColor;
+                    color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
                 }
 
-                colors[monitoredKeys.IndexOf(key)] = color;
-                keys[monitoredKeys.IndexOf(key)] = vkCode;
+                int index = monitoredKeys.IndexOf(key);
+                colors[index] = color;
+                keys[index] = vkCode;
             }
 
             lampArray.SetColorsForKeys(colors, keys);
