@@ -1,12 +1,14 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
 using Windows.Devices.Lights;
+using System.ComponentModel;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -52,7 +54,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
 
-        private static async Task<List<DeviceInformation>> FindKeyboardLampArrayDevices()
+        private static async Task<BindingList<DeviceInformation>> FindKeyboardLampArrayDevices()
         {
             string keyboardSelector = HidDevice.GetDeviceSelector((ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC, (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD);
             string lampArraySelector = LampArray.GetDeviceSelector();
@@ -82,7 +84,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Find devices that have both interfaces by comparing their container IDs
-            var matchingDevices = new List<DeviceInformation>();
+            BindingList<DeviceInformation> matchingDevices = [];
             foreach (var containerId in keyboardDict.Keys.Intersect(lampArrayDevicesDict.Keys))
             {
                 matchingDevices.Add(lampArrayDevicesDict[containerId]);
@@ -91,9 +93,9 @@ namespace Dynamic_Lighting_Key_Indicator
             return matchingDevices;
         }
 
-        private async Task<string> GetKeyboardLampArrayDeviceSelectorAsync()
+        private static async Task<string> GetKeyboardLampArrayDeviceSelectorAsync()
         {
-            List<DeviceInformation> matchingDevices = await FindKeyboardLampArrayDevices();
+            BindingList<DeviceInformation> matchingDevices = await FindKeyboardLampArrayDevices();
 
             if (matchingDevices.Count == 0)
             {
@@ -138,7 +140,14 @@ namespace Dynamic_Lighting_Key_Indicator
             lock (m_attachedLampArrays)
             {
                 // Remove devices from our array that match the ID of the device from the event
-                m_attachedLampArrays.RemoveAll(info => info.id == args.Id);
+                foreach (var device in m_attachedLampArrays)
+                {
+                    if (device.id == args.Id)
+                    {
+                        m_attachedLampArrays.Remove(device);
+                        break;
+                    }
+                }
             }
 
             // Update UI on the UI thread

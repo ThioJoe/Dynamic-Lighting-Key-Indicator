@@ -6,8 +6,10 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -17,7 +19,7 @@ using Windows.Devices.Lights;
 using Windows.Graphics;
 
 #nullable enable
-
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -34,12 +36,14 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool DEBUGMODE = false;
 
         // GUI Related
-        List<string> devicesListForDropdown = [];
+        ObservableCollection<string> devicesListForDropdown = [];
+
         UserConfig currentConfig = new();
 
         // Currently attached LampArrays
-        private readonly List<LampArrayInfo> m_attachedLampArrays = [];
-        private readonly List<DeviceInformation> availableDevices = [];
+        private readonly ObservableCollection<LampArrayInfo> m_attachedLampArrays = [];
+        private readonly ObservableCollection<DeviceInformation> availableDevices = [];
+
 
         private DeviceWatcher m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
@@ -86,14 +90,16 @@ namespace Dynamic_Lighting_Key_Indicator
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
-            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);           
+            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
-            KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
+            #pragma warning disable IDE0028 // Use 'await' when calling this method.
+            KeyStatesHandler.SetMonitoredKeys(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
+            #pragma warning restore IDE0028 // Use 'await' when calling this method.
 
             ForceUpdateButtonBackgrounds();
             ForceUpdateAllButtonGlyphs();
@@ -199,7 +205,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void AttachToSavedDevice()
         {
-            var device = availableDevices.Find(d => d.Id == currentConfig.DeviceId);
+            DeviceInformation? device = availableDevices.First(d => d.Id == currentConfig.DeviceId);
 
             if (device != null)
             {
@@ -353,7 +359,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             string selectedDeviceID = deviceIndexDict[selectedDeviceIndex];
-            DeviceInformation selectedDeviceObj = availableDevices.Find(device => device.Id == selectedDeviceID);
+            DeviceInformation selectedDeviceObj = availableDevices.FirstOrDefault(device => device.Id == selectedDeviceID);
 
             if (selectedDeviceObj == null)
             {
@@ -369,7 +375,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private void UpdateSelectedDeviceDropdown()
         {
             // Get the index of the device that matches the current device ID
-            int deviceIndex = availableDevices.FindIndex(device => device.Id == currentConfig.DeviceId);
+            int deviceIndex = availableDevices.ToList().FindIndex(device => device.Id == currentConfig.DeviceId);
 
             if (deviceIndex == -1 || deviceIndex > availableDevices.Count)
             {
@@ -563,18 +569,11 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
-        internal class LampArrayInfo
+        internal class LampArrayInfo(string id, string displayName, LampArray lampArray)
         {
-            public LampArrayInfo(string id, string displayName, LampArray lampArray)
-            {
-                this.id = id;
-                this.displayName = displayName;
-                this.lampArray = lampArray;
-            }
-
-            public readonly string id;
-            public readonly string displayName;
-            public readonly LampArray lampArray;
+            public readonly string id = id;
+            public readonly string displayName = displayName;
+            public readonly LampArray lampArray = lampArray;
         }
 
         // See: https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.lamparraykind

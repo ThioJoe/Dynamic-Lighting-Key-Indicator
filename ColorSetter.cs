@@ -14,12 +14,12 @@ namespace Dynamic_Lighting_Key_Indicator
     internal static class ColorSetter
     {
         private static Windows.UI.Color _keyboardMainColor;
-        private static LampArray _currentDevice;
-        private static List<int> _monitoredIndices;
+        private static LampArray? _currentDevice;
+        private static List<int>? _monitoredIndices;
 
         public static Windows.UI.Color KeyboardMainColor => _keyboardMainColor;
-        public static LampArray CurrentDevice => _currentDevice;
-        public static List<int> MonitoredIndices => _monitoredIndices;
+        public static LampArray? CurrentDevice => _currentDevice;
+        public static List<int>? MonitoredIndices => _monitoredIndices;
 
         public static void DefineKeyboardMainColor_FromRGB(RGBTuple color)
         {
@@ -43,13 +43,13 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
 
-        public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
+        public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
             if (lampArray == null)
             {
                 if (CurrentDevice == null)
                 {
-                    throw new ArgumentNullException("LampArray must be defined.");
+                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
                 }
                 else
                 {
@@ -69,7 +69,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (key.IsOn())
                 {
                     color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
-
                 }
                 else
                 {
@@ -97,12 +96,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void SetKeyboardColorExceptMonitoredKeys(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
         {
-
             if (lampArray == null)
             {
                 if (CurrentDevice == null)
                 {
-                    throw new ArgumentNullException("LampArray must be defined.");
+                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
                 }
                 else
                 {

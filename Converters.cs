@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Dynamic_Lighting_Key_Indicator.Converters
 {
-    public class ColorToBrushConverter : IValueConverter
+    public partial class ColorToBrushConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, string language)
+        public object? Convert(object value, Type targetType, object parameter, string language)
         {
             if (value is Windows.UI.Color color)
             {
@@ -19,7 +19,7 @@ namespace Dynamic_Lighting_Key_Indicator.Converters
             return null;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        public object? ConvertBack(object value, Type targetType, object parameter, string language)
         {
             if (value is SolidColorBrush brush)
             {

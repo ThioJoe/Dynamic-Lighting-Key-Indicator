@@ -256,3 +256,5 @@ tab_width = 4
 indent_size = 4
 end_of_line = crlf
 dotnet_style_prefer_conditional_expression_over_assignment = true:silent
+dotnet_style_prefer_conditional_expression_over_return = true:silent
+dotnet_style_explicit_tuple_names = true:suggestion

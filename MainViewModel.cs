@@ -671,10 +671,10 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 color = color[1..]; // Remove the hash symbol / first character
             }
-            byte r = Convert.ToByte(color.Substring(0, 2), 16);
-            byte g = Convert.ToByte(color.Substring(2, 2), 16);
-            byte b = Convert.ToByte(color.Substring(4, 2), 16);
-            return Windows.UI.Color.FromArgb(255, r, g, b);
+            byte r = Convert.ToByte(color[..2], 16);
+            byte g = Convert.ToByte(color.Substring(startIndex: 2, length: 2), 16);
+            byte b = Convert.ToByte(color.Substring(startIndex: 4, length: 2), 16);
+            return Windows.UI.Color.FromArgb(a:255, r, g, b);
         }
 
         public static string AsString(Windows.UI.Color color)
@@ -706,7 +706,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             if (userConfig == null || userConfig.MonitoredKeysAndColors == null)
             {
-                throw new ArgumentNullException("UserConfig cannot be null.");
+                throw new ArgumentNullException(nameof(userConfig), "UserConfig cannot be null.");
             }
 
             Brightness = userConfig.Brightness;

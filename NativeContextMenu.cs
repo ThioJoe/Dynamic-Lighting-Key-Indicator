@@ -81,18 +81,11 @@ namespace Dynamic_Lighting_Key_Indicator
             return clickedItem;
         }
 
-        public class MenuItem
+        public class MenuItem(string text, int index)
         {
-            public string Text { get; set; }
-            public bool IsSeparator { get; set; }
-            public int Index { get; set; } // The index should be 1-based
-
-            public MenuItem(string text, int index)
-            {
-                Text = text;
-                IsSeparator = false;
-                Index = index;
-            }
+            public string Text { get; set; } = text;
+            public bool IsSeparator { get; set; } = false;
+            public int Index { get; set; } = index;
 
             public static MenuItem Separator(int index)
             {

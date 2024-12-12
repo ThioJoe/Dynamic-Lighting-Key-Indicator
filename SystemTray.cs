@@ -21,9 +21,9 @@ using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal class SystemTray
+    internal class SystemTray(MainWindow mainWindow)
     {
-        private readonly MainWindow mainWindow;
+        private readonly MainWindow mainWindow = mainWindow;
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         public struct NOTIFYICONDATAW
@@ -71,11 +71,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private WndProcDelegate newWndProc;
         private IntPtr defaultWndProc;
 
-        public SystemTray(MainWindow mainWindow)
-        {
-            this.mainWindow = mainWindow;
-        }
-
         public void InitializeSystemTray()
         {
             // Get the window handle
@@ -96,6 +91,7 @@ namespace Dynamic_Lighting_Key_Indicator
             SetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(newWndProc));
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "Because")]
         public static System.Drawing.Icon LoadIconFromResource(string resourceName)
         {
             // Get the assembly containing the resource
