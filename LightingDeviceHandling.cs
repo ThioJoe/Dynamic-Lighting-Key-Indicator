@@ -158,7 +158,7 @@ namespace Dynamic_Lighting_Key_Indicator
             });
         }
 
-        private async void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
+        private void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
         {
             string addedArrayID = args.Id;
             string addedArrayName = args.Name;

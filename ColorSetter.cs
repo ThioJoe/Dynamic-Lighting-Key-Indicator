@@ -32,7 +32,7 @@ namespace Dynamic_Lighting_Key_Indicator
             _keyboardMainColor = color;
         }
 
-        public static void SetCurrentDevice(LampArray device)
+        public static void SetCurrentDevice(LampArray? device)
         {
             _currentDevice = device;
         }
@@ -94,7 +94,7 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.BrightnessLevel = 1.0f;
         }
 
-        public static void SetKeyboardColorExceptMonitoredKeys(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray lampArray = null)
+        public static void SetKeyboardColorExceptMonitoredKeys(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
             if (lampArray == null)
             {
@@ -108,7 +108,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             }
 
-            List<int> monitoredKeyIndices = MonitoredIndices;
+            List<int>? monitoredKeyIndices = MonitoredIndices;
             monitoredKeyIndices ??= UpdateMonitoredLampArrayIndices(lampArray); // If the monitored indices are null, update them
 
             Windows.UI.Color[] colors = new Windows.UI.Color[lampArray.LampCount - monitoredKeys.Count];

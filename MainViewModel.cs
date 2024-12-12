@@ -25,6 +25,28 @@ namespace Dynamic_Lighting_Key_Indicator
 
             InitializeStartupTaskStateAsync();
 
+            // Set default values
+            _scrollLockOffGlyph = UnlinkedGlyph;
+            _capsLockOffGlyph = UnlinkedGlyph;
+            _numLockOffGlyph = UnlinkedGlyph;
+            _numLockOnGlyph = UnlinkedGlyph;
+            _capsLockOnGlyph = UnlinkedGlyph;
+            _scrollLockOnGlyph = UnlinkedGlyph;
+            _capsLockOnGlyph = UnlinkedGlyph;
+            _numLockOnGlyph = UnlinkedGlyph;
+            _capsLockOnGlyph = UnlinkedGlyph;
+            _scrollLockOnGlyph = UnlinkedGlyph;
+            _capsLockOnGlyph = UnlinkedGlyph;
+            _numLockOnGlyph = UnlinkedGlyph;
+            _capsLockOnGlyph = UnlinkedGlyph;
+            _startupSettingCanBeChanged = true;
+            _startupSettingReason = "";
+            _isStartupEnabled = false;
+            _deviceStatusMessage = "";
+            _attachedDevicesMessage = "";
+            _deviceWatcherStatusMessage = "";
+            _colorSettings = new ColorSettings();
+
             Debug.WriteLine("MainViewModel created.");
         }
 
@@ -252,9 +274,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ----------------------- Event Handlers -----------------------
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             if (_dispatcherQueue.HasThreadAccess)
             {
@@ -269,7 +291,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;

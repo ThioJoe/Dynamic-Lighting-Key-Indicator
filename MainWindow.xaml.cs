@@ -45,7 +45,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private readonly ObservableCollection<DeviceInformation> availableDevices = [];
 
 
-        private DeviceWatcher m_deviceWatcher;
+        private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
         private readonly object _lock = new();
 
@@ -75,8 +75,14 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine("System tray initialized.");
 
             // Use WM_SETICON message to set the window title bar icon
-            Icon icon = SystemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
-            SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, icon.Handle); // WM_SETICON = 0x0080, ICON_BIG = 1
+            IntPtr hIcon;
+            Icon? icon = SystemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            if (icon == null)
+                hIcon = SystemTray.GetDefaultIconHandle();
+            else
+                hIcon = icon.Handle;
+
+            SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, hIcon); // WM_SETICON = 0x0080, ICON_BIG = 1
 
             // Initialize the ViewModel
             ViewModel = new MainViewModel
@@ -253,9 +259,13 @@ namespace Dynamic_Lighting_Key_Indicator
                 KeyStatesHandler.StopHook(); // Stop the keyboard hook 
             }
 
-            if (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
+            if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
             {
                 m_deviceWatcher.Stop();
+                ViewModel.IsWatcherRunning = false;
+            }
+            else if (m_deviceWatcher == null)
+            {
                 ViewModel.IsWatcherRunning = false;
             }
 
@@ -359,7 +369,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             string selectedDeviceID = deviceIndexDict[selectedDeviceIndex];
-            DeviceInformation selectedDeviceObj = availableDevices.FirstOrDefault(device => device.Id == selectedDeviceID);
+            DeviceInformation? selectedDeviceObj = availableDevices.First(device => device.Id == selectedDeviceID);
 
             if (selectedDeviceObj == null)
             {
@@ -433,10 +443,14 @@ namespace Dynamic_Lighting_Key_Indicator
         // Determine whether to use white or black text based on the background color
         static SolidColorBrush DetermineGlyphColor(Button button)
         {
-            var buttonBackgroundColorBruh = button.Background as SolidColorBrush;
-            Windows.UI.Color bgColor = buttonBackgroundColorBruh.Color;
+            var buttonBackgroundColorBrush = button.Background as SolidColorBrush;
+            Windows.UI.Color? bgColor = buttonBackgroundColorBrush?.Color;
 
-            double luminance = (0.299 * bgColor.R + 0.587 * bgColor.G + 0.114 * bgColor.B) / 255;
+            // If it's null just return the original color
+            if (bgColor == null || bgColor?.R == null || bgColor?.G == null || bgColor?.R == null)
+                return (SolidColorBrush)button.Background;
+
+            double luminance = (0.299 * bgColor.Value.R + 0.587 * bgColor.Value.G + 0.114 * bgColor.Value.B) / 255;
             bool useWhite = luminance < 0.5;
             SolidColorBrush newGlyphColor = useWhite ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
 
@@ -715,16 +729,19 @@ namespace Dynamic_Lighting_Key_Indicator
         private void SyncToStandardColor_Click(string colorPropertyName, ColorPicker colorPicker, Button parentButton, Flyout colorPickerFlyout)
         {
             string defaultColorPropertyName = "DefaultColor";
-            var defaultColor = (Windows.UI.Color)ViewModel.GetType().GetProperty(defaultColorPropertyName).GetValue(ViewModel);
-            colorPicker.Color = defaultColor;
+            Windows.UI.Color? defaultColor = (Windows.UI.Color?)ViewModel?.GetType()?.GetProperty(defaultColorPropertyName)?.GetValue(ViewModel);
+            if (defaultColor == null)
+                return;
+
+            colorPicker.Color = (Windows.UI.Color)defaultColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {
-                ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
+                ViewModel?.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor);
                 parentButton.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the default color
             };
 
-            ViewModel.UpdateSyncSetting(syncSetting: true, colorPropertyName: colorPropertyName);
+            ViewModel?.UpdateSyncSetting(syncSetting: true, colorPropertyName: colorPropertyName);
 
             ForceUpdateAllButtonGlyphs();
 
@@ -735,27 +752,50 @@ namespace Dynamic_Lighting_Key_Indicator
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
-            var colorPropertyName = button.Tag as string;
+            if (button == null)
+            {
+                Debug.WriteLine("Button is null.");
+                return;
+            }
+                
+
+            if (button.Tag is not string colorPropertyName)
+            {
+                Debug.WriteLine("Color property name is null.");
+                return;
+            }
+
             ViewModel.UpdateSyncSetting(syncSetting: false, colorPropertyName: colorPropertyName); // Disabling syncing if the user opens the color picker
             ForceUpdateAllButtonGlyphs();
 
             // Update the button color from the settings as soon as the button is clicked. Also will be updated later
-            button.Background = new SolidColorBrush((Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel));
+            SolidColorBrush? newBGColor = ViewModel?.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
+            if (button != null && newBGColor != null)
+                button.Background = newBGColor;
 
+            // Next show the color picker flyout
             var flyout = new Flyout();
             var stackPanel = new StackPanel();
-
             var colorPicker = new ColorPicker
             {
                 MinWidth = 300,
                 MinHeight = 400
             };
-            var currentColor = (Windows.UI.Color)ViewModel.GetType().GetProperty(colorPropertyName).GetValue(ViewModel);
-            colorPicker.Color = currentColor;
+            Windows.UI.Color? currentColor = (Windows.UI.Color?)ViewModel?.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
+            if (currentColor == null)
+            {
+                Debug.WriteLine("Current color is null.");
+                return;
+            }
+
+            colorPicker.Color = (Windows.UI.Color)currentColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {
-                ViewModel.GetType().GetProperty(colorPropertyName).SetValue(ViewModel, args.NewColor);
+                if (button == null)
+                    return;
+
+                ViewModel?.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor);
                 button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
 
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
@@ -781,7 +821,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         if (syncPropertyInfo == null)
                             continue;
 
-                        bool isSynced = (bool)(syncPropertyInfo.GetValue(ViewModel.ColorSettings) ?? false);
+                        bool isSynced = (bool)(syncPropertyInfo.GetValue(ViewModel?.ColorSettings) ?? false);
                         if (isSynced)
                         {
                             button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
@@ -800,6 +840,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 Content = "Sync to default color",
                 Margin = new Thickness(0, 10, 0, 0)
             };
+
+            if (button == null)
+                return;
 
             // Attach the event handler to the button's Click event
             syncButton.Click += (s, args) => SyncToStandardColor_Click(colorPropertyName, colorPicker, button, flyout);

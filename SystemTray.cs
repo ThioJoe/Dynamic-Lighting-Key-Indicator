@@ -59,6 +59,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll")]
         static extern IntPtr GetWindowLongPtr(IntPtr hWnd, WinEnums.nIndex nIndex);
+        [DllImport("user32.dll")]
+        static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
 
         // Using this to pass on messages to the original default window procedure if not being processed by the custom one
         [DllImport("user32.dll")]
@@ -67,8 +69,8 @@ namespace Dynamic_Lighting_Key_Indicator
         private NOTIFYICONDATAW notifyIcon;
         private IntPtr hwnd;
         private WindowId windowId;
-        private AppWindow appWindow;
-        private WndProcDelegate newWndProc;
+        private AppWindow appWindow = mainWindow.AppWindow;
+        private WndProcDelegate? newWndProc;
         private IntPtr defaultWndProc;
 
         public void InitializeSystemTray()
@@ -91,20 +93,27 @@ namespace Dynamic_Lighting_Key_Indicator
             SetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(newWndProc));
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0270:Use coalesce expression", Justification = "Because")]
-        public static System.Drawing.Icon LoadIconFromResource(string resourceName)
+        public static System.Drawing.Icon? LoadIconFromResource(string resourceName)
         {
             // Get the assembly containing the resource
             Assembly assembly = typeof(MainWindow).Assembly;
 
             // Get the resource stream
-            using Stream iconStream = assembly.GetManifestResourceStream(resourceName);
+            using Stream? iconStream = assembly.GetManifestResourceStream(resourceName);
             if (iconStream == null)
-                throw new Exception("Icon resource not found.");
+            {
+                Debug.WriteLine($"Failed to load icon from resource: {resourceName}");
+                return null;
+            }
 
             System.Drawing.Icon icon = new Icon(iconStream);
 
             return icon;
+        }
+
+        public static IntPtr GetDefaultIconHandle()
+        {
+            return LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
         }
 
         public void InitializeNotifyIcon()
@@ -123,9 +132,21 @@ namespace Dynamic_Lighting_Key_Indicator
             notifyIcon.szTip = tip;
 
             // Load icon from embedded resource
-            Icon icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
-            IntPtr hIcon = icon.Handle; // This gives you the HICON handle
-            
+            IntPtr hIcon;
+            Icon? icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+
+            if (icon == null)
+            {
+                hIcon = GetDefaultIconHandle();
+            }
+            else
+            {
+                hIcon = icon.Handle; // This gives you the HICON handle
+            }
+
+            // Load default icon if failed to load from resource
+
+
             notifyIcon.hIcon = hIcon;
 
             // Add the icon

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -125,7 +126,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private static extern short GetKeyState(int keyCode);
 
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-        private static LowLevelKeyboardProc _proc;
+        private static LowLevelKeyboardProc? _proc;
         private static IntPtr _hookID = IntPtr.Zero;
         public static bool hookIsActive = false;
 
@@ -146,8 +147,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
-            using var curProcess = System.Diagnostics.Process.GetCurrentProcess();
-            using var curModule = curProcess.MainModule;
+            // Get the current module, throw an exception if it fails
+            using Process? curProcess = System.Diagnostics.Process.GetCurrentProcess();
+            using ProcessModule? curModule = (curProcess?.MainModule) ?? throw new Exception("Failed to get current module."); 
+
             return SetWindowsHookEx((int)KeyboardHook.WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
         }
 
@@ -156,7 +159,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (nCode >= 0)
             {
                 // Get the data from the struct as an object
-                KBDLLHOOKSTRUCT kbd = (KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
+                KBDLLHOOKSTRUCT kbd = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
                 int vkCode = (int)kbd.vkCode;
                 LowLevelKeyboardHookFlags flags = kbd.flags;
 
@@ -189,6 +192,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // Returned as pointer in the lparam of the hook callback
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
+        [StructLayout(LayoutKind.Sequential)]
         private struct KBDLLHOOKSTRUCT
         {
             public DWORD vkCode;          // Virtual key code
