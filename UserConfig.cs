@@ -30,22 +30,24 @@ namespace Dynamic_Lighting_Key_Indicator
         public readonly static int DefaultBrightness = 100;
         public readonly static RGBTuple DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
         public readonly static RGBTuple DefaultMonitoredKeyActiveColor = (R: 255, G: 0, B: 0);
-        public readonly static List<MonitoredKey> DefaultMonitoredKeysAndColors = new List<MonitoredKey> {
-                new MonitoredKey(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
-                new MonitoredKey(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
-                new MonitoredKey(ToggleAbleKeys.ScrollLock, onColor : DefaultMonitoredKeyActiveColor, offColor : DefaultStandardKeyColor, onColorTiedToStandard : false, offColorTiedToStandard : true)
-        };
+
+        public readonly static List<MonitoredKey> DefaultMonitoredKeysAndColors =
+        [
+                new(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new(ToggleAbleKeys.ScrollLock, onColor : DefaultMonitoredKeyActiveColor, offColor : DefaultStandardKeyColor, onColorTiedToStandard : false, offColorTiedToStandard : true)
+        ];
 
         // ------------ Private Variables ------------
         private const string configFileName = "Key_Indicator_Config.json";
-        private static StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-        private static JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        private static readonly StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+        private static readonly JsonSerializerOptions jsonSerializerOptions = new()
         {
             WriteIndented = true,
             MaxDepth = 10,
             IncludeFields = true // This is needed for tuples to be serialized
         };
-        private static bool defaultMinimizedToTray = false;
+        private static readonly bool defaultMinimizedToTray = false;
 
         // --------------------------- Constructors ---------------------------
         // Constructors must set default values for all properties that aren't set at declaration
@@ -82,7 +84,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return true;
         }
 
-        public UserConfig? ReadConfigurationFile()
+        public static UserConfig? ReadConfigurationFile()
         {
             UserConfig? config;
             try
@@ -156,7 +158,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.FirstOrDefault(mk => mk.key == key);
         }
 
-        public async void OpenConfigFolder()
+        public static async void OpenConfigFolder()
         {
             await Launcher.LaunchFolderPathAsync(localFolder.Path);
         }
@@ -184,7 +186,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // -------- Local Function --------
             // Set the absolute scale of a color based on a brightness level. 100 is full brightness, 0 is off
             // Will use relative scaling of the largest or smallest value in the color
-            RGBTuple ScaleColor(RGBTuple color, int brightness)
+            static RGBTuple ScaleColor(RGBTuple color, int brightness)
             {
                 // Clamp brightness to the 0-100 range
                 brightness = Math.Max(0, Math.Min(100, brightness));

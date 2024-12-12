@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 
+#pragma warning disable IDE0305 // Collection expression more confusing than a simple ToArray initializer
+
 namespace Dynamic_Lighting_Key_Indicator
 {
     public class NativeContextMenu
@@ -63,9 +65,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 itemId++;
             }
 
-            // Get the current cursor position to display the menu at that location
-            POINT pt;
-            GetCursorPos(out pt);
+            // Get the current cursor position to display the menu at that location, result comes out as pt parameter
+            GetCursorPos(out POINT pt);
 
             // This is necessary to ensure the menu will close when the user clicks elsewhere
             SetForegroundWindow(hwnd);
@@ -101,7 +102,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public class MenuItemSet
         {
-            private List<MenuItem> _menuItems = new List<MenuItem>();
+            private readonly List<MenuItem> _menuItems = [];
 
             public void AddMenuItem(string text)
             {
@@ -217,7 +218,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             // Show message box with MB_OK style (just OK button)
             // First parameter is IntPtr.Zero for no parent window
-            var result = MessageBox(IntPtr.Zero, message, title, MB_OK);
+            _ = MessageBox(IntPtr.Zero, message, title, MB_OK);
         }
 
         public static void ShowErrorMessage(string message, string title)
@@ -225,7 +226,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Show message box with MB_ICONERROR style (error icon)
             // First parameter is IntPtr.Zero for no parent window
             const uint MB_ICONERROR = 0x00000010;
-            var result = MessageBox(IntPtr.Zero, message, title, MB_OK | MB_ICONERROR);
+            _ = MessageBox(IntPtr.Zero, message, title, MB_OK | MB_ICONERROR);
         }
     } // --------------- End of NativeMessageBox class ---------------
 

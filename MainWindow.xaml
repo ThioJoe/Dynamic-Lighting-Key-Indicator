@@ -47,21 +47,21 @@
         <!-- Row With Monitoring Buttons and Apply button -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,20,0,0" HorizontalAlignment="Center">
 
-            <Button x:Name="buttonStartWatch" Click="buttonStartWatch_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
+            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0"/>
                     <TextBlock Text="Start Monitoring"/>
                 </StackPanel>
             </Button>
             
-            <Button x:Name="buttonStopWatch" Click="buttonStopWatch_Click" Margin="10,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
+            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0"/>
                     <TextBlock Text="Stop Monitoring"/>
                 </StackPanel>
             </Button>
 
-            <Button x:Name="buttonApply" Click="buttonApply_Click" Margin="10,0,0,0"
+            <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
                     Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
                     IsEnabled="{x:Bind ViewModel.HasNoAttachedDevices, Mode=OneWay}">
@@ -209,21 +209,21 @@
         <!-- Config Buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="6" HorizontalAlignment="Center" Margin="0,20,0,0">
 
-            <Button x:Name="buttonSaveSettings" Click="buttonSaveSettings_Click" Margin="0,0,0,0">
+            <Button x:Name="buttonSaveSettings" Click="ButtonSaveSettings_Click" Margin="0,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" Margin="0,0,8,0"/>
                     <TextBlock Text="Save Settings"/>
                 </StackPanel>
             </Button>
             
-            <Button x:Name="buttonOpenConfigFolder" Click="openConfigFolder_Click" Margin="10,0,0,0">
+            <Button x:Name="buttonOpenConfigFolder" Click="OpenConfigFolder_Click" Margin="10,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
                     <TextBlock Text="Open Config Folder"/>
                 </StackPanel>
             </Button>
 
-            <Button x:Name="buttonRestoreDefaults" Click="restoreDefaults_Click" Margin="10,0,0,0">
+            <Button x:Name="buttonRestoreDefaults" Click="RestoreDefaults_Click" Margin="10,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7A7;" Margin="0,0,8,0"/>
                     <TextBlock Text="Restore Default Colors"/>

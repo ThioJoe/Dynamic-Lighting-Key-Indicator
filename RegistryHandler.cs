@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+// ------------------------------------------------ THIS IS CURRENTLY UNUSED ------------------------------------------------
+
 namespace Dynamic_Lighting_Key_Indicator
 {
     class RegistryHandler

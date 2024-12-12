@@ -111,12 +111,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             List<int> monitoredKeyIndices = MonitoredIndices;
-
-            if (monitoredKeyIndices == null)
-            {
-                monitoredKeyIndices = UpdateMonitoredLampArrayIndices(lampArray);
-            }
-
+            monitoredKeyIndices ??= UpdateMonitoredLampArrayIndices(lampArray); // If the monitored indices are null, update them
 
             Windows.UI.Color[] colors = new Windows.UI.Color[lampArray.LampCount - monitoredKeys.Count];
             int[] keys = new int[lampArray.LampCount - monitoredKeys.Count];

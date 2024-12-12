@@ -16,27 +16,16 @@ namespace Dynamic_Lighting_Key_Indicator
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
+            // Process any command line arguments
+            string[] argsArray = [];
+            if (!string.IsNullOrEmpty(args.Arguments))
+                argsArray = args.Arguments.Split(' ');
+
             // Create and activate window first
-            _ = new MainWindow();
+            _ = new MainWindow(argsArray);
 
             // Initialize URL handler after window is active
             URLHandler.Initialize();
-
-            // Process any command line arguments
-            string arguments = args.Arguments;
-            if (!string.IsNullOrEmpty(arguments))
-            {
-                ProcessArguments(arguments);
-            }
-        }
-
-        private void ProcessArguments(string arguments)
-        {
-            string[] argsArray = arguments.Split(' ');
-            foreach (string arg in argsArray)
-            {
-                // Nothing here yet
-            }
         }
     }
 }

@@ -6,21 +6,13 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.UI;
+using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class KeyStatesHandler
     {
-        // Keyboard hook constants
-        private const int WH_KEYBOARD_LL = 13;
-        private const int WM_KEYDOWN = 0x0100;
-        private const int WM_KEYUP = 0x0101;
-        private const int VK_NUMLOCK = 0x90;
-        private const int VK_CAPSLOCK = 0x14;
-        private const int VM_SYSKEYDOWN = 0x104;
-        private const int VM_SYSKEYUP = 0x105;
-
-        public static List<MonitoredKey> monitoredKeys = new List<MonitoredKey>();
+        public static List<MonitoredKey> monitoredKeys = [];
 
         public static void SetMonitoredKeys(List<MonitoredKey> keys)
         {
@@ -33,7 +25,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void UpdateMonitoredKeyColors(RGBTuple standardColor, List<MonitoredKey> keys)
+        public static void UpdateMonitoredKeyColors(List<MonitoredKey> keys)
         {
             foreach (var keyObj in keys)
             {
@@ -126,7 +118,7 @@ namespace Dynamic_Lighting_Key_Indicator
         [DllImport("user32.dll")]
         private static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
         [DllImport("user32.dll")]
@@ -154,11 +146,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private static IntPtr SetHook(LowLevelKeyboardProc proc)
         {
-            using (var curProcess = System.Diagnostics.Process.GetCurrentProcess())
-            using (var curModule = curProcess.MainModule)
-            {
-                return SetWindowsHookEx(WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-            }
+            using var curProcess = System.Diagnostics.Process.GetCurrentProcess();
+            using var curModule = curProcess.MainModule;
+            return SetWindowsHookEx((int)KeyboardHook.WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
         }
 
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)

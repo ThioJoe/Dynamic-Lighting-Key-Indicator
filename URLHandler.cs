@@ -58,8 +58,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (args.Kind == ExtendedActivationKind.Protocol)
             {
                 System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (2) at" + currentTime);
-                var protocolArgs = args.Data as IProtocolActivatedEventArgs;
-                if (protocolArgs != null)
+                if (args.Data is IProtocolActivatedEventArgs protocolArgs)
                 {
                     // Process the URI
                     System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (3) at" + currentTime);
@@ -80,10 +79,10 @@ namespace Dynamic_Lighting_Key_Indicator
             _mainWindow = mainWindow;
         }
 
-        public static readonly List<string> Commands = new List<string>
-            {
-                "set",
-            };
+        public static readonly List<string> Commands =
+        [
+            "set",
+        ];
 
         public static class ParameterNames
         {
@@ -278,7 +277,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private static RGBTuple? ParseColor(string color, RGBTuple standardColor)
         {
             // If the string says 'default'
-            if (color.ToLower() == "default")
+            if (color.Equals("default", StringComparison.OrdinalIgnoreCase))
             {
                 return standardColor;
             }

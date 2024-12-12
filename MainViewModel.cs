@@ -15,7 +15,7 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     using VK = KeyStatesHandler.ToggleAbleKeys;
 
-    public class MainViewModel : INotifyPropertyChanged
+    public partial class MainViewModel : INotifyPropertyChanged
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
@@ -132,17 +132,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static string GetReason(StartupTaskState startupTaskState)
         {
-            switch (startupTaskState)
+            return startupTaskState switch
             {
-                case StartupTaskState.EnabledByPolicy:
-                    return "Warning: This setting (Startup with Windows enabled) is currently managed by group policy and can't be changed.";
-                case StartupTaskState.DisabledByPolicy:
-                    return "Warning: This setting (Startup with Windows disabled) is currently managed by group policy and can't be changed.";
-                case StartupTaskState.DisabledByUser:
-                    return "Warning: Startup setting has been manually disabled elsewhere like the Task Manager or Startup settings, and therefore cannot be enabled from within the app, you must manually enable it again.";
-                default:
-                    return "";
-            }
+                StartupTaskState.EnabledByPolicy => "Warning: This setting (Startup with Windows enabled) is currently managed by group policy and can't be changed.",
+                StartupTaskState.DisabledByPolicy => "Warning: This setting (Startup with Windows disabled) is currently managed by group policy and can't be changed.",
+                StartupTaskState.DisabledByUser => "Warning: Startup setting has been manually disabled elsewhere like the Task Manager or Startup settings, and therefore cannot be enabled from within the app, you must manually enable it again.",
+                _ => "", // Empty string (no message) if the state is not one of the above, meaning the state can be changed
+            };
         }
 
         public Visibility StartupSettingCanBeChanged_VisibilityBool
@@ -671,9 +667,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 return DefaultColor;
             }
 
-            if (color.StartsWith("#"))
+            if (color.StartsWith('#'))
             {
-                color = color.Substring(1);
+                color = color[1..]; // Remove the hash symbol / first character
             }
             byte r = Convert.ToByte(color.Substring(0, 2), 16);
             byte g = Convert.ToByte(color.Substring(2, 2), 16);
@@ -681,7 +677,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return Windows.UI.Color.FromArgb(255, r, g, b);
         }
 
-        public string AsString(Windows.UI.Color color)
+        public static string AsString(Windows.UI.Color color)
         {
             return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
         }

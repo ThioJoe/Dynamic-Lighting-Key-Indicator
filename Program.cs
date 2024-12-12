@@ -7,6 +7,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Windows.ApplicationModel.Activation;
 
+
+#pragma warning disable IDE0060 // Remove unused parameter
+
 namespace Dynamic_Lighting_Key_Indicator
 {
     public class Program

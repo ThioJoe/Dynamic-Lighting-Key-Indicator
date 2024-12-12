@@ -35,15 +35,15 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // GUI Related
         List<string> devicesListForDropdown = [];
-        UserConfig currentConfig = new UserConfig();
+        UserConfig currentConfig = new();
 
         // Currently attached LampArrays
-        private readonly List<LampArrayInfo> m_attachedLampArrays = new List<LampArrayInfo>();
-        private readonly List<DeviceInformation> availableDevices = new List<DeviceInformation>();
+        private readonly List<LampArrayInfo> m_attachedLampArrays = [];
+        private readonly List<DeviceInformation> availableDevices = [];
 
         private DeviceWatcher m_deviceWatcher;
-        private Dictionary<int, string> deviceIndexDict = new Dictionary<int, string>();
-        private readonly object _lock = new object();
+        private readonly Dictionary<int, string> deviceIndexDict = [];
+        private readonly object _lock = new();
 
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
@@ -52,7 +52,7 @@ namespace Dynamic_Lighting_Key_Indicator
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
 
-        public MainWindow()
+        public MainWindow(string[] args)
         {
             #if DEBUG
                 DEBUGMODE = true;
@@ -71,26 +71,28 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine("System tray initialized.");
 
             // Use WM_SETICON message to set the window title bar icon
-            Icon icon = systemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            Icon icon = SystemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
             SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, icon.Handle); // WM_SETICON = 0x0080, ICON_BIG = 1
 
             // Initialize the ViewModel
-            ViewModel = new MainViewModel();
-            ViewModel.DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.";
-            ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.";
-            ViewModel.ColorSettings = new ColorSettings();
+            ViewModel = new MainViewModel
+            {
+                DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
+                DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
+                ColorSettings = new ColorSettings()
+            };
 
             // Load the user config from file
-            currentConfig = currentConfig.ReadConfigurationFile() ?? new UserConfig();
+            currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);           
 
             // Set up keyboard hook
             KeyStatesHandler.SetMonitoredKeys(new List<MonitoredKey> {
-                new MonitoredKey(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
-                new MonitoredKey(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
-                new MonitoredKey(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
+                new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
+                new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
+                new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
 
             ForceUpdateButtonBackgrounds();
@@ -134,9 +136,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // TaskId is set in the Package.appxmanifest file under <uap5:StartupTask> extension
             StartupTask startupTask = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
             Debug.WriteLine("Original startup state: {0}", startupTask.State);
-
-            List<StartupTaskState> possibleEnabledStates = [StartupTaskState.Enabled, StartupTaskState.EnabledByPolicy];
-            List<StartupTaskState> possibleDisabledStates = [StartupTaskState.Disabled, StartupTaskState.DisabledByPolicy, StartupTaskState.DisabledByUser];
 
             // If the startup state already matches the desired state, return the current state
             if (MatchesStartupState(enableAtStartupRequestedState))
@@ -278,7 +277,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             lock (_lock)
             {
-                devicesListForDropdown = new List<string>(); // Clear the list
+                devicesListForDropdown = []; // Clear the list
                 deviceIndexDict.Clear();
 
                 lock (availableDevices)
@@ -327,7 +326,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         message = $"Attached To: ";
                         foreach (LampArrayInfo info in m_attachedLampArrays)
                         {
-                            message += $"{info.displayName} ({info.lampArray.LampArrayKind.ToString()}, {info.lampArray.LampCount} lights)";
+                            message += $"{info.displayName} ({info.lampArray.LampArrayKind}, {info.lampArray.LampCount} lights)";
                         }
                     }
                     
@@ -390,7 +389,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public async void ShowErrorMessage(string message)
         {
-            ContentDialog errorDialog = new ContentDialog
+            ContentDialog errorDialog = new()
             {
                 Title = "Error",
                 Content = message,
@@ -426,7 +425,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Determine whether to use white or black text based on the background color
-        SolidColorBrush DetermineGlyphColor(Button button)
+        static SolidColorBrush DetermineGlyphColor(Button button)
         {
             var buttonBackgroundColorBruh = button.Background as SolidColorBrush;
             Windows.UI.Color bgColor = buttonBackgroundColorBruh.Color;
@@ -453,7 +452,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
                 if (fontIcon != null)
                 {
-                    Microsoft.UI.Xaml.Media.FontFamily glyphFont = new Microsoft.UI.Xaml.Media.FontFamily("Segoe MDL2 Assets");
+                    Microsoft.UI.Xaml.Media.FontFamily glyphFont = new("Segoe MDL2 Assets");
                     fontIcon.FontFamily = glyphFont;
                     fontIcon.Foreground = iconColor;
                     fontIcon.Glyph = glyph;
@@ -462,7 +461,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Find the FontIcon object within the button, which has the glyph
-        private FontIcon? GetButtonGlyphObject(Button button)
+        private static FontIcon? GetButtonGlyphObject(Button button)
         {
             // If the FontIcon is nested in the button, find it
             if (button.Content is StackPanel stackPanel)
@@ -526,15 +525,15 @@ namespace Dynamic_Lighting_Key_Indicator
                 scrollOffColor = defaultColor;
 
             // TODO: Add binding to new settings to link on/off colors to standard color
-            List<MonitoredKey> monitoredKeysList = new List<MonitoredKey> {
-                new MonitoredKey(VK.NumLock,    onColor: numOnColor,    offColor: numOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
-                new MonitoredKey(VK.CapsLock,   onColor: capsOnColor,   offColor: capsOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
-                new MonitoredKey(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
-            };
+            List<MonitoredKey> monitoredKeysList = [
+                new(VK.NumLock,    onColor: numOnColor,    offColor: numOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
+                new(VK.CapsLock,   onColor: capsOnColor,   offColor: capsOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
+                new(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
+            ];
 
             KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
 
-            KeyStatesHandler.UpdateMonitoredKeyColors(defaultColor, monitoredKeysList);
+            KeyStatesHandler.UpdateMonitoredKeyColors(monitoredKeysList);
             currentConfig = new UserConfig(defaultColor, monitoredKeysList);
 
             // If there was a device attached, update the colors
@@ -651,7 +650,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
 
-        private void buttonStartWatch_Click(object sender, RoutedEventArgs e)
+        private void ButtonStartWatch_Click(object sender, RoutedEventArgs e)
         {
             // Clear the current list of attached devices
             m_attachedLampArrays.Clear();
@@ -661,7 +660,7 @@ namespace Dynamic_Lighting_Key_Indicator
             StartWatchingForLampArrays();
         }
 
-        private void buttonStopWatch_Click(object sender, RoutedEventArgs e)
+        private void ButtonStopWatch_Click(object sender, RoutedEventArgs e)
         {
             m_attachedLampArrays.Clear();
             availableDevices.Clear();
@@ -670,7 +669,7 @@ namespace Dynamic_Lighting_Key_Indicator
             StopWatchingForLampArrays();
         }
 
-        private async void buttonApply_Click(object sender, RoutedEventArgs e)
+        private async void ButtonApply_Click(object sender, RoutedEventArgs e)
         {
             // If there was a device attached, remove it
             if (ColorSetter.CurrentDevice != null)
@@ -686,12 +685,12 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
+        private void OpenConfigFolder_Click(object sender, RoutedEventArgs e)
         {
-            currentConfig.OpenConfigFolder();
+            UserConfig.OpenConfigFolder();
         }
 
-        private void restoreDefaults_Click(object sender, RoutedEventArgs e)
+        private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
             currentConfig.RestoreDefault();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
@@ -708,7 +707,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Process.Start(processStartInfo);
         }
 
-        private async void buttonSaveSettings_Click(object sender, RoutedEventArgs e)
+        private void ButtonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
             ApplyAndSaveSettings(saveFile: true);
         }

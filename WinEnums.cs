@@ -1,13 +1,77 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+#pragma warning disable IDE0079 // Remove unnecessary suppression. It was saying CA1069 was unnecessary but it still gives a warning about it.
+#pragma warning disable CA1069  // Disable Warning: Enums values should not be duplicated
+#pragma warning disable IDE1006 // Naming Styles, capitalization
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal class WinEnums
+    internal static class WinEnums
     {
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters
+        public enum nIndex: int
+        {
+            GWLP_WNDPROC = -4,  // Sets a new address for the window procedure.
+            GWLP_HINSTANCE = -6,
+            GWL_EXSTYLE = -20,
+            GWLP_ID = -12,
+            GWL_STYLE = -16,
+            GWLP_USERDATA = -21,
+        }
+
+        // For use in the NOTIFYICONDATA structure
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-notifyicondataa
+        // Values from shellapi.h
+        public enum uVersion : uint
+        {
+            _zero = 0, // Not named but a possible value
+            NOTIFYICON_VERSION = 3, // Use this or else the context menu will not work
+            NOTIFYICON_VERSION_4 = 4
+        }
+
+        [Flags]
+        public enum NOTIFYICONDATAA_uFlags : uint
+        {
+            NIF_MESSAGE = 0x00000001,
+            NIF_ICON = 0x00000002,
+            NIF_TIP = 0x00000004,
+            NIF_STATE = 0x00000008,
+            NIF_INFO = 0x00000010,
+            NIF_GUID = 0x00000020,
+            NIF_REALTIME = 0x00000040,
+            NIF_SHOWTIP = 0x00000080
+        }
+
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw
+        public enum NotifyIcon_dwMessage
+        {
+            NIM_ADD = 0x00000000,
+            NIM_MODIFY = 0x00000001,
+            NIM_DELETE = 0x00000002,
+            NIM_SETFOCUS = 0x00000003,
+            NIM_SETVERSION = 0x00000004
+        }
+
+        public enum KeyboardHook : int
+        {
+            WH_KEYBOARD_LL = 13,
+            WM_KEYDOWN = 0x0100,
+            WM_KEYUP = 0x0101,
+            VK_NUMLOCK = 0x90,
+            VK_CAPSLOCK = 0x14,
+            VM_SYSKEYDOWN = 0x104,
+            VM_SYSKEYUP = 0x105,
+        }
+
+        public enum ShellNotifyIconMessage : uint
+        {
+            NIM_ADD = 0x00000000,
+            NIM_MODIFY = 0x00000001,
+            NIM_DELETE = 0x00000002,
+            NIM_SETFOCUS = 0x00000003,
+            NIM_SETVERSION = 0x00000004,
+        }
+
         public enum WM_MESSAGE: uint
         {
             WM_NULL = 0x0000,
@@ -271,6 +335,8 @@ namespace Dynamic_Lighting_Key_Indicator
             WM_USER = 0x0400,
             WM_TOOLTIPDISMISS = 0x0345,
 
+            // Can't find exactly where these are from but apparently it's correct
+            WM_TRAYICON = 0x800
         }
     }
 }

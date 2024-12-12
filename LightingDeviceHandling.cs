@@ -52,7 +52,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
 
-        private async Task<List<DeviceInformation>> FindKeyboardLampArrayDevices()
+        private static async Task<List<DeviceInformation>> FindKeyboardLampArrayDevices()
         {
             string keyboardSelector = HidDevice.GetDeviceSelector((ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC, (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD);
             string lampArraySelector = LampArray.GetDeviceSelector();
