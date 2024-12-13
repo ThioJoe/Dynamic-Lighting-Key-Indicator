@@ -560,16 +560,17 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
-        internal async void ApplyAndSaveSettings(bool saveFile = true, UserConfig? newConfig = null)
+        internal async void ApplyColorSettings(bool saveFile, UserConfig? newConfig = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;
 
-            // Save the current color settings to the ViewModel
+            // Save the current color settings from the GUI to the ViewModel if no specific config is passed in
             if (newConfig == null)
             {
                 colorSettings.SetAllColorsFromGUI(ViewModel);
                 ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
             }
+            // Instead of using the GUI, use the passed in premade config
             else
             {
                 colorSettings.SetAllColorsFromUserConfig(config: newConfig, window:this);
@@ -615,14 +616,10 @@ namespace Dynamic_Lighting_Key_Indicator
             if (ColorSetter.CurrentDevice != null)
             {
                 ColorSetter.SetColorsToKeyboard(ColorSetter.CurrentDevice);
+                currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
             ForceUpdateAllButtonGlyphs();
-
-            if (ColorSetter.CurrentDevice != null)
-            {
-                currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
-            }
 
             // Ensures the minimized tray setting is updated even though the toggle should auto update from being bound
             currentConfig.StartMinimizedToTray = ViewModel.StartMinimizedToTray;
@@ -763,28 +760,19 @@ namespace Dynamic_Lighting_Key_Indicator
             // Upon applying the settings, it should trigger event handlers in MainViewModel for HasAttachedDevices, attachedDevicesMessage, EnableApplyButton etc.
         }
 
-        private void OpenConfigFolder_Click(object sender, RoutedEventArgs e)
-        {
-            UserConfig.OpenConfigFolder();
-        }
-
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
             //currentConfig.RestoreDefault();
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: new UserConfig(), window:this); // Set the color settings to the default values
-            //ForceUpdateButtonBackgrounds();
-            //ForceUpdateAllButtonGlyphs();
-            ViewModel.CheckAndUpdateSaveButton();
+            //ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: new UserConfig(), window:this); // Set the color settings to the default values
+            ApplyColorSettings(saveFile: false, newConfig: new UserConfig());
         }
 
         private void UndoChanges_Click(object sender, RoutedEventArgs e)
         {
             currentConfig = (UserConfig)configSavedOnDisk.Clone();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: currentConfig, window: this);
-            //ForceUpdateButtonBackgrounds();
-            //ForceUpdateAllButtonGlyphs();
             ViewModel.CheckAndUpdateSaveButton();
-            ApplyAndSaveSettings(saveFile: false, newConfig: currentConfig);
+            ApplyColorSettings(saveFile: false, newConfig: currentConfig);
         }
 
         private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
@@ -799,7 +787,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ButtonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            ApplyAndSaveSettings(saveFile: true);
+            ApplyColorSettings(saveFile: true, newConfig: null);
         }
 
         // This is the button within the flyout  menu
@@ -824,6 +812,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Close the flyout
             colorPickerFlyout.Hide();
+        }
+
+        private void Flyout_OnClosed(object sender, object e)
+        {
+            //ViewModel.CheckAndUpdateSaveButton();
+            //ColorSetter.SetColorsToKeyboard();
+            ApplyColorSettings(saveFile:false, newConfig: null);
         }
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
@@ -853,7 +848,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Next show the color picker flyout
             var flyout = new Flyout();
             // Add event handler for when the flyout is closed
-            flyout.Closed += (s, args) => ViewModel.CheckAndUpdateSaveButton();
+            flyout.Closed += (s, args) => Flyout_OnClosed(sender, e);
 
             var stackPanel = new StackPanel();
             var colorPicker = new ColorPicker

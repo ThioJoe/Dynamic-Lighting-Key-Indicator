@@ -255,7 +255,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Apply
-            _mainWindow.ApplyAndSaveSettings(saveFile: false, newConfig: config);
+            _mainWindow.ApplyColorSettings(saveFile: false, newConfig: config);
         }
 
         private static int? ParseBrightness(string brightness)
