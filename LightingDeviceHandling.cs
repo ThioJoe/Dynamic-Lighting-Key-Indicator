@@ -14,7 +14,7 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     public sealed partial class MainWindow : Window
     {
-        private async Task<LampArrayInfo?> Attach_To_DeviceAsync(DeviceInformation device)
+        private async Task<LampArrayInfo?> AttachToDevice_Async(DeviceInformation device)
         {
             var lampArray = await LampArray.FromIdAsync(device.Id); // This actually takes control of the device
             var info = new LampArrayInfo(device.Id, device.Name, lampArray);

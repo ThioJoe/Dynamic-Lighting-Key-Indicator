@@ -224,10 +224,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (device != null)
             {
-                LampArrayInfo? lampArrayInfo = await Attach_To_DeviceAsync(device);
+                LampArrayInfo? lampArrayInfo = await AttachToDevice_Async(device);
                 if (lampArrayInfo != null)
                 {
-                    ApplyLightingToDevice(lampArrayInfo);
+                    ApplyLightingToDevice_AndSaveIdToConfig(lampArrayInfo);
                     UpdateSelectedDeviceDropdown();
                 }
             }
@@ -366,7 +366,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        async Task<LampArrayInfo?> AttachSelectedDevice_Async()
+        async Task<LampArrayInfo?> AttachSelectedDeviceFromDropdown_Async()
         {
             // Get the index of the selection from the GUI dropdown
             int selectedDeviceIndex = ViewModel.SelectedDeviceIndex;
@@ -386,7 +386,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
             else
             {
-                LampArrayInfo? device = await Attach_To_DeviceAsync(selectedDeviceObj);
+                LampArrayInfo? device = await AttachToDevice_Async(selectedDeviceObj);
                 return device;
             }
         }
@@ -426,11 +426,15 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
 
-        private void ApplyLightingToDevice(LampArrayInfo lampArrayInfo)
+        private async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
         {
             LampArray lampArray = lampArrayInfo.lampArray;
 
+            // Update the current and saved config to reflect the new device ID
             currentConfig.DeviceId = lampArrayInfo.id;
+            savedConfig.DeviceId = lampArrayInfo.id;
+            await savedConfig.WriteConfigurationFile_Async();
+
             ColorSetter.SetCurrentDevice(lampArray);
             ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
             KeyStatesHandler.UpdateKeyStatus();
@@ -585,6 +589,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
+            // Ensures the minimized tray setting is updated even though the toggle should auto update from being bound
             currentConfig.StartMinimizedToTray = ViewModel.StartMinimizedToTray;
 
             if (saveFile)
@@ -700,17 +705,17 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void ButtonApply_Click(object sender, RoutedEventArgs e)
         {
-            // If there was a device attached, remove it
+            // If there was a device attached, remove it from our current device variable
             if (ColorSetter.CurrentDevice != null)
             {
                 ColorSetter.SetCurrentDevice(null);
             }
 
-            LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDevice_Async();
+            LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDeviceFromDropdown_Async();
 
             if (selectedLampArrayInfo != null)
             {
-                ApplyLightingToDevice(selectedLampArrayInfo);
+                ApplyLightingToDevice_AndSaveIdToConfig(selectedLampArrayInfo);
             }
         }
 
