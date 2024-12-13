@@ -14,6 +14,12 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Other Misc\**" />
+    <EmbeddedResource Remove="Other Misc\**" />
+    <None Remove="Other Misc\**" />
+    <Page Remove="Other Misc\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="RegistryHandler.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -139,5 +145,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="D:\Users\Joe\Documents\Development\Dynamic-Lighting-Key-Indicator\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Remove="Other Misc\**" />
   </ItemGroup>
 </Project>

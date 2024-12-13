@@ -47,7 +47,6 @@ namespace Dynamic_Lighting_Key_Indicator
             mainWindow = mainWindowPassIn;
 
             InitializeStartupTaskStateAsync();
-            CheckAndUpdateSaveButton();
 
             Debug.WriteLine("MainViewModel created.");
         }
@@ -304,9 +303,9 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _startMinimizedToTray, value);
-                MainWindow.CurrentConfig.StartMinimizedToTray = value;
-                MainWindow.SavedConfig.StartMinimizedToTray = value;
-                _ = MainWindow.SavedConfig.WriteConfigurationFile_Async();
+                mainWindow.CurrentConfig.StartMinimizedToTray = value;
+                mainWindow.SavedConfig.StartMinimizedToTray = value;
+                _ = mainWindow.SavedConfig.WriteConfigurationFile_Async();
             }
         }
 
@@ -322,18 +321,17 @@ namespace Dynamic_Lighting_Key_Indicator
                 SetProperty(ref _isSaveButtonEnabled, value);
             }
         }
-        private void CheckAndUpdateSaveButton()
+        internal void CheckAndUpdateSaveButton()
         {
-            bool originalEnabledStatus = IsSaveButtonEnabled;
+            // Enable it if the colors are not the same as the config
+            bool newEnabledStatus = !ColorSettings.IsColorSettingsSameAsConfig(config: mainWindow.CurrentConfig);
 
-            bool updatedEnabledStatus = !MainWindow.CurrentConfigMatchesSavedConfig();
-
-            if (originalEnabledStatus != updatedEnabledStatus)
+            // Only update the property if it doesn't already match the new enabled status
+            if (IsSaveButtonEnabled != newEnabledStatus)
             {
-                IsSaveButtonEnabled = updatedEnabledStatus;
+                IsSaveButtonEnabled = newEnabledStatus;
                 OnPropertyChanged(nameof(IsSaveButtonEnabled));
             }
-                
         }
 
         // ----------------------- Event Handlers -----------------------
@@ -356,10 +354,10 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // If anything changes, check if the current configuration is different from the saved configuration, and if so, enable the save button
             // Don't check if it's from the save button itself to avoid infinite loop
-            if (propertyName != nameof(IsSaveButtonEnabled))
-            {
-                CheckAndUpdateSaveButton();
-            }
+            //if (propertyName != nameof(IsSaveButtonEnabled))
+            //{
+            //    CheckAndUpdateSaveButton();
+            //}
         }
 
         protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -732,6 +730,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
     } // ----------------------- End of MainViewModel -----------------------
 
+    // Color settings has a lot of the same info as the UserConfig, but is used to store the colors in a way that can be easily bound to the GUI
+    // The settings must then be applied to the user config when the user clicks the save button
+    // This is kind of redundant and can probably be simplified to just use the currentConfig but it would require refactoring
     public class ColorSettings
     {
         // Properties as strings to store hex values for colors
@@ -773,6 +774,59 @@ namespace Dynamic_Lighting_Key_Indicator
         public static string AsString(Windows.UI.Color color)
         {
             return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
+        }
+
+        internal bool IsColorSettingsSameAsConfig(UserConfig config)
+        {
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
+            }
+
+            // Local function to compare two colors
+            bool ColorsAreDifferent(Windows.UI.Color color1, RGBTuple color2)
+            {
+                if      (!color1.R.Equals((byte)color2.R))
+                    return true;
+                else if (!color1.G.Equals((byte)color2.G))
+                    return true;
+                else if (!color1.B.Equals((byte)color2.B))
+                    return true;
+                else
+                    return false;
+            }
+
+            if (ColorsAreDifferent(ScrollLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColor))
+                return false;
+            if (ColorsAreDifferent(ScrollLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColor))
+                return false;
+            if (ColorsAreDifferent(CapsLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColor))
+                return false;
+            if (ColorsAreDifferent(CapsLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColor))
+                return false;
+            if (ColorsAreDifferent(NumLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColor))
+                return false;
+            if (ColorsAreDifferent(NumLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColor))
+                return false;
+            if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
+                return false;
+
+            if (Brightness != config.Brightness)
+                return false;
+            if (SyncScrollLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColorTiedToStandard)
+                return false;
+            if (SyncScrollLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColorTiedToStandard)
+                return false;
+            if (SyncCapsLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColorTiedToStandard)
+                return false;
+            if (SyncCapsLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColorTiedToStandard)
+                return false;
+            if (SyncNumLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColorTiedToStandard)
+                return false;
+            if (SyncNumLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColorTiedToStandard)
+                return false;
+
+            return true;
         }
 
         // Set all the colors from the text boxes in the GUI
@@ -841,5 +895,4 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
     }
-
 }
