@@ -286,9 +286,9 @@
             <Run Text="      1. Click here to open "/>
             <Hyperlink NavigateUri="ms-settings:personalization-lighting" Click="OpenLightingSettings_Click">Settings > Personalization > Dynamic Lighting</Hyperlink>
             <LineBreak/>
-            <Run Text="      2. Find and click on your keyboard device in the list to open its specific settings"/>
+            <Run Text="      2. Find and click on your keyboard device in the row of devices at the top, to open its specific settings"/>
             <LineBreak/>
-            <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top"/>
+            <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top of the list"/>
             <LineBreak/>
             <LineBreak/>
             <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/><LineBreak/>
