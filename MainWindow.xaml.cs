@@ -220,6 +220,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void AttachToSavedDevice()
         {
+            // If current device ID is null or empty it probably means the user stopped watching so it reset, so don't try to attach or else it will throw an exception
+            if (currentConfig.DeviceId == null || currentConfig.DeviceId == "")
+            {
+                return;
+            }
+
             DeviceInformation? device = availableDevices.First(d => d.Id == currentConfig.DeviceId);
 
             if (device != null)
@@ -432,8 +438,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Update the current and saved config to reflect the new device ID
             currentConfig.DeviceId = lampArrayInfo.id;
-            savedConfig.DeviceId = lampArrayInfo.id;
-            await savedConfig.WriteConfigurationFile_Async();
+            if (savedConfig.DeviceId != currentConfig.DeviceId)
+            {
+                savedConfig.DeviceId = lampArrayInfo.id;
+                await savedConfig.WriteConfigurationFile_Async();
+            }
 
             ColorSetter.SetCurrentDevice(lampArray);
             ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
