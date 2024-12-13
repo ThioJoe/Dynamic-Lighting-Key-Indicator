@@ -577,36 +577,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorSetter.DefineKeyboardMainColor_FromRGB(newConfig.StandardKeyColor);
             }
 
-            // Update the key states to reflect the new color settings
-            var scrollOnColor = (colorSettings.ScrollLockOnColor.R, colorSettings.ScrollLockOnColor.G, colorSettings.ScrollLockOnColor.B);
-            var capsOnColor = (colorSettings.CapsLockOnColor.R, colorSettings.CapsLockOnColor.G, colorSettings.CapsLockOnColor.B);
-            var numOnColor = (colorSettings.NumLockOnColor.R, colorSettings.NumLockOnColor.G, colorSettings.NumLockOnColor.B);
-            var numOffColor = (colorSettings.NumLockOffColor.R, colorSettings.NumLockOffColor.G, colorSettings.NumLockOffColor.B);
-            var capsOffColor = (colorSettings.CapsLockOffColor.R, colorSettings.CapsLockOffColor.G, colorSettings.CapsLockOffColor.B);
-            var scrollOffColor = (colorSettings.ScrollLockOffColor.R, colorSettings.ScrollLockOffColor.G, colorSettings.ScrollLockOffColor.B);
-
-            var defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
-
-            // Sync to defaults if set to do so. Janky but whatever
-            if (colorSettings.SyncNumLockOnColor)
-                numOnColor = defaultColor;
-            if (colorSettings.SyncNumLockOffColor)
-                numOffColor = defaultColor;
-            if (colorSettings.SyncCapsLockOnColor)
-                capsOnColor = defaultColor;
-            if (colorSettings.SyncCapsLockOffColor)
-                capsOffColor = defaultColor;
-            if (colorSettings.SyncScrollLockOnColor)
-                scrollOnColor = defaultColor;
-            if (colorSettings.SyncScrollLockOffColor)
-                scrollOffColor = defaultColor;
-
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredKeysList = [
-                new(VK.NumLock,    onColor: numOnColor,    offColor: numOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
-                new(VK.CapsLock,   onColor: capsOnColor,   offColor: capsOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
-                new(VK.ScrollLock, onColor: scrollOnColor, offColor: scrollOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
+                new(VK.NumLock,    onColor: colorSettings.NumLockOnColor,    offColor: colorSettings.NumLockOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
+                new(VK.CapsLock,   onColor: colorSettings.CapsLockOnColor,   offColor: colorSettings.CapsLockOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
+                new(VK.ScrollLock, onColor: colorSettings.ScrollLockOnColor, offColor: colorSettings.ScrollLockOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
             ];
+
+            RGBTuple defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
 
             KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
             KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
@@ -762,16 +740,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
-            //currentConfig.RestoreDefault();
-            //ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: new UserConfig(), window:this); // Set the color settings to the default values
             ApplyColorSettings(saveFile: false, newConfig: new UserConfig());
         }
 
         private void UndoChanges_Click(object sender, RoutedEventArgs e)
         {
             currentConfig = (UserConfig)configSavedOnDisk.Clone();
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: currentConfig, window: this);
-            ViewModel.CheckAndUpdateSaveButton();
             ApplyColorSettings(saveFile: false, newConfig: currentConfig);
         }
 
@@ -816,8 +790,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void Flyout_OnClosed(object sender, object e)
         {
-            //ViewModel.CheckAndUpdateSaveButton();
-            //ColorSetter.SetColorsToKeyboard();
             ApplyColorSettings(saveFile:false, newConfig: null);
         }
 

@@ -848,6 +848,20 @@ namespace Dynamic_Lighting_Key_Indicator
             SyncCapsLockOffColor = viewModel.SyncCapsLockOffColor;
             SyncNumLockOnColor = viewModel.SyncNumLockOnColor;
             SyncNumLockOffColor = viewModel.SyncNumLockOffColor;
+
+            // Sync to defaults if set to do so. Janky but whatever
+            if (SyncNumLockOnColor)
+                NumLockOnColor = DefaultColor;
+            if (SyncNumLockOffColor)
+                NumLockOffColor = DefaultColor;
+            if (SyncCapsLockOnColor)
+                CapsLockOnColor = DefaultColor;
+            if (SyncCapsLockOffColor)
+                CapsLockOffColor = DefaultColor;
+            if (SyncScrollLockOnColor)
+                ScrollLockOnColor = DefaultColor;
+            if (SyncScrollLockOffColor)
+                ScrollLockOffColor = DefaultColor;
         }
 
         internal void SetAllColorsFromUserConfig(UserConfig config, MainWindow window)
@@ -868,8 +882,15 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
 
                 // Sync colors to default if applicable
-                onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
-                offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
+                if (onColorTiedToStandard)
+                    onColor = DefaultColor;
+                else
+                    onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
+
+                if (offColorTiedToStandard)
+                    offColor = DefaultColor;
+                else
+                    offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
 
                 // Actually apply the colors to the correct properties in the view model after processing
                 switch (monitoredKey.key)
