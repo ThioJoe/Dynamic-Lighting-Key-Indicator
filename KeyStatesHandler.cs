@@ -26,7 +26,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void UpdateMonitoredKeyColors(List<MonitoredKey> keys)
+        public static void UpdateMonitoredKeyColorSettings(List<MonitoredKey> keys)
         {
             foreach (var keyObj in keys)
             {

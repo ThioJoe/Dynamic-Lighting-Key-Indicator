@@ -40,8 +40,22 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void SetInitialDefaultKeyboardColor(LampArray lampArray)
         {
             lampArray.SetColor(KeyboardMainColor);
+            UpdateKeyStatus();
         }
 
+        public static void SetColorsToKeyboard(LampArray? lampArray = null) // Defaults to the current device
+        {
+            if (lampArray == null)
+            {
+                if (CurrentDevice == null)
+                    return;
+                else
+                    lampArray = CurrentDevice;
+            }
+
+            SetInitialDefaultKeyboardColor(lampArray);
+            SetMonitoredKeysColor(monitoredKeys);
+        }
 
         public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {

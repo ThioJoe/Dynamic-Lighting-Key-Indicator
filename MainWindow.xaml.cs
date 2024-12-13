@@ -474,8 +474,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             ColorSetter.SetCurrentDevice(lampArray);
-            ColorSetter.SetInitialDefaultKeyboardColor(lampArray);
-            KeyStatesHandler.UpdateKeyStatus();
+            ColorSetter.SetColorsToKeyboard(lampArray);
         }
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
@@ -609,15 +608,13 @@ namespace Dynamic_Lighting_Key_Indicator
             ];
 
             KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
-
-            KeyStatesHandler.UpdateMonitoredKeyColors(monitoredKeysList);
+            KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
             currentConfig = new UserConfig(defaultColor, monitoredKeysList);
 
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
             {
-                ColorSetter.SetInitialDefaultKeyboardColor(ColorSetter.CurrentDevice);
-                ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys, ColorSetter.CurrentDevice);
+                ColorSetter.SetColorsToKeyboard(ColorSetter.CurrentDevice);
             }
 
             ForceUpdateAllButtonGlyphs();
