@@ -44,7 +44,7 @@
                    Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"/>
         
-        <!-- Row With Monitoring Buttons and Apply button -->
+        <!-- Row With Start/Stop monitoring buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,20,0,0" HorizontalAlignment="Center">
 
             <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
@@ -61,10 +61,25 @@
                 </StackPanel>
             </Button>
 
+            
+            
+        </StackPanel>
+
+        <!-- Row with Dropdown with selectable devices and Apply Button -->
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,20,0,0" HorizontalAlignment="Center">
+            
+            <ComboBox x:Name="dropdownDevices" 
+                  Margin="0,0,0,0"
+                  Width="300"
+                  HorizontalAlignment="Center"
+                  PlaceholderText="Select a device"
+                  SelectedIndex="{x:Bind ViewModel.SelectedDeviceIndex, Mode=TwoWay}"
+                  Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
                     Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
-                    IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">
+                    IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">  
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
                     <TextBlock Text="Apply To Device"/>
@@ -72,16 +87,6 @@
             </Button>
             
         </StackPanel>
-
-        <!-- Dropdown with selectable devices -->
-        <ComboBox x:Name="dropdownDevices" 
-                  Grid.Row="2" 
-                  Margin="0,20,0,0"
-                  Width="300"
-                  HorizontalAlignment="Center"
-                  PlaceholderText="Select a device"
-                  SelectedIndex="{x:Bind ViewModel.SelectedDeviceIndex, Mode=TwoWay}"
-                  Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
 
         <!-- Mixed Use status message: When attached, says number of attached devices, otherwise watcher status such as 'Waiting' with instructional message to start -->
         <TextBlock x:Name="statusText" 
