@@ -86,11 +86,11 @@ namespace Dynamic_Lighting_Key_Indicator
             SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, hIcon); // WM_SETICON = 0x0080, ICON_BIG = 1
 
             // Initialize the ViewModel
-            ViewModel = new MainViewModel
+            ViewModel = new MainViewModel(mainWindowPassIn: this)
             {
                 DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
-                ColorSettings = new ColorSettings()
+                ColorSettings = new ColorSettings(),
             };
 
             // Load the user config from file
@@ -397,6 +397,34 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        // Check if the currently attached device matches the selected device in the dropdown, to know whether to enable or disable the apply button
+        // Return null if not applicable / no attached device, false if it doesn't match, true if it does
+        public bool? AttachedDeviceMatchesDropdownSelection()
+        {
+            if (ColorSetter.CurrentDevice == null || availableDevices.Count == 0 || m_attachedLampArrays.Count == 0 || ViewModel.SelectedDeviceIndex == -1)
+            {
+                return null; // If there's no device attached, return null
+            }
+
+            // Currently there's only one attached but this is set up to handle multiple in the future
+            List<string> attachedDeviceIds = m_attachedLampArrays.Select(info => info.id).ToList();
+            // Get the current dropdown selection
+            int selectedDeviceIndex = ViewModel.SelectedDeviceIndex;
+
+            foreach (string id in attachedDeviceIds)
+            {
+                // Check if the attached device ID matches the selected device ID using deviceIndexDict
+                if (deviceIndexDict[selectedDeviceIndex] == id)
+                {
+                    return true;
+                }
+            }
+
+            // At this point it means none were found
+            return false;
+        }
+
+        // Updates the dropdown list to reflect the current device ID if it was selected programatically, like on startup
         private void UpdateSelectedDeviceDropdown()
         {
             // Get the index of the device that matches the current device ID
@@ -720,12 +748,17 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorSetter.SetCurrentDevice(null);
             }
 
+            // Reset the m_attachedLampArrays list. In the future might allow multiple devices
+            m_attachedLampArrays.Clear();
+
             LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDeviceFromDropdown_Async();
 
             if (selectedLampArrayInfo != null)
             {
                 ApplyLightingToDevice_AndSaveIdToConfig(selectedLampArrayInfo);
             }
+
+            // Upon applying the settings, it should trigger event handlers in MainViewModel for HasAttachedDevices, attachedDevicesMessage, EnableApplyButton etc.
         }
 
         private void OpenConfigFolder_Click(object sender, RoutedEventArgs e)

@@ -19,7 +19,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
-        public MainViewModel()
+        public MainViewModel(MainWindow mainWindowPassIn)
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -44,11 +44,14 @@ namespace Dynamic_Lighting_Key_Indicator
             _attachedDevicesMessage = "";
             _deviceWatcherStatusMessage = "";
             _colorSettings = new ColorSettings();
+            mainWindow = mainWindowPassIn;
 
             InitializeStartupTaskStateAsync();
 
             Debug.WriteLine("MainViewModel created.");
         }
+
+        private MainWindow mainWindow;
 
         private bool _isStartupEnabled;
         public bool IsStartupEnabled
@@ -198,16 +201,34 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         private bool _hasAttachedDevices;
-        public bool HasNoAttachedDevices => !HasAttachedDevices;
         public bool HasAttachedDevices
         {
             get => _hasAttachedDevices;
             set
             {
-                if (SetProperty(ref _hasAttachedDevices, value))
+                SetProperty(ref _hasAttachedDevices, value);
+                // Notify that EnableApplyButton has also changed when device attachment status changes
+                OnPropertyChanged(nameof(EnableApplyButton));
+            }
+        }
+        public bool EnableApplyButton
+        {
+            get
+            {
+                // If there aren't even any attached devices, return true, since we can attach to any device
+                if (!HasAttachedDevices)
+                    return true;
+
+                bool? attachMatch = mainWindow.AttachedDeviceMatchesDropdownSelection();
+
+                // If there are attached devices, only enable the apply button if the selected device is different from the attached device
+                if (attachMatch == null)
                 {
-                    // Notify that HasNoAttachedDevices has also changed
-                    OnPropertyChanged(nameof(HasNoAttachedDevices));
+                    return false;
+                }
+                else
+                {
+                    return (bool)!attachMatch;
                 }
             }
         }
@@ -254,6 +275,12 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 _selectedDeviceIndex = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(EnableApplyButton));
+                //// Disable the apply button if the selected device is the same as the attached device, otherwise enable it
+                //if (mainWindow.AttachedDeviceMatchesDropdownSelection() != true)
+                //{
+                //    apply
+                //}
             }
         }
 
