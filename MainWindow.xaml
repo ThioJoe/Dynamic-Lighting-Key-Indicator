@@ -6,7 +6,8 @@
     xmlns:converters="using:Dynamic_Lighting_Key_Indicator.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
+    xmlns:ignore="http://www.galasoft.ch/ignore"
+    mc:Ignorable="ignore"
     Title="Dynamic Lighting Key Indicator"
     >
 
@@ -74,11 +75,13 @@
                   HorizontalAlignment="Center"
                   PlaceholderText="Select a device"
                   SelectedIndex="{x:Bind ViewModel.SelectedDeviceIndex, Mode=TwoWay}"
-                  Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+                  IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}"
+                  ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
+            />
 
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
-                    Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
+                    ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
                     IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">  
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
@@ -93,13 +96,16 @@
                    Grid.Row="3" 
                    Margin="0,20,0,0"
                    Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
-                   HorizontalAlignment="Center"/>
+                   HorizontalAlignment="Center"
+                   />
 
         <TextBlock x:Name="attachedDevices"
                    Grid.Row="4"
+                   Margin="0,5,0,0"
                    Text="{x:Bind ViewModel.AttachedDevicesMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
-                   Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"/>
+                   ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
+                   />
 
         <!-- Color Settings Grid -->
         <Grid Grid.Row="5" Margin="0,20,0,0" HorizontalAlignment="Center">

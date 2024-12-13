@@ -215,6 +215,14 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             get
             {
+                // If the watcher isn't running then always return false
+                if (!IsWatcherRunning)
+                    return false;
+
+                // If the dropdown isn't currently selecting a device, return false
+                if (SelectedDeviceIndex == -1)
+                    return false;
+
                 // If there aren't even any attached devices, return true, since we can attach to any device
                 if (!HasAttachedDevices)
                     return true;
@@ -252,6 +260,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Notify that IsWatcherStopped has also changed
                     OnPropertyChanged(nameof(IsWatcherStopped));
                     OnPropertyChanged(nameof(WatcherRunningVisibilityBool));
+                    OnPropertyChanged(nameof(EnableApplyButton));
                 }
             }
         }
@@ -276,11 +285,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 _selectedDeviceIndex = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(EnableApplyButton));
-                //// Disable the apply button if the selected device is the same as the attached device, otherwise enable it
-                //if (mainWindow.AttachedDeviceMatchesDropdownSelection() != true)
-                //{
-                //    apply
-                //}
             }
         }
 
