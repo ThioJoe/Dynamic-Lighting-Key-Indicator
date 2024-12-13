@@ -788,11 +788,6 @@ namespace Dynamic_Lighting_Key_Indicator
             colorPickerFlyout.Hide();
         }
 
-        private void Flyout_OnClosed(object sender, object e)
-        {
-            ApplyColorSettings(saveFile:false, newConfig: null);
-        }
-
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as Button;
@@ -820,7 +815,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Next show the color picker flyout
             var flyout = new Flyout();
             // Add event handler for when the flyout is closed
-            flyout.Closed += (s, args) => Flyout_OnClosed(sender, e);
+            flyout.Closed += (s, args) => ApplyColorSettings(saveFile: false, newConfig: null);
 
             var stackPanel = new StackPanel();
             var colorPicker = new ColorPicker
@@ -879,6 +874,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         }
                     }
                 }
+                //ApplyColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
             };
 
             // Create a button in the flyout to sync the color setting to the default/standard color
