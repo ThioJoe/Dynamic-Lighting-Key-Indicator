@@ -38,7 +38,8 @@ namespace Dynamic_Lighting_Key_Indicator
         // GUI Related
         ObservableCollection<string> devicesListForDropdown = [];
 
-        UserConfig currentConfig = new();
+        static UserConfig currentConfig = new();
+        static UserConfig savedConfig = new();
 
         // Currently attached LampArrays
         private readonly ObservableCollection<LampArrayInfo> m_attachedLampArrays = [];
@@ -94,6 +95,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Load the user config from file
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
+            savedConfig = (UserConfig)currentConfig.Clone();
+
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
@@ -135,10 +138,16 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ------------------------------- Getters / Setters -------------------------------
         // Getter and setter for user config
-        internal UserConfig CurrentConfig
+        internal static UserConfig CurrentConfig
         {
             get => currentConfig;
             set => currentConfig = value;
+        }
+
+        internal static UserConfig SavedConfig
+        {
+            get => savedConfig;
+            set => savedConfig = value;
         }
 
         // ------------------------------- Methods -------------------------------
@@ -457,6 +466,12 @@ namespace Dynamic_Lighting_Key_Indicator
             return newGlyphColor;
         }
 
+        private void UpdateOtherSettingVisuals()
+        {
+            // Check if the app is set to start with windows
+            bool isStartupEnabled = MatchesStartupState(true);
+        }
+
         private void ForceUpdateAllButtonGlyphs()
         {
             // Update the sync glpyhs
@@ -574,6 +589,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (saveFile)
             {
+                savedConfig = (UserConfig)currentConfig.Clone(); // Save the current config to the saved config, then save the current config to the file
                 bool result = await currentConfig.WriteConfigurationFile_Async();
                 if (!result)
                 {

@@ -23,8 +23,6 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
-            InitializeStartupTaskStateAsync();
-
             // Set default values
             _scrollLockOffGlyph = UnlinkedGlyph;
             _capsLockOffGlyph = UnlinkedGlyph;
@@ -46,6 +44,8 @@ namespace Dynamic_Lighting_Key_Indicator
             _attachedDevicesMessage = "";
             _deviceWatcherStatusMessage = "";
             _colorSettings = new ColorSettings();
+
+            InitializeStartupTaskStateAsync();
 
             Debug.WriteLine("MainViewModel created.");
         }
@@ -269,7 +269,13 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool StartMinimizedToTray
         {
             get => _startMinimizedToTray;
-            set => SetProperty(ref _startMinimizedToTray, value);
+            set
+            {
+                SetProperty(ref _startMinimizedToTray, value);
+                MainWindow.CurrentConfig.StartMinimizedToTray = value;
+                MainWindow.SavedConfig.StartMinimizedToTray = value;
+                _ = MainWindow.SavedConfig.WriteConfigurationFile_Async();
+            }
         }
 
         // ----------------------- Event Handlers -----------------------

@@ -13,7 +13,7 @@ using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal class UserConfig
+    internal class UserConfig: ICloneable
     {
         // --------------------------- Properties ---------------------------
         [JsonInclude]
@@ -239,6 +239,21 @@ namespace Dynamic_Lighting_Key_Indicator
             // Update the standard key color
             RGBTuple standardColor = ScaleColor(config.StandardKeyColor, brightnessLevel);
             config.StandardKeyColor = standardColor;
+        }
+
+        public object Clone()
+        {
+            // Create a new UserConfig object
+            UserConfig clonedConfig = new UserConfig
+            {
+                Brightness = this.Brightness,
+                StandardKeyColor = this.StandardKeyColor,
+                MonitoredKeysAndColors = this.MonitoredKeysAndColors.Select(mk => new MonitoredKey(mk.key, mk.onColor, mk.offColor, mk.onColorTiedToStandard, mk.offColorTiedToStandard)).ToList(),
+                DeviceId = this.DeviceId,
+                StartMinimizedToTray = this.StartMinimizedToTray
+            };
+
+            return clonedConfig;
         }
 
     } // ----------------- End of UserConfig class ------------------
