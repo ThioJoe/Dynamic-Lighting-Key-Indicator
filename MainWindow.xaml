@@ -225,11 +225,11 @@
                 </StackPanel>
             </Button>
 
-            <!-- Open Config Folder Button -->
-            <Button x:Name="buttonOpenConfigFolder" Click="OpenConfigFolder_Click" Margin="10,0,0,0">
+            <!-- Undo Changes -->
+            <Button x:Name="undoChangesButton" Click="UndoChanges_Click" Margin="10,0,0,0" IsEnabled="{x:Bind ViewModel.IsSaveButtonEnabled, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
-                    <TextBlock Text="Open Config Folder"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xECC5;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Undo Changes"/>
                 </StackPanel>
             </Button>
 

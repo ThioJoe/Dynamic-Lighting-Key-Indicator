@@ -333,6 +333,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 OnPropertyChanged(nameof(IsSaveButtonEnabled));
             }
         }
+        public bool IsUndoButtonEnabled => !IsSaveButtonEnabled;
 
         // ----------------------- Event Handlers -----------------------
 

@@ -773,11 +773,22 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
-            currentConfig.RestoreDefault();
+            //currentConfig.RestoreDefault();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(new UserConfig()); // Set the color settings to the default values
+            ForceUpdateButtonBackgrounds();
+            ForceUpdateAllButtonGlyphs();
+            ViewModel.CheckAndUpdateSaveButton();
+        }
+
+        private void UndoChanges_Click(object sender, RoutedEventArgs e)
+        {
+            currentConfig = (UserConfig)configSavedOnDisk.Clone();
             ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ForceUpdateButtonBackgrounds();
             ForceUpdateAllButtonGlyphs();
+            ViewModel.CheckAndUpdateSaveButton();
         }
+
         private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
         {
             var processStartInfo = new ProcessStartInfo
