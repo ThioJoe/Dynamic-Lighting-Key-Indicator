@@ -560,6 +560,24 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
+        internal static bool CurrentConfigMatchesSavedConfig()
+        {
+            // Manually go through each property to check if they match. Trying to use Equals directly on the whole config objects gave an error
+            foreach (var property in typeof(UserConfig).GetProperties())
+            {
+                var propeprtyInCurrent = property.GetValue(currentConfig);
+                var propeprtyInSaved = property.GetValue(savedConfig);
+
+                // Use the Equals method to compare the values instead of != or ==,
+                // because the variables are references to the objects, not their values, and therefore would always say not equal
+                if (!Equals(propeprtyInCurrent, propeprtyInSaved))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         internal async void ApplyAndSaveSettings(bool saveFile = true, UserConfig? newConfig = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;

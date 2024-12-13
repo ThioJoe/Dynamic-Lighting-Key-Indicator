@@ -214,19 +214,18 @@
             <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
         </Grid>
 
-        <!-- Save Button -->
-        
-
         <!-- Config Buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="6" HorizontalAlignment="Center" Margin="0,20,0,0">
-
-            <Button x:Name="buttonSaveSettings" Click="ButtonSaveSettings_Click" Margin="0,0,0,0">
+            
+            <!-- Save Button -->
+            <Button x:Name="buttonSaveSettings" Click="ButtonSaveSettings_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsSaveButtonEnabled, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE74E;" Margin="0,0,8,0"/>
                     <TextBlock Text="Save Settings"/>
                 </StackPanel>
             </Button>
-            
+
+            <!-- Open Config Folder Button -->
             <Button x:Name="buttonOpenConfigFolder" Click="OpenConfigFolder_Click" Margin="10,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
@@ -234,6 +233,7 @@
                 </StackPanel>
             </Button>
 
+            <!-- Restore Defaults Button -->
             <Button x:Name="buttonRestoreDefaults" Click="RestoreDefaults_Click" Margin="10,0,0,0">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE7A7;" Margin="0,0,8,0"/>

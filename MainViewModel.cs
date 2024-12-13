@@ -47,6 +47,7 @@ namespace Dynamic_Lighting_Key_Indicator
             mainWindow = mainWindowPassIn;
 
             InitializeStartupTaskStateAsync();
+            CheckAndUpdateSaveButton();
 
             Debug.WriteLine("MainViewModel created.");
         }
@@ -309,6 +310,32 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private bool _isSaveButtonEnabled;
+        public bool IsSaveButtonEnabled
+        {
+            get
+            {
+                return _isSaveButtonEnabled;
+            }
+            set
+            {
+                SetProperty(ref _isSaveButtonEnabled, value);
+            }
+        }
+        private void CheckAndUpdateSaveButton()
+        {
+            bool originalEnabledStatus = IsSaveButtonEnabled;
+
+            bool updatedEnabledStatus = !MainWindow.CurrentConfigMatchesSavedConfig();
+
+            if (originalEnabledStatus != updatedEnabledStatus)
+            {
+                IsSaveButtonEnabled = updatedEnabledStatus;
+                OnPropertyChanged(nameof(IsSaveButtonEnabled));
+            }
+                
+        }
+
         // ----------------------- Event Handlers -----------------------
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -325,6 +352,13 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 });
+            }
+
+            // If anything changes, check if the current configuration is different from the saved configuration, and if so, enable the save button
+            // Don't check if it's from the save button itself to avoid infinite loop
+            if (propertyName != nameof(IsSaveButtonEnabled))
+            {
+                CheckAndUpdateSaveButton();
             }
         }
 
