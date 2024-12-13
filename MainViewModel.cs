@@ -324,7 +324,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal void CheckAndUpdateSaveButton()
         {
             // Enable it if the colors are not the same as the config
-            bool newEnabledStatus = !ColorSettings.IsColorSettingsSameAsConfig(config: mainWindow.CurrentConfig);
+            bool newEnabledStatus = !ColorSettings.IsColorSettingsSameAsConfig(config: mainWindow.SavedConfig);
 
             // Only update the property if it doesn't already match the new enabled status
             if (IsSaveButtonEnabled != newEnabledStatus)
@@ -850,17 +850,17 @@ namespace Dynamic_Lighting_Key_Indicator
             SyncNumLockOffColor = viewModel.SyncNumLockOffColor;
         }
 
-        internal void SetAllColorsFromUserConfig(UserConfig userConfig)
+        internal void SetAllColorsFromUserConfig(UserConfig config, MainWindow window)
         {
-            if (userConfig == null || userConfig.MonitoredKeysAndColors == null)
+            if (config == null || config.MonitoredKeysAndColors == null)
             {
-                throw new ArgumentNullException(nameof(userConfig), "UserConfig cannot be null.");
+                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
             }
 
-            Brightness = userConfig.Brightness;
-            DefaultColor = Windows.UI.Color.FromArgb(255, (byte)userConfig.StandardKeyColor.R, (byte)userConfig.StandardKeyColor.G, (byte)userConfig.StandardKeyColor.B);
+            Brightness = config.Brightness;
+            DefaultColor = Windows.UI.Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B);
 
-            foreach (KeyStatesHandler.MonitoredKey monitoredKey in userConfig.MonitoredKeysAndColors)
+            foreach (KeyStatesHandler.MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
             {
                 Windows.UI.Color onColor;
                 Windows.UI.Color offColor;
@@ -894,6 +894,9 @@ namespace Dynamic_Lighting_Key_Indicator
                         break;
                 }
             }
+
+            window.ForceUpdateButtonBackgrounds();
+            window.ForceUpdateAllButtonGlyphs();
         }
     }
 }

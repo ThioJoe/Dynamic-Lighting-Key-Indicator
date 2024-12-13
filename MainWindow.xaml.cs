@@ -97,7 +97,7 @@ namespace Dynamic_Lighting_Key_Indicator
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             configSavedOnDisk = (UserConfig)currentConfig.Clone();
 
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config:currentConfig, window:this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton();
             ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
@@ -480,7 +480,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
         // This doesn't work when put in the viewmodel class for some reason
-        private void ForceUpdateButtonBackgrounds()
+        internal void ForceUpdateButtonBackgrounds()
         {
             buttonNumLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOnColor);
             buttonNumLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOffColor);
@@ -514,7 +514,7 @@ namespace Dynamic_Lighting_Key_Indicator
             bool isStartupEnabled = MatchesStartupState(true);
         }
 
-        private void ForceUpdateAllButtonGlyphs()
+        internal void ForceUpdateAllButtonGlyphs()
         {
             // Update the sync glpyhs
             foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
@@ -573,7 +573,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
             else
             {
-                colorSettings.SetAllColorsFromUserConfig(newConfig);
+                colorSettings.SetAllColorsFromUserConfig(config: newConfig, window:this);
                 ColorSetter.DefineKeyboardMainColor_FromRGB(newConfig.StandardKeyColor);
             }
 
@@ -638,10 +638,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
                 }
+                ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: currentConfig, window:this);
             }
 
             // Update the Save button enabled status
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton();
         }
 
@@ -774,19 +774,20 @@ namespace Dynamic_Lighting_Key_Indicator
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
             //currentConfig.RestoreDefault();
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(new UserConfig()); // Set the color settings to the default values
-            ForceUpdateButtonBackgrounds();
-            ForceUpdateAllButtonGlyphs();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: new UserConfig(), window:this); // Set the color settings to the default values
+            //ForceUpdateButtonBackgrounds();
+            //ForceUpdateAllButtonGlyphs();
             ViewModel.CheckAndUpdateSaveButton();
         }
 
         private void UndoChanges_Click(object sender, RoutedEventArgs e)
         {
             currentConfig = (UserConfig)configSavedOnDisk.Clone();
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(currentConfig);
-            ForceUpdateButtonBackgrounds();
-            ForceUpdateAllButtonGlyphs();
+            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: currentConfig, window: this);
+            //ForceUpdateButtonBackgrounds();
+            //ForceUpdateAllButtonGlyphs();
             ViewModel.CheckAndUpdateSaveButton();
+            ApplyAndSaveSettings(saveFile: false, newConfig: currentConfig);
         }
 
         private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
