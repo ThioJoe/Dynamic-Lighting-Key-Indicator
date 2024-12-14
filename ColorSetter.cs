@@ -19,6 +19,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public static Windows.UI.Color KeyboardMainColor => _keyboardMainColor;
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
+        public static Dictionary<KeyStatesHandler.ToggleAbleKeys, int>? MonitoredKeyIndicesDict { get; set; }
+        public static List<VirtualKey>? NonMonitoredKeyIndices { get; set; }
 
         public static void DefineKeyboardMainColor_FromRGB(RGBTuple color)
         {
@@ -96,6 +98,25 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.SetColorsForKeys(colors, keys);
         }
 
+        public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
+        {
+            Dictionary<KeyStatesHandler.ToggleAbleKeys, int> monitoredKeyIndicesDict = new Dictionary<KeyStatesHandler.ToggleAbleKeys, int>();
+            NonMonitoredKeyIndices = new List<VirtualKey>();
+
+            // Build the arrays of colors and keys
+            for (int i = 0; i < lampArray.LampCount; i++)
+            {
+                if (KeyStatesHandler.monitoredKeys.Any(mk => (int)mk.key == i))
+                {
+                    var mk = KeyStatesHandler.monitoredKeys.First(mk => (int)mk.key == i);
+                    monitoredKeyIndicesDict.Add(mk.key, i);
+                }
+                else
+                {
+                    NonMonitoredKeyIndices.Add((VirtualKey)i); // Need to set empty list for this as default or create
+                }
+            }
+        }
 
         // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
 

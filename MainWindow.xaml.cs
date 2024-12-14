@@ -394,6 +394,9 @@ namespace Dynamic_Lighting_Key_Indicator
             else
             {
                 LampArrayInfo? device = await AttachToDevice_Async(selectedDeviceObj);
+                if (device != null)
+                    ColorSetter.BuildMonitoredKeyIndicesDict(device.lampArray);
+
                 return device;
             }
         }
@@ -874,7 +877,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         }
                     }
                 }
-                //ApplyColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
+                ApplyColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
             };
 
             // Create a button in the flyout to sync the color setting to the default/standard color
