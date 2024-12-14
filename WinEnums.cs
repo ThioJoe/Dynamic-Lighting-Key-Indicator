@@ -72,6 +72,44 @@ namespace Dynamic_Lighting_Key_Indicator
             NIM_SETVERSION = 0x00000004,
         }
 
+        // See: https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.lamparraykind
+        private enum LampArrayKind : int
+        {
+            Undefined = 0,
+            Keyboard = 1,
+            Mouse = 2,
+            GameController = 3,
+            Peripheral = 4,
+            Scene = 5,
+            Notification = 6,
+            Chassis = 7,
+            Wearable = 8,
+            Furniture = 9,
+            Art = 10,
+            Headset = 11,
+            Microphone = 12,
+            Speaker = 13
+        }
+
+        public enum HIDUsagePage : ushort
+        {
+            HID_USAGE_PAGE_GENERIC = 0x01,
+            HID_USAGE_PAGE_GAME = 0x05,
+            HID_USAGE_PAGE_LED = 0x08,
+            HID_USAGE_PAGE_BUTTON = 0x09
+        }
+
+        public enum HIDGenericDesktopUsage : ushort
+        {
+            HID_USAGE_GENERIC_POINTER = 0x01,
+            HID_USAGE_GENERIC_MOUSE = 0x02,
+            HID_USAGE_GENERIC_JOYSTICK = 0x04,
+            HID_USAGE_GENERIC_GAMEPAD = 0x05,
+            HID_USAGE_GENERIC_KEYBOARD = 0x06,
+            HID_USAGE_GENERIC_KEYPAD = 0x07,
+            HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
+        }
+
         public enum WM_MESSAGE: uint
         {
             WM_NULL = 0x0000,

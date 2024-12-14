@@ -831,7 +831,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Set all the colors from the text boxes in the GUI
-        public void SetAllColorsFromGUI(MainViewModel viewModel)
+        public void SetAllColorSettingsFromGUI(MainViewModel viewModel)
         {
             ScrollLockOnColor = GetColorFromString(viewModel.TextScrollLockOnColor);
             ScrollLockOffColor = GetColorFromString(viewModel.TextScrollLockOffColor);
@@ -864,7 +864,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 ScrollLockOffColor = DefaultColor;
         }
 
-        internal void SetAllColorsFromUserConfig(UserConfig config, MainWindow window)
+        internal void SetAllColorSettingsFromUserConfig(UserConfig config, MainWindow window)
         {
             if (config == null || config.MonitoredKeysAndColors == null)
             {

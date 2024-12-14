@@ -15,29 +15,9 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         public static List<MonitoredKey> monitoredKeys = [];
 
-        public static void SetMonitoredKeys(List<MonitoredKey> keys)
+        public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> keys)
         {
-            // Clear the list and add the new keys
-            monitoredKeys.Clear();
-
-            foreach (var key in keys)
-            {
-                monitoredKeys.Add(key);
-            }
-        }
-
-        public static void UpdateMonitoredKeyColorSettings(List<MonitoredKey> keys)
-        {
-            foreach (var keyObj in keys)
-            {
-                // Loop through to find the matching key from the monitored keys list, vs the one passed in
-                if (monitoredKeys.Any(mk => (int)mk.key == (int)keyObj.key))
-                {
-                    var mk = monitoredKeys.First(mk => (int)mk.key == (int)keyObj.key);
-                    mk.onColor = (keyObj.onColor.R, keyObj.onColor.G, keyObj.onColor.B);
-                    mk.offColor = (keyObj.offColor.R, keyObj.offColor.G, keyObj.offColor.B);
-                }
-            }
+            monitoredKeys = keys;
         }
 
         public class MonitoredKey

@@ -97,19 +97,19 @@ namespace Dynamic_Lighting_Key_Indicator
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             configSavedOnDisk = (UserConfig)currentConfig.Clone();
 
-            ViewModel.ColorSettings.SetAllColorsFromUserConfig(config:currentConfig, window:this);
+            ViewModel.ColorSettings.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton();
-            ColorSetter.DefineKeyboardMainColor_FromRGB(currentConfig.StandardKeyColor);
+            ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
-            #pragma warning disable IDE0028 // Use 'await' when calling this method.
-            KeyStatesHandler.SetMonitoredKeys(keys: new List<MonitoredKey> {
+            #pragma warning disable IDE0028
+            KeyStatesHandler.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
-            #pragma warning restore IDE0028 // Use 'await' when calling this method.
+            #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
             ForceUpdateButtonBackgrounds();
             ForceUpdateAllButtonGlyphs();
@@ -394,8 +394,6 @@ namespace Dynamic_Lighting_Key_Indicator
             else
             {
                 LampArrayInfo? device = await AttachToDevice_Async(selectedDeviceObj);
-                if (device != null)
-                    ColorSetter.BuildMonitoredKeyIndicesDict(device.lampArray);
 
                 return device;
             }
@@ -463,7 +461,6 @@ namespace Dynamic_Lighting_Key_Indicator
             await errorDialog.ShowAsync();
         }
 
-
         private async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
         {
             LampArray lampArray = lampArrayInfo.lampArray;
@@ -508,12 +505,6 @@ namespace Dynamic_Lighting_Key_Indicator
             SolidColorBrush newGlyphColor = useWhite ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black);
 
             return newGlyphColor;
-        }
-
-        private void UpdateOtherSettingVisuals()
-        {
-            // Check if the app is set to start with windows
-            bool isStartupEnabled = MatchesStartupState(true);
         }
 
         internal void ForceUpdateAllButtonGlyphs()
@@ -563,21 +554,21 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
-        internal async void ApplyColorSettings(bool saveFile, UserConfig? newConfig = null)
+        internal async void ApplyColorSettings(bool saveFile, UserConfig? newConfig = null, KeyColorUpdateInfo newColorInfo = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;
 
             // Save the current color settings from the GUI to the ViewModel if no specific config is passed in
             if (newConfig == null)
             {
-                colorSettings.SetAllColorsFromGUI(ViewModel);
-                ColorSetter.DefineKeyboardMainColor_FromName(colorSettings.DefaultColor);
+                colorSettings.SetAllColorSettingsFromGUI(ViewModel);
+                ColorSetter.DefineKeyboardMainColor(colorSettings.DefaultColor);
             }
             // Instead of using the GUI, use the passed in premade config
             else
             {
-                colorSettings.SetAllColorsFromUserConfig(config: newConfig, window:this);
-                ColorSetter.DefineKeyboardMainColor_FromRGB(newConfig.StandardKeyColor);
+                colorSettings.SetAllColorSettingsFromUserConfig(config: newConfig, window:this);
+                ColorSetter.DefineKeyboardMainColor(newConfig.StandardKeyColor);
             }
 
             // TODO: Add binding to new settings to link on/off colors to standard color
@@ -589,8 +580,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             RGBTuple defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
 
-            KeyStatesHandler.SetMonitoredKeys(monitoredKeysList);
-            KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
+            KeyStatesHandler.DefineAllMonitoredKeysAndColors(monitoredKeysList);
+            //KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
             currentConfig = new UserConfig(defaultColor, monitoredKeysList);
 
             // If there was a device attached, update the colors
@@ -613,7 +604,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
                 }
-                ViewModel.ColorSettings.SetAllColorsFromUserConfig(config: currentConfig, window:this);
+                ViewModel.ColorSettings.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
             }
 
             // Update the Save button enabled status
@@ -628,42 +619,19 @@ namespace Dynamic_Lighting_Key_Indicator
             public readonly LampArray lampArray = lampArray;
         }
 
-        // See: https://learn.microsoft.com/en-us/uwp/api/windows.devices.lights.lamparraykind
-        private enum LampArrayKind : int
+        // Stores info about the color a key is being updated to, for which state (on/off/both), etc. For more precise control over color updates
+        internal class KeyColorUpdateInfo(VK key, RGBTuple color, StateColorApply forState)
         {
-            Undefined = 0,
-            Keyboard = 1,
-            Mouse = 2,
-            GameController = 3,
-            Peripheral = 4,
-            Scene = 5,
-            Notification = 6,
-            Chassis = 7,
-            Wearable = 8,
-            Furniture = 9,
-            Art = 10,
-            Headset = 11,
-            Microphone = 12,
-            Speaker = 13
+            public readonly VK key = key;
+            public readonly RGBTuple color = color;
+            public readonly StateColorApply state = forState;
         }
 
-        public enum HIDUsagePage : ushort
+        internal enum StateColorApply
         {
-            HID_USAGE_PAGE_GENERIC = 0x01,
-            HID_USAGE_PAGE_GAME = 0x05,
-            HID_USAGE_PAGE_LED = 0x08,
-            HID_USAGE_PAGE_BUTTON = 0x09
-        }
-
-        public enum HIDGenericDesktopUsage : ushort
-        {
-            HID_USAGE_GENERIC_POINTER = 0x01,
-            HID_USAGE_GENERIC_MOUSE = 0x02,
-            HID_USAGE_GENERIC_JOYSTICK = 0x04,
-            HID_USAGE_GENERIC_GAMEPAD = 0x05,
-            HID_USAGE_GENERIC_KEYBOARD = 0x06,
-            HID_USAGE_GENERIC_KEYPAD = 0x07,
-            HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
+            On,
+            Off,
+            Both
         }
 
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------

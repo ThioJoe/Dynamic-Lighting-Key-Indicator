@@ -50,13 +50,16 @@ namespace Dynamic_Lighting_Key_Indicator
             // Initialize the keyboard hook and callback to monitor key states
             KeyStatesHandler.InitializeHookAndCallback();
 
+            if (info != null)
+                ColorSetter.BuildMonitoredKeyIndicesDict(info.lampArray);
+
             return info;
         }
 
 
         private static async Task<BindingList<DeviceInformation>> FindKeyboardLampArrayDevices()
         {
-            string keyboardSelector = HidDevice.GetDeviceSelector((ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC, (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD);
+            string keyboardSelector = HidDevice.GetDeviceSelector((ushort)WinEnums.HIDUsagePage.HID_USAGE_PAGE_GENERIC, (ushort)WinEnums.HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD);
             string lampArraySelector = LampArray.GetDeviceSelector();
 
             // Get both sets of devices

@@ -19,19 +19,20 @@ namespace Dynamic_Lighting_Key_Indicator
         public static Windows.UI.Color KeyboardMainColor => _keyboardMainColor;
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
-        public static Dictionary<KeyStatesHandler.ToggleAbleKeys, int>? MonitoredKeyIndicesDict { get; set; }
-        public static List<VirtualKey>? NonMonitoredKeyIndices { get; set; }
+        public static Dictionary<KeyStatesHandler.ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
+        public static List<int> NonMonitoredKeyIndices { get; set; } = []; // Maybe make this an array later
 
-        public static void DefineKeyboardMainColor_FromRGB(RGBTuple color)
+
+        // ------------- Define Main Color with wither RGBTuple or Windows.UI.Color -------------
+        public static void DefineKeyboardMainColor(RGBTuple color)
         {
-
-            _keyboardMainColor = Windows.UI.Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
+            _keyboardMainColor = RGBTuple_To_ColorObj(color);
         }
-
-        public static void DefineKeyboardMainColor_FromName(Windows.UI.Color color)
+        public static void DefineKeyboardMainColor(Windows.UI.Color color)
         {
             _keyboardMainColor = color;
         }
+        //------------------------------------------------------------------------------------------
 
         public static void SetCurrentDevice(LampArray? device)
         {
@@ -63,13 +64,9 @@ namespace Dynamic_Lighting_Key_Indicator
             if (lampArray == null)
             {
                 if (CurrentDevice == null)
-                {
                     throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
-                }
                 else
-                {
                     lampArray = CurrentDevice;
-                }
             }
 
             Windows.UI.Color[] colors = new Windows.UI.Color[monitoredKeys.Count];
@@ -98,24 +95,51 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.SetColorsForKeys(colors, keys);
         }
 
+        public static void SetNonMonitoredKeysColor(Windows.UI.Color color, LampArray? lampArray = null)
+        {
+            if (lampArray == null)
+            {
+                if (CurrentDevice == null)
+                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
+                else
+                    lampArray = CurrentDevice;
+            }
+
+            // Build corresponding arrays of colors and keys to pass in.
+            // The colors are all the same since these are all non-monitored keys so will always use the standard/default color
+            Windows.UI.Color[] colors = Enumerable.Repeat(color, NonMonitoredKeyIndices.Count).ToArray(); // Repeat the color into an array
+            int[] keys = NonMonitoredKeyIndices.ToArray();
+            lampArray.SetColorsForIndices(colors, keys);
+        }
+
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
         {
-            Dictionary<KeyStatesHandler.ToggleAbleKeys, int> monitoredKeyIndicesDict = new Dictionary<KeyStatesHandler.ToggleAbleKeys, int>();
-            NonMonitoredKeyIndices = new List<VirtualKey>();
+            MonitoredKeyIndicesDict = new Dictionary<KeyStatesHandler.ToggleAbleKeys, int>();
+            NonMonitoredKeyIndices = new List<int>();
 
             // Build the arrays of colors and keys
             for (int i = 0; i < lampArray.LampCount; i++)
             {
-                if (KeyStatesHandler.monitoredKeys.Any(mk => (int)mk.key == i))
+                // Add all indices to the non-monitored list, then we'll remove the monitored ones
+                NonMonitoredKeyIndices.Add(i);
+            }
+
+            // Get the indices of the monitored keys using lampArray's built in methods, and remove them from the non-monitored list
+            foreach (var key in KeyStatesHandler.monitoredKeys)
+            {
+                VirtualKey vkCode = (VirtualKey)key.key;
+                int[] indices = lampArray.GetIndicesForKey(vkCode);
+                foreach (int index in indices)
                 {
-                    var mk = KeyStatesHandler.monitoredKeys.First(mk => (int)mk.key == i);
-                    monitoredKeyIndicesDict.Add(mk.key, i);
-                }
-                else
-                {
-                    NonMonitoredKeyIndices.Add((VirtualKey)i); // Need to set empty list for this as default or create
+                    MonitoredKeyIndicesDict.Add(key.key, index);
+                    NonMonitoredKeyIndices.Remove(index);
                 }
             }
+        }
+
+        public static Windows.UI.Color RGBTuple_To_ColorObj(RGBTuple color)
+        {
+            return Windows.UI.Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
         }
 
         // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
