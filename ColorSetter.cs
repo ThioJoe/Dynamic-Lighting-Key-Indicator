@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Lights;
 using Windows.System;
-using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -40,7 +39,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void SetInitialDefaultKeyboardColor(LampArray lampArray)
         {
             lampArray.SetColor(KeyboardMainColor);
-            UpdateKeyStatus();
+            ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys);
         }
 
         public static void SetColorsToKeyboard(LampArray? lampArray = null) // Defaults to the current device
@@ -54,7 +53,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             SetInitialDefaultKeyboardColor(lampArray);
-            SetMonitoredKeysColor(monitoredKeys);
+            SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys);
         }
 
         public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)

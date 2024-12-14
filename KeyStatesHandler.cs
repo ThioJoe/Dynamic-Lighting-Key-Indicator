@@ -166,15 +166,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Check if the key presses was one of the monitored keys
                 if (monitoredKeys.Any(mk => (int)mk.key == vkCode) && flags.HasFlag(LowLevelKeyboardHookFlags.KeyUp))
                 {
-                    Task.Run(() => UpdateKeyStatus());
+                    Task.Run(() => ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys));
                 }
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);
-        }
-
-        public static void UpdateKeyStatus()
-        {
-            ColorSetter.SetMonitoredKeysColor(monitoredKeys);
         }
 
         private static bool FetchKeyState(int vkCode)
