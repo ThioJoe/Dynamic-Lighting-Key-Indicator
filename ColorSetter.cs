@@ -7,6 +7,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Lights;
 using Windows.System;
+using static Dynamic_Lighting_Key_Indicator.MainWindow;
+
+#pragma warning disable IDE0305 // Simplify collection initialization
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -34,40 +37,49 @@ namespace Dynamic_Lighting_Key_Indicator
         }
         //------------------------------------------------------------------------------------------
 
-        public static void SetCurrentDevice(LampArray? device)
+        public static void DefineCurrentDevice(LampArray? device)
         {
             _currentDevice = device;
         }
 
-        public static void SetInitialDefaultKeyboardColor(LampArray lampArray)
+        public static LampArray? DetermineLampArray(LampArray? lampArray)
+        {
+            if (lampArray == null)
+            {
+                if (CurrentDevice == null)
+                    MainWindow.ShowErrorMessage("LampArray must be defined.");
+                else
+                    lampArray = CurrentDevice;
+            }
+            return lampArray;
+        }
+
+        public static Windows.UI.Color DetermineDefaultColor(Windows.UI.Color? color)
+        {
+            return color ?? KeyboardMainColor;
+        }
+
+        public static void SetInitialDefaultColor_ToKeyboard(LampArray lampArray)
         {
             lampArray.SetColor(KeyboardMainColor);
-            ColorSetter.SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys);
+            ColorSetter.SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys);
         }
 
-        public static void SetColorsToKeyboard(LampArray? lampArray = null) // Defaults to the current device
+        public static void SetAllColors_ToKeyboard(LampArray? lampArray = null) // Defaults to the current device
         {
-            if (lampArray == null)
-            {
-                if (CurrentDevice == null)
-                    return;
-                else
-                    lampArray = CurrentDevice;
-            }
+            // If it's null, it will show an error then we can return
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
 
-            SetInitialDefaultKeyboardColor(lampArray);
-            SetMonitoredKeysColor(KeyStatesHandler.monitoredKeys);
+            SetInitialDefaultColor_ToKeyboard(lampArrayToUse);
+            SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys);
         }
 
-        public static void SetMonitoredKeysColor(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
+        public static void SetAllMonitoredKeyColors_ToKeyboard(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
-            if (lampArray == null)
-            {
-                if (CurrentDevice == null)
-                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
-                else
-                    lampArray = CurrentDevice;
-            }
+            // If it's null, it will show an error then we can return
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
 
             Windows.UI.Color[] colors = new Windows.UI.Color[monitoredKeys.Count];
             VirtualKey[] keys = new VirtualKey[monitoredKeys.Count];
@@ -92,24 +104,79 @@ namespace Dynamic_Lighting_Key_Indicator
                 keys[index] = vkCode;
             }
 
-            lampArray.SetColorsForKeys(colors, keys);
+            lampArrayToUse.SetColorsForKeys(colors, keys);
         }
 
-        public static void SetNonMonitoredKeysColor(Windows.UI.Color color, LampArray? lampArray = null)
+        public static void SetSpecificKeysColor_ToKeyboard(KeyColorUpdateInfo colorUpdateInfo, LampArray? lampArray = null, bool noStateCheck = false)
         {
-            if (lampArray == null)
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
+
+            KeyStatesHandler.ToggleAbleKeys key = colorUpdateInfo.key;
+            RGBTuple color = colorUpdateInfo.color;
+            StateColorApply forState = colorUpdateInfo.forState;
+
+            if (noStateCheck == true || forState == StateColorApply.Both)
             {
-                if (CurrentDevice == null)
-                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
-                else
-                    lampArray = CurrentDevice;
+                lampArrayToUse.SetColorsForKey(RGBTuple_To_ColorObj(color), (VirtualKey)key);
             }
+            else
+            {
+                bool currentKeyState = KeyStatesHandler.FetchKeyState((int)key);
+                // Do nothing if the key's state doesn't match the state to which the color applies
+                if ((forState == StateColorApply.On && currentKeyState == true) || (forState == StateColorApply.Off && currentKeyState == false))
+                    lampArrayToUse.SetColorsForKey(RGBTuple_To_ColorObj(color), (VirtualKey)key);
+                else
+                    return;
+            }
+        }
+
+        public static void SetOnlyNonMonitoredKeysColor_ToKeyboard(RGBTuple color, LampArray? lampArray = null) // Overload
+        {
+            SetOnlyNonMonitoredKeysColor_ToKeyboard(RGBTuple_To_ColorObj(color), lampArray);
+        }
+        public static void SetOnlyNonMonitoredKeysColor_ToKeyboard(Windows.UI.Color? color = null, LampArray? lampArray = null)
+        {
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
+
+            Windows.UI.Color colorToUse = DetermineDefaultColor(color);
 
             // Build corresponding arrays of colors and keys to pass in.
             // The colors are all the same since these are all non-monitored keys so will always use the standard/default color
-            Windows.UI.Color[] colors = Enumerable.Repeat(color, NonMonitoredKeyIndices.Count).ToArray(); // Repeat the color into an array
+            Windows.UI.Color[] colors = Enumerable.Repeat(colorToUse, NonMonitoredKeyIndices.Count).ToArray(); // Repeat the color into an array
             int[] keys = NonMonitoredKeyIndices.ToArray();
-            lampArray.SetColorsForIndices(colors, keys);
+
+            // Actually sets the colors on the keyboard
+            lampArrayToUse.SetColorsForIndices(colors, keys);
+        }
+
+        public static void SetApplicableMonitoredKeysColor_ToKeyboard(RGBTuple color, LampArray? lampArray = null, bool noStateCheck = false) // Overload
+        {
+            SetApplicableMonitoredKeysColor_ToKeyboard(RGBTuple_To_ColorObj(color), lampArray, noStateCheck);
+        }
+
+        // Applies the same color to monitored keys that are linked to the standard color and their status matches the state to which the color applies
+        public static void SetApplicableMonitoredKeysColor_ToKeyboard(Windows.UI.Color? color = null, LampArray? lampArray = null, bool noStateCheck = false)
+        {
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
+            Windows.UI.Color colorToUse = DetermineDefaultColor(color);
+
+            // Check which keys have on or off colors linked to the standard color, and also whether the color is on or off, to decide which colors need to be updated on the keyboard
+            List<Windows.UI.Color> colors = [];
+            List<int> keyIndices = [];
+
+            foreach (var key in KeyStatesHandler.monitoredKeys)
+            {
+                if (noStateCheck || (key.onColorTiedToStandard && key.IsOn()) || (key.offColorTiedToStandard && !key.IsOn()))
+                {
+                    keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
+                    colors.Add(colorToUse);
+                }
+            }
+
+            lampArrayToUse.SetColorsForIndices(colors.ToArray(), keyIndices.ToArray()); // Might instead be able to use SetColorsForKeys and not have to convert to indices first
         }
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)

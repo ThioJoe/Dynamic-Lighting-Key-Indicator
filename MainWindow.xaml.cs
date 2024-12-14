@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -27,38 +28,40 @@ using Windows.Graphics;
 namespace Dynamic_Lighting_Key_Indicator
 {
     using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
-    using VK = KeyStatesHandler.ToggleAbleKeys;
 
     public sealed partial class MainWindow : Window
     {
+        // Null forgiving because it will immediatley be set in the constructor
+        public static MainWindow mainWindow { get; private set; } = null!;
         public MainViewModel ViewModel { get; set; }
 
         public bool DEBUGMODE = false;
-
-        // GUI Related
-        ObservableCollection<string> devicesListForDropdown = [];
-
         static UserConfig currentConfig = new();
         static UserConfig configSavedOnDisk = new();
 
-        // Currently attached LampArrays
+        // Related to known / currently attached LampArrays
         private readonly ObservableCollection<LampArrayInfo> m_attachedLampArrays = [];
         private readonly ObservableCollection<DeviceInformation> availableDevices = [];
-
+        ObservableCollection<string> devicesListForDropdown = [];
 
         private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
         private readonly object _lock = new();
 
+        // Constants
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
         public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
 
+        // Imported Windows API functions
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
 
+        // --------------------------------------------------- CONSTRUCTOR ---------------------------------------------------
         public MainWindow(string[] args)
         {
+            mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
+
             #if DEBUG
                 DEBUGMODE = true;
             #endif
@@ -86,7 +89,7 @@ namespace Dynamic_Lighting_Key_Indicator
             SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, hIcon); // WM_SETICON = 0x0080, ICON_BIG = 1
 
             // Initialize the ViewModel
-            ViewModel = new MainViewModel(mainWindowPassIn: this)
+            ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: DEBUGMODE)
             {
                 DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
@@ -99,7 +102,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             ViewModel.ColorSettings.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
-            ViewModel.CheckAndUpdateSaveButton();
+            ViewModel.CheckAndUpdateSaveButton_EnabledStatus();
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
@@ -111,8 +114,8 @@ namespace Dynamic_Lighting_Key_Indicator
             });
             #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
-            ForceUpdateButtonBackgrounds();
-            ForceUpdateAllButtonGlyphs();
+            ForceUpdateButtonBackgrounds(); // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
+            ForceUpdateAllButtonGlyphs();   // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
 
             // If there's a device ID in the config, try to attach to it on startup, otherwise user will have to select a device
             if (!string.IsNullOrEmpty(currentConfig.DeviceId))
@@ -285,7 +288,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 ViewModel.IsWatcherRunning = false;
             }
 
-            ColorSetter.SetCurrentDevice(null);
+            ColorSetter.DefineCurrentDevice(null);
             ViewModel.HasAttachedDevices = false;
             currentConfig.DeviceId = "";
 
@@ -448,14 +451,14 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public async void ShowErrorMessage(string message)
+        public static async void ShowErrorMessage(string message)
         {
             ContentDialog errorDialog = new()
             {
                 Title = "Error",
                 Content = message,
                 CloseButtonText = "OK",
-                XamlRoot = this.Content.XamlRoot // Ensure the dialog is associated with the current window
+                XamlRoot = mainWindow.Content.XamlRoot // Ensure the dialog is associated with the current window
             };
 
             await errorDialog.ShowAsync();
@@ -473,8 +476,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 await configSavedOnDisk.WriteConfigurationFile_Async();
             }
 
-            ColorSetter.SetCurrentDevice(lampArray);
-            ColorSetter.SetColorsToKeyboard(lampArray);
+            ColorSetter.DefineCurrentDevice(lampArray);
+            ColorSetter.SetAllColors_ToKeyboard(lampArray);
         }
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
@@ -554,21 +557,19 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
-        internal async void ApplyColorSettings(bool saveFile, UserConfig? newConfig = null, KeyColorUpdateInfo newColorInfo = null)
+        internal async void ApplyAndSaveColorSettings(bool saveFile, UserConfig? newConfig = null, KeyColorUpdateInfo newColorInfo = null)
         {
             ColorSettings colorSettings = ViewModel.ColorSettings;
 
             // Save the current color settings from the GUI to the ViewModel if no specific config is passed in
             if (newConfig == null)
             {
-                colorSettings.SetAllColorSettingsFromGUI(ViewModel);
-                ColorSetter.DefineKeyboardMainColor(colorSettings.DefaultColor);
+                colorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
             }
             // Instead of using the GUI, use the passed in premade config
             else
             {
                 colorSettings.SetAllColorSettingsFromUserConfig(config: newConfig, window:this);
-                ColorSetter.DefineKeyboardMainColor(newConfig.StandardKeyColor);
             }
 
             // TODO: Add binding to new settings to link on/off colors to standard color
@@ -587,13 +588,13 @@ namespace Dynamic_Lighting_Key_Indicator
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
             {
-                ColorSetter.SetColorsToKeyboard(ColorSetter.CurrentDevice);
+                ColorSetter.SetAllColors_ToKeyboard(ColorSetter.CurrentDevice);
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
-            ForceUpdateAllButtonGlyphs();
+            ForceUpdateAllButtonGlyphs(); // TODO: Might not be necessary they're also called from SetAllColorSettingsFromUserConfig, but might need to add to UpdateAllColorSettingsFromGUI
 
-            // Ensures the minimized tray setting is updated even though the toggle should auto update from being bound
+            // Ensures the minimized tray setting is updated even though the toggle should auto update from being bound. TODO: Maybe remove this, check if it's needed
             currentConfig.StartMinimizedToTray = ViewModel.StartMinimizedToTray;
 
             if (saveFile)
@@ -608,7 +609,25 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Update the Save button enabled status
-            ViewModel.CheckAndUpdateSaveButton();
+            ViewModel.CheckAndUpdateSaveButton_EnabledStatus();
+        }
+
+        // This is called when a specific key color is changed via GUI. It inherently will not update the standard keys, since it is unlinked from the standard color when changed
+        internal void ApplySpecificMonitoredKeyColor(KeyColorUpdateInfo colorUpdateInfo)
+        {
+            ViewModel.ColorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
+
+            ColorSetter.SetSpecificKeysColor_ToKeyboard(colorUpdateInfo);
+        }
+
+        // This is called when the standard / default key color is changed via GUI. Updates both standard keys and applicable monitored keys
+        internal void ApplyNewDefaultColor(RGBTuple color)
+        {
+            ViewModel.ColorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
+
+            //TODO: Can probably combine these into one method
+            ColorSetter.SetOnlyNonMonitoredKeysColor_ToKeyboard(color);
+            ColorSetter.SetApplicableMonitoredKeysColor_ToKeyboard(color);
         }
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
@@ -624,7 +643,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             public readonly VK key = key;
             public readonly RGBTuple color = color;
-            public readonly StateColorApply state = forState;
+            public readonly StateColorApply forState = forState;
         }
 
         internal enum StateColorApply
@@ -632,6 +651,30 @@ namespace Dynamic_Lighting_Key_Indicator
             On,
             Off,
             Both
+        }
+
+        // TODO: Implement this instead of using strings
+        internal enum ColorProperty
+        {
+            NumLockOn,
+            NumLockOff,
+            CapsLockOn,
+            CapsLockOff,
+            ScrollLockOn,
+            ScrollLockOff,
+            DefaultColor
+        }
+
+        // TODO: Or at least use this to refer to the strings
+        internal class ColorPropName
+        {
+            public const string NumLockOn = "NumLockOnColor";
+            public const string NumLockOff = "NumLockOffColor";
+            public const string CapsLockOn = "CapsLockOnColor";
+            public const string CapsLockOff = "CapsLockOffColor";
+            public const string ScrollLockOn = "ScrollLockOnColor";
+            public const string ScrollLockOff = "ScrollLockOffColor";
+            public const string DefaultColor = "DefaultColor";
         }
 
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
@@ -693,7 +736,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // If there was a device attached, remove it from our current device variable
             if (ColorSetter.CurrentDevice != null)
             {
-                ColorSetter.SetCurrentDevice(null);
+                ColorSetter.DefineCurrentDevice(null);
             }
 
             // Reset the m_attachedLampArrays list. In the future might allow multiple devices
@@ -711,13 +754,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
-            ApplyColorSettings(saveFile: false, newConfig: new UserConfig());
+            ApplyAndSaveColorSettings(saveFile: false, newConfig: new UserConfig());
         }
 
         private void UndoChanges_Click(object sender, RoutedEventArgs e)
         {
             currentConfig = (UserConfig)configSavedOnDisk.Clone();
-            ApplyColorSettings(saveFile: false, newConfig: currentConfig);
+            ApplyAndSaveColorSettings(saveFile: false, newConfig: currentConfig);
         }
 
         private void OpenLightingSettings_Click(object sender, RoutedEventArgs e)
@@ -732,7 +775,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ButtonSaveSettings_Click(object sender, RoutedEventArgs e)
         {
-            ApplyColorSettings(saveFile: true, newConfig: null);
+            ApplyAndSaveColorSettings(saveFile: true, newConfig: null);
+        }
+
+        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
+        {
+            UserConfig.OpenConfigFolder();
         }
 
         // This is the button within the flyout  menu
@@ -786,7 +834,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Next show the color picker flyout
             var flyout = new Flyout();
             // Add event handler for when the flyout is closed
-            flyout.Closed += (s, args) => ApplyColorSettings(saveFile: false, newConfig: null);
+            flyout.Closed += (s, args) => ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
 
             var stackPanel = new StackPanel();
             var colorPicker = new ColorPicker
@@ -845,7 +893,23 @@ namespace Dynamic_Lighting_Key_Indicator
                         }
                     }
                 }
-                ApplyColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
+                //ApplyAndSaveColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
+
+                // Create the KeyColorUpdateInfo object to pass to the ApplySpecificMonitoredKeyColor method, depending on which color is being updated
+                if (colorPropertyName == "DefaultColor")
+                {
+                    ApplyNewDefaultColor((args.NewColor.R, args.NewColor.G, args.NewColor.B));
+                }
+                else
+                {
+                    KeyColorUpdateInfo colorUpdateInfo = new KeyColorUpdateInfo(
+                        key: ColorSettings.GetKeyByPropertyName(colorPropertyName), 
+                        color: (args.NewColor.R, args.NewColor.G, args.NewColor.B),
+                        forState: ColorSettings.GetStateByPropertyName(colorPropertyName)
+                    );
+
+                    ApplySpecificMonitoredKeyColor(colorUpdateInfo);
+                }
             };
 
             // Create a button in the flyout to sync the color setting to the default/standard color

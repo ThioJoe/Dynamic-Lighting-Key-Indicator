@@ -13,13 +13,11 @@ using System.Diagnostics;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using VK = KeyStatesHandler.ToggleAbleKeys;
-
     public partial class MainViewModel : INotifyPropertyChanged
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
-        public MainViewModel(MainWindow mainWindowPassIn)
+        public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
@@ -49,9 +47,11 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeStartupTaskStateAsync();
 
             Debug.WriteLine("MainViewModel created.");
+            this.debugMode = debugMode;
         }
 
         private MainWindow mainWindow;
+        
 
         private bool _isStartupEnabled;
         public bool IsStartupEnabled
@@ -172,6 +172,18 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 // If the startup setting can't be changed, show the warning message, so set to visible
                 if (!StartupSettingCanBeChanged) 
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
+        }
+
+        private bool debugMode;
+        public Visibility DebugMode_VisibilityBool
+        {
+            get
+            {
+                if (debugMode)
                     return Visibility.Visible;
                 else
                     return Visibility.Collapsed;
@@ -321,7 +333,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 SetProperty(ref _isSaveButtonEnabled, value);
             }
         }
-        internal void CheckAndUpdateSaveButton()
+        internal void CheckAndUpdateSaveButton_EnabledStatus()
         {
             // Enable it if the colors are not the same as the config
             bool newEnabledStatus = !ColorSettings.IsColorSettingsSameAsConfig(config: mainWindow.SavedConfig);
@@ -831,7 +843,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Set all the colors from the text boxes in the GUI
-        public void SetAllColorSettingsFromGUI(MainViewModel viewModel)
+        public void UpdateAllColorSettingsFromGUI(MainViewModel viewModel)
         {
             ScrollLockOnColor = GetColorFromString(viewModel.TextScrollLockOnColor);
             ScrollLockOffColor = GetColorFromString(viewModel.TextScrollLockOffColor);
@@ -862,6 +874,36 @@ namespace Dynamic_Lighting_Key_Indicator
                 ScrollLockOnColor = DefaultColor;
             if (SyncScrollLockOffColor)
                 ScrollLockOffColor = DefaultColor;
+
+            ColorSetter.DefineKeyboardMainColor(DefaultColor);
+        }
+
+        internal static VK GetKeyByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(NumLockOnColor) => VK.NumLock,
+                nameof(NumLockOffColor) => VK.NumLock,
+                nameof(CapsLockOnColor) => VK.CapsLock,
+                nameof(CapsLockOffColor) => VK.CapsLock,
+                nameof(ScrollLockOnColor) => VK.ScrollLock,
+                nameof(ScrollLockOffColor) => VK.ScrollLock,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
+        }
+
+        internal static MainWindow.StateColorApply GetStateByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(NumLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(NumLockOffColor) => MainWindow.StateColorApply.Off,
+                nameof(CapsLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(CapsLockOffColor) => MainWindow.StateColorApply.Off,
+                nameof(ScrollLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(ScrollLockOffColor) => MainWindow.StateColorApply.Off,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
         }
 
         internal void SetAllColorSettingsFromUserConfig(UserConfig config, MainWindow window)
@@ -915,6 +957,8 @@ namespace Dynamic_Lighting_Key_Indicator
                         break;
                 }
             }
+
+            ColorSetter.DefineKeyboardMainColor(DefaultColor);
 
             window.ForceUpdateButtonBackgrounds();
             window.ForceUpdateAllButtonGlyphs();

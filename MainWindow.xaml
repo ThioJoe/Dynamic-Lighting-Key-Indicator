@@ -241,6 +241,18 @@
                 </StackPanel>
             </Button>
             
+            <!-- Open Config Folder (Debug Mode) -->
+            <Button x:Name="buttonOpenConfigFolder" 
+                    Click="openConfigFolder_Click"
+                    Margin="0,0,10,0"
+                    Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
+                    >
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Open Config Folder"/>
+                </StackPanel>
+            </Button>
+
         </StackPanel>
 
         <!-- Startup Setting Toggle and Message -->

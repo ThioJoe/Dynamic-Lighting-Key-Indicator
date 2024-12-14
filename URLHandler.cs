@@ -11,7 +11,6 @@ using Windows.ApplicationModel.Activation;
 namespace Dynamic_Lighting_Key_Indicator
 {
     using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
-    using VK = KeyStatesHandler.ToggleAbleKeys;
 
     internal static class URLHandler
     {
@@ -255,7 +254,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Apply
-            _mainWindow.ApplyColorSettings(saveFile: false, newConfig: config);
+            _mainWindow.ApplyAndSaveColorSettings(saveFile: false, newConfig: config);
         }
 
         private static int? ParseBrightness(string brightness)
