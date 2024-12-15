@@ -41,9 +41,19 @@ namespace Dynamic_Lighting_Key_Indicator
         static UserConfig configSavedOnDisk = new();
 
         // Related to known / currently attached LampArrays
-        private readonly ObservableCollection<LampArrayInfo> m_attachedLampArrays = [];
         private readonly ObservableCollection<DeviceInformation> availableDevices = [];
         ObservableCollection<string> devicesListForDropdown = [];
+
+        private static LampArrayInfo? _attachedDevice = null;
+        internal static LampArrayInfo? AttachedDevice
+        {
+            get => _attachedDevice;
+            private set
+            {
+                _attachedDevice = value;
+                mainWindow.OnAttachedDeviceSet();
+            }
+        }
 
         private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
@@ -61,6 +71,10 @@ namespace Dynamic_Lighting_Key_Indicator
         // --------------------------------------------------- CONSTRUCTOR ---------------------------------------------------
         public MainWindow(string[] args)
         {
+            #if DEBUG
+                DEBUGMODE = true;
+            #endif
+
             mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
 
             ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: DEBUGMODE)
@@ -68,10 +82,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
             };
-
-            #if DEBUG
-                DEBUGMODE = true;
-            #endif
 
             InitializeComponent();
             this.Activated += MainWindow_Activated;
@@ -349,30 +359,26 @@ namespace Dynamic_Lighting_Key_Indicator
 
             lock (_lock)
             {
-                lock (m_attachedLampArrays)
+                if (AttachedDevice != null)
                 {
-                    if (m_attachedLampArrays.Count == 0)
+                    lock (AttachedDevice)
                     {
-                        message = "Attached To: None";
+                        message = $"Attached To: {AttachedDevice.displayName} ({AttachedDevice.lampArray.LampArrayKind}, {AttachedDevice.lampArray.LampCount} lights)";
                     }
-                    else
-                    {
-                        message = $"Attached To: ";
-                        foreach (LampArrayInfo info in m_attachedLampArrays)
-                        {
-                            message += $"{info.displayName} ({info.lampArray.LampArrayKind}, {info.lampArray.LampCount} lights)";
-                        }
-                    }
-                    
+                }
+                else
+                {
+                    message = "Attached To: None";
                 }
 
                 // Update ViewModel on UI thread
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ViewModel.AttachedDevicesMessage = message;
-                    ViewModel.HasAttachedDevices = m_attachedLampArrays.Count > 0;
+                    ViewModel.HasAttachedDevices = (AttachedDevice != null);
                 });
             }
+            ViewModel.UpdateAttachedDeviceStatus();
         }
 
         async Task<LampArrayInfo?> AttachSelectedDeviceFromDropdown_Async()
@@ -405,27 +411,17 @@ namespace Dynamic_Lighting_Key_Indicator
         // Return null if not applicable / no attached device, false if it doesn't match, true if it does
         public bool? AttachedDeviceMatchesDropdownSelection()
         {
-            if (ColorSetter.CurrentDevice == null || availableDevices.Count == 0 || m_attachedLampArrays.Count == 0 || ViewModel.SelectedDeviceIndex == -1)
+            if (ColorSetter.CurrentDevice == null || availableDevices.Count == 0 || AttachedDevice == null || ViewModel.SelectedDeviceIndex == -1)
             {
                 return null; // If there's no device attached, return null
             }
 
-            // Currently there's only one attached but this is set up to handle multiple in the future
-            List<string> attachedDeviceIds = m_attachedLampArrays.Select(info => info.id).ToList();
-            // Get the current dropdown selection
             int selectedDeviceIndex = ViewModel.SelectedDeviceIndex;
 
-            foreach (string id in attachedDeviceIds)
-            {
-                // Check if the attached device ID matches the selected device ID using deviceIndexDict
-                if (deviceIndexDict[selectedDeviceIndex] == id)
-                {
-                    return true;
-                }
-            }
-
-            // At this point it means none were found
-            return false;
+            if (deviceIndexDict[selectedDeviceIndex] == AttachedDevice.id)
+                return true;
+            else
+                return false;
         }
 
         // Updates the dropdown list to reflect the current device ID if it was selected programatically, like on startup
@@ -666,8 +662,6 @@ namespace Dynamic_Lighting_Key_Indicator
             DefaultColor
         }
 
-        
-
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
 
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
@@ -701,12 +695,18 @@ namespace Dynamic_Lighting_Key_Indicator
             });
         }
 
+        private void OnAttachedDeviceSet()
+        {
+            UpdateAttachedLampArrayDisplayList();
+            ViewModel.UpdateAttachedDeviceStatus();
+        }
+
         // -------------------------------------- GUI EVENT HANDLERS --------------------------------------
 
         private void ButtonStartWatch_Click(object sender, RoutedEventArgs e)
         {
             // Clear the current list of attached devices
-            m_attachedLampArrays.Clear();
+            AttachedDevice = null;
             availableDevices.Clear();
             UpdateAttachedLampArrayDisplayList();
 
@@ -715,7 +715,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ButtonStopWatch_Click(object sender, RoutedEventArgs e)
         {
-            m_attachedLampArrays.Clear();
+            AttachedDevice = null;
             availableDevices.Clear();
             UpdateAttachedLampArrayDisplayList();
             UpdatAvailableLampArrayDisplayList();
@@ -731,7 +731,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Reset the m_attachedLampArrays list. In the future might allow multiple devices
-            m_attachedLampArrays.Clear();
+            AttachedDevice = null;
 
             LampArrayInfo? selectedLampArrayInfo = await AttachSelectedDeviceFromDropdown_Async();
 

@@ -37,6 +37,7 @@
             <RowDefinition Height="Auto" />     <!-- Row 8 -->
             <RowDefinition Height="Auto" />     <!-- Row 9 -->
             <RowDefinition Height="Auto" />     <!-- Row 10 -->
+            <RowDefinition Height="Auto" />     <!-- Row 11 -->
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="watcherStatusText" 
@@ -257,10 +258,10 @@
             <Button x:Name="buttonOpenConfigFolder" 
                     Click="openConfigFolder_Click"
                     Margin="0,0,10,0"
-                    Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
+                    ignore:Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
                     >
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="10,0,8,0"/>
                     <TextBlock Text="Open Config Folder"/>
                 </StackPanel>
             </Button>
@@ -329,6 +330,25 @@
             <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/><LineBreak/>
             <Run Text="The setting in the top level 'Dynamic Lighting' menu is the global setting that will affect all devices."/>
         </TextBlock>
+        <!-- Debug Information Row -->
+        <StackPanel Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}">
+            <TextBlock Margin="0,5,0,0">
+        <Run Text="Name: "/>
+        <Run Text="{x:Bind ViewModel.AttachedDeviceName, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Margin="0,5,0,0">
+        <Run Text="Is Available: "/>
+        <Run Text="{x:Bind ViewModel.DeviceIsAvailable, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Margin="0,5,0,0">
+        <Run Text="Is Connected: "/>
+        <Run Text="{x:Bind ViewModel.DeviceIsConnected, Mode=OneWay}"/>
+            </TextBlock>
+            <TextBlock Margin="0,5,0,0">
+        <Run Text="Is Enabled: "/>
+        <Run Text="{x:Bind ViewModel.DeviceIsEnabled, Mode=OneWay}"/>
+            </TextBlock>
+        </StackPanel>
 
     </Grid>
 </Window>

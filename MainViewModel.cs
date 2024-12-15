@@ -46,7 +46,7 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeStartupTaskStateAsync();
 
             Debug.WriteLine("MainViewModel created.");
-            this.debugMode = debugMode;
+            this._debugMode = debugMode;
         }
 
         private MainWindow mainWindow;
@@ -177,12 +177,17 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private bool debugMode;
+        private bool _debugMode;
+        public bool DebugMode
+        {
+            get => _debugMode;
+            set => SetProperty(ref _debugMode, value);
+        }
         public Visibility DebugMode_VisibilityBool
         {
             get
             {
-                if (debugMode)
+                if (DebugMode)
                     return Visibility.Visible;
                 else
                     return Visibility.Collapsed;
@@ -337,6 +342,19 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
         public bool IsUndoButtonEnabled => !IsSaveButtonEnabled;
+
+        public string AttachedDeviceName => MainWindow.AttachedDevice?.displayName ?? "None";
+        public bool DeviceIsAvailable => MainWindow.AttachedDevice?.lampArray.IsAvailable ?? false;
+        public bool DeviceIsConnected => MainWindow.AttachedDevice?.lampArray.IsConnected ?? false;
+        public bool DeviceIsEnabled => MainWindow.AttachedDevice?.lampArray.IsEnabled ?? false;
+
+        public void UpdateAttachedDeviceStatus()
+        {
+            OnPropertyChanged(nameof(AttachedDeviceName));
+            OnPropertyChanged(nameof(DeviceIsAvailable));
+            OnPropertyChanged(nameof(DeviceIsConnected));
+            OnPropertyChanged(nameof(DeviceIsEnabled));
+        }
 
         // ----------------------- Event Handlers -----------------------
 

@@ -33,10 +33,7 @@ namespace Dynamic_Lighting_Key_Indicator
             info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
 
             // Add to the list (thread-safe)
-            lock (m_attachedLampArrays)
-            {
-                m_attachedLampArrays.Add(info);
-            }
+            AttachedDevice = info;
 
             // Update UI on the UI thread
             DispatcherQueue.TryEnqueue(() =>
@@ -136,21 +133,17 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 UpdateAttachedLampArrayDisplayList();
             });
+            ViewModel.UpdateAttachedDeviceStatus();
         }
 
         private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            lock (m_attachedLampArrays)
+            if (AttachedDevice == null)
+                return;
+
+            lock (AttachedDevice)
             {
-                // Remove devices from our array that match the ID of the device from the event
-                foreach (var device in m_attachedLampArrays)
-                {
-                    if (device.id == args.Id)
-                    {
-                        m_attachedLampArrays.Remove(device);
-                        break;
-                    }
-                }
+                AttachedDevice = null;
             }
 
             // Update UI on the UI thread
