@@ -40,6 +40,25 @@
             <RowDefinition Height="Auto" />     <!-- Row 11 -->
         </Grid.RowDefinitions>
 
+
+        <!-- Debug mode test toggle -->
+        <ToggleSwitch x:Name="testToggle" 
+            IsOn="{x:Bind ViewModel.DebugMode, Mode=TwoWay}" 
+            Visibility="{x:Bind ViewModel.Special_DebugMode_VisibilityBool, Mode=OneWay}" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Top"
+            Header="Debug Mode"
+            Margin="0,-25,0,0"
+            >
+        </ToggleSwitch>
+        <!-- Debug mode test button 1 -->
+        <Button x:Name="testButton" 
+            Content="Test" 
+            Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}" 
+            HorizontalAlignment="Right" 
+            VerticalAlignment="Top" 
+            Click="TestButton_Click"
+        />
         <!-- Title -->
         <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" FontFamily="Highway Gothic" FontSize="30" FontWeight="Normal" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
 
@@ -118,6 +137,7 @@
                    Margin="0,10,0,0"
                    Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
+                   Foreground="{x:Bind ViewModel.DeviceStatusColor, Mode=OneWay}"
                    />
 
         <TextBlock x:Name="attachedDevices"
@@ -279,7 +299,7 @@
             <Button x:Name="buttonOpenConfigFolder" 
                     Click="openConfigFolder_Click"
                     Margin="10,0,10,0"
-                    ignore:Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
                     >
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
@@ -334,40 +354,51 @@
               HorizontalAlignment="Center"
               Margin="0,10,0,0"
             />
-        <TextBlock Grid.Row="10"
-           TextWrapping="Wrap"
-           Margin="0,10,0,0"
-           HorizontalAlignment="Center">
-            <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Black"/><Run Text=": Follow these steps to set up Dynamic Lighting:"/>
-            <LineBreak/>
-            <Run Text="      1. Click here to open "/>
-            <Hyperlink NavigateUri="ms-settings:personalization-lighting" Click="OpenLightingSettings_Click">Settings > Personalization > Dynamic Lighting</Hyperlink>
-            <LineBreak/>
-            <Run Text="      2. Find and click on your keyboard device in the row of devices at the top, to open its specific settings"/>
-            <LineBreak/>
-            <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top of the list"/>
-            <LineBreak/>
-            <LineBreak/>
-            <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/><LineBreak/>
-            <Run Text="The setting in the top level 'Dynamic Lighting' menu is the global setting that will affect all devices."/>
-        </TextBlock>
+        
+        <Expander Grid.Row="10"
+          Header="Instructions"
+          IsExpanded="False"
+                  Width="700"
+          Margin="0,20,0,0"
+          HorizontalAlignment="Center"
+          SizeChanged="Expander_SizeChange"
+          >
+            <TextBlock TextWrapping="Wrap">
+                <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Black"/>
+                <Run Text=": Follow these steps to set up Dynamic Lighting:"/>
+                <LineBreak/>
+                <Run Text="      1. Click this to open: "/>
+                <Hyperlink NavigateUri="ms-settings:personalization-lighting" Click="OpenLightingSettings_Click">
+                    Settings > Personalization > Dynamic Lighting
+                </Hyperlink>
+                <LineBreak/>
+                <Run Text="      2. Find and click on your keyboard device in the row of devices at the top, to open its specific settings"/>
+                <LineBreak/>
+                <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top of the list"/>
+                <LineBreak/>
+                <LineBreak/>
+                <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/>
+                <LineBreak/>
+                <Run Text="The setting in the top level 'Dynamic Lighting' menu is the global setting that will affect all devices."/>
+            </TextBlock>
+        </Expander>
         <!-- Debug Information Row -->
         <StackPanel Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}">
-            <TextBlock Margin="0,5,0,0">
-        <Run Text="Name: "/>
-        <Run Text="{x:Bind ViewModel.AttachedDeviceName, Mode=OneWay}"/>
-            </TextBlock>
-            <TextBlock Margin="0,5,0,0">
-        <Run Text="Is Available: "/>
-        <Run Text="{x:Bind ViewModel.DeviceIsAvailable, Mode=OneWay}"/>
-            </TextBlock>
-            <TextBlock Margin="0,5,0,0">
-        <Run Text="Is Connected: "/>
-        <Run Text="{x:Bind ViewModel.DeviceIsConnected, Mode=OneWay}"/>
-            </TextBlock>
-            <TextBlock Margin="0,5,0,0">
-        <Run Text="Is Enabled: "/>
-        <Run Text="{x:Bind ViewModel.DeviceIsEnabled, Mode=OneWay}"/>
+            <TextBlock Margin="0,5,0,0" >
+                <Run Text="Name: "/>
+                <Run Text="{x:Bind ViewModel.AttachedDeviceName, Mode=OneWay}"/>
+                    </TextBlock>
+            <TextBlock Margin="0,5,0,0" >
+                <Run Text="Is Available: "/>
+                <Run Text="{x:Bind ViewModel.DeviceIsAvailable, Mode=OneWay}"/>
+                    </TextBlock>
+            <TextBlock Margin="0,5,0,0" >
+                <Run Text="Is Connected: "/>
+                <Run Text="{x:Bind ViewModel.DeviceIsConnected, Mode=OneWay}"/>
+                    </TextBlock>
+            <TextBlock Margin="0,5,0,0" >
+                <Run Text="Is Enabled: "/>
+                <Run Text="{x:Bind ViewModel.DeviceIsEnabled, Mode=OneWay}"/>
             </TextBlock>
         </StackPanel>
 

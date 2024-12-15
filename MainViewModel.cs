@@ -183,13 +183,28 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool DebugMode
         {
             get => _debugMode;
-            set => SetProperty(ref _debugMode, value);
+            set
+            {
+                SetProperty(ref _debugMode, value);
+                OnPropertyChanged(nameof(DebugMode_VisibilityBool));
+            }
         }
         public Visibility DebugMode_VisibilityBool
         {
             get
             {
                 if (DebugMode)
+                    return Visibility.Visible;
+                else
+                    return Visibility.Collapsed;
+            }
+        }
+        // For the special debug mode testing toggle switch, which always shows in debug mode but allows disabling regular debug controls
+        public Visibility Special_DebugMode_VisibilityBool
+        {
+            get
+            {
+                if (MainWindow.DEBUGMODE)
                     return Visibility.Visible;
                 else
                     return Visibility.Collapsed;
@@ -209,6 +224,12 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             get => _deviceStatusMessage;
             set => SetProperty(ref _deviceStatusMessage, value);
+        }
+        private SolidColorBrush _deviceStatusColor;
+        public SolidColorBrush DeviceStatusColor
+        {
+            get => _deviceStatusColor;
+            set => SetProperty(ref _deviceStatusColor, value);
         }
 
         private string _attachedDevicesMessage;

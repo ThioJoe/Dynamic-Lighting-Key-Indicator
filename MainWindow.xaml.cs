@@ -29,6 +29,7 @@ using Windows.Graphics;
 namespace Dynamic_Lighting_Key_Indicator
 {
     using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
+    using Brush = Microsoft.UI.Xaml.Media.Brush;
 
     public sealed partial class MainWindow : Window
     {
@@ -36,7 +37,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static MainWindow mainWindow { get; private set; } = null!;
         public MainViewModel ViewModel { get; private init; } = null!;
 
-        public bool DEBUGMODE = false;
+        public static bool DEBUGMODE = false;
         static UserConfig currentConfig = new();
         static UserConfig configSavedOnDisk = new();
 
@@ -77,7 +78,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
 
-            ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: DEBUGMODE)
+            ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: false)
             {
                 DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
@@ -304,19 +305,46 @@ namespace Dynamic_Lighting_Key_Indicator
             UpdatAvailableLampArrayDisplayList();
         }
 
-        private void UpdatAvailableLampArrayDisplayList()
+        private void UpdateStatusMessage()
         {
             string message;
+            Windows.UI.Color statusColor = Colors.Black;
 
+            // If there are no devices available, it could be because the user has no devices, or could be because the watcher hasn't started yet, so show the appropriate message
             if (availableDevices.Count == 0)
             {
-                message = "Status: Waiting - Start device watcher to list available devices.";
+                // This means the watcher is running and has not yet found any devices
+                if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
+                    message = "Status: No elegible lighting devices found";
+                else
+                    message = "Status: Waiting - Start device watcher to list available devices.";
             }
-            else
+            // If there are devices available, but nothing attached yet, show the number of devices
+            else if (AttachedDevice == null)
             {
                 message = $"Available Devices: {availableDevices.Count}";
             }
+            // If the device is attached but is not available, show warning because they probably need to set it up in the lighting settings
+            else if (AttachedDevice.lampArray.IsAvailable == false)
+            {
+                message = "Status: Device attached but not controllable. See instructions below for how to enable background control.";
+                statusColor = Colors.Red;
+            }
+            else
+            {
+                message = "Status: Good";
+                statusColor = Colors.Green;
+            }
 
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                ViewModel.DeviceStatusMessage = message;
+                ViewModel.DeviceStatusColor = new SolidColorBrush(statusColor);
+            });
+        }
+
+        private void UpdatAvailableLampArrayDisplayList()
+        {
             int deviceIndex = 0;
 
             lock (_lock)
@@ -328,8 +356,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     foreach (DeviceInformation device in availableDevices)
                     {
-                        //message += $"\n{deviceIndex + 1}: {device.Name}";
-
                         // Add the device to the dropdown list and store its index in the dictionary
                         devicesListForDropdown.Add(device.Name);
                         if (deviceIndexDict.ContainsKey(deviceIndex))
@@ -344,10 +370,11 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
 
+                UpdateStatusMessage();
+
                 // Update ViewModel on UI thread
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    ViewModel.DeviceStatusMessage = message;
                     dropdownDevices.ItemsSource = devicesListForDropdown; // Populate the ComboBox
                 });
             }
@@ -379,6 +406,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 });
             }
             ViewModel.UpdateAttachedDeviceStatus();
+            UpdateStatusMessage();
         }
 
         async Task<LampArrayInfo?> AttachSelectedDeviceFromDropdown_Async()
@@ -663,10 +691,9 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
-
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
-            System.Diagnostics.Debug.WriteLine($"Window activation state: {args.WindowActivationState}");
+            //System.Diagnostics.Debug.WriteLine($"Window activation state: {args.WindowActivationState}");
         }
 
         // This will handle the redirected activation from the protocol (URL) activation of further instances
@@ -807,16 +834,47 @@ namespace Dynamic_Lighting_Key_Indicator
             colorPickerFlyout.Hide();
         }
 
+        private void Expander_SizeChange(object sender, SizeChangedEventArgs e) // When expanded or collapsed
+        {
+            Double prevHeight = e.PreviousSize.Height;
+            Double newHeight = e.NewSize.Height;
+
+            if (e.NewSize.Height > e.PreviousSize.Height)
+                AutoSizeWindowFromExpander(sender:sender, IsExpanding:true, previousExpanderHeight: prevHeight, newExpanderHeight:newHeight);
+            else
+                AutoSizeWindowFromExpander(sender: sender, IsExpanding: false, previousExpanderHeight: prevHeight, newExpanderHeight: newHeight);
+        }
+
+        private void TestButton_Click(object sender, object e)
+        {
+
+        }
+
+        private void AutoSizeWindowFromExpander(object sender, bool IsExpanding, Double previousExpanderHeight, Double newExpanderHeight)
+        {
+            var window = this;  // assuming this is in the Window class
+
+            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            {
+                Expander expander = (Expander)sender;
+                Double scale = windowRoot.XamlRoot.RasterizationScale;
+                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+
+                int windowHeightToSet;
+                int extraBuffer = 50;
+
+                if (IsExpanding)
+                    windowHeightToSet = (int)Math.Ceiling(windowRoot.ActualHeight * scale);
+                else
+                    //height = (int)Math.Ceiling((rootElement.ActualHeight - expander.ActualHeight + 20) * scale);
+                    windowHeightToSet = (int)Math.Ceiling((windowRoot.ActualHeight - previousExpanderHeight + extraBuffer) * scale);
+
+                AppWindow.ResizeClient(new SizeInt32(width, windowHeightToSet));
+            }
+        }
+
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
-            // Look up the current state of the keys to use as assumed state while updating colors continuously
-            //Dictionary<VK, bool> assumedStatesDict = new()
-            //{
-            //    { VK.NumLock, KeyStatesHandler.FetchKeyState((int)VK.NumLock) },
-            //    { VK.CapsLock, KeyStatesHandler.FetchKeyState((int)VK.CapsLock) },
-            //    { VK.ScrollLock, KeyStatesHandler.FetchKeyState((int)VK.ScrollLock) }
-            //};
-
             List<VK> monitoredKeysToPreviewDefaultColor = new();
             // Add keys where their current state matches their linked default state
             foreach (MonitoredKey key in KeyStatesHandler.monitoredKeys)

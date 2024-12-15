@@ -133,7 +133,8 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 UpdateAttachedLampArrayDisplayList();
             });
-            ViewModel.UpdateAttachedDeviceStatus();
+
+            UpdateStatusMessage();
         }
 
         private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
