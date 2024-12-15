@@ -671,25 +671,6 @@ namespace Dynamic_Lighting_Key_Indicator
             public readonly StateColorApply forState = forState;
         }
 
-        internal enum StateColorApply
-        {
-            On,
-            Off,
-            Both
-        }
-
-        // TODO: Implement this instead of using strings
-        internal enum ColorProperty
-        {
-            NumLockOn,
-            NumLockOff,
-            CapsLockOn,
-            CapsLockOff,
-            ScrollLockOn,
-            ScrollLockOff,
-            DefaultColor
-        }
-
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
