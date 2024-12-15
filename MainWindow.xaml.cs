@@ -621,15 +621,18 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // This is called when the standard / default key color is changed via GUI. Updates both standard keys and applicable monitored keys
-        internal void ApplyNewDefaultColor(RGBTuple color)
+        //internal void ApplyNewDefaultColor(RGBTuple color, Dictionary<VK, bool> assumedStatesDict)
+        internal void ApplyNewDefaultColor(RGBTuple color, List<VK> additionalKeys)
         {
             ViewModel.UpdateAllColorSettingsFromGUI();
 
-            ColorSetter.SetDefaultAndApplicableKeysColor_ToKeyboard(color);
+            //ColorSetter.SetDefaultAndApplicableKeysColor_ToKeyboard(color, lampArray:ColorSetter.CurrentDevice, noStateCheck:false, assumedStatesDict:assumedStatesDict);
+            ColorSetter.SetColorToDefaultAndAdditionalIndices(colorTuple: color, additionalKeys: additionalKeys, lampArray: ColorSetter.CurrentDevice);
+
         }
 
-        // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
-        internal class LampArrayInfo(string id, string displayName, LampArray lampArray)
+    // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
+    internal class LampArrayInfo(string id, string displayName, LampArray lampArray)
         {
             public readonly string id = id;
             public readonly string displayName = displayName;
@@ -806,6 +809,30 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
+            // Look up the current state of the keys to use as assumed state while updating colors continuously
+            //Dictionary<VK, bool> assumedStatesDict = new()
+            //{
+            //    { VK.NumLock, KeyStatesHandler.FetchKeyState((int)VK.NumLock) },
+            //    { VK.CapsLock, KeyStatesHandler.FetchKeyState((int)VK.CapsLock) },
+            //    { VK.ScrollLock, KeyStatesHandler.FetchKeyState((int)VK.ScrollLock) }
+            //};
+
+            List<VK> monitoredKeysToPreviewDefaultColor = new();
+            // Add keys where their current state matches their linked default state
+            foreach (MonitoredKey key in KeyStatesHandler.monitoredKeys)
+            {
+                bool keystate = KeyStatesHandler.FetchKeyState((int)key.key);
+                if (key.onColorTiedToStandard && keystate)
+                {
+                    monitoredKeysToPreviewDefaultColor.Add(key.key);
+                }
+                else if (key.offColorTiedToStandard && !keystate)
+                {
+                    monitoredKeysToPreviewDefaultColor.Add(key.key);
+                }
+            }
+
+
             var button = sender as Button;
             if (button == null)
             {
@@ -884,7 +911,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Create the KeyColorUpdateInfo object to pass to the ApplySpecificMonitoredKeyColor method, depending on which color is being updated
                 if (colorPropertyName == "DefaultColor")
                 {
-                    ApplyNewDefaultColor((args.NewColor.R, args.NewColor.G, args.NewColor.B));
+                    ApplyNewDefaultColor((args.NewColor.R, args.NewColor.G, args.NewColor.B), monitoredKeysToPreviewDefaultColor);
                 }
                 else
                 {

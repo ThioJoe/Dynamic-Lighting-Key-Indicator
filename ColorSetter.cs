@@ -181,8 +181,22 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        public static void SetColorToDefaultAndAdditionalIndices(RGBTuple colorTuple, List<VK> additionalKeys, LampArray lampArray)
+        {
+            if (lampArray == null)
+                return;
+
+            Windows.UI.Color colorToUse = Windows.UI.Color.FromArgb(255, (byte)colorTuple.R, (byte)colorTuple.G, (byte)colorTuple.B);
+
+            List<int> keyIndices = [];
+            keyIndices.AddRange(NonMonitoredKeyIndices);
+            keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[key]));
+
+            lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
+        }
+
         // For when the user is changing the color of the default color in the UI, which may include linked colors of monitored keys
-        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false) // Overload
+        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false, Dictionary<VK,bool>? assumedStatesDict = null)
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
@@ -195,7 +209,13 @@ namespace Dynamic_Lighting_Key_Indicator
             // Add non-monitored keys and applicable monitored keys to the list of indices
             foreach (var key in KeyStatesHandler.monitoredKeys)
             {
-                if (noStateCheck || (key.onColorTiedToStandard && key.IsOn()) || (key.offColorTiedToStandard && !key.IsOn()))
+                bool keyState;
+                if (assumedStatesDict != null)
+                    keyState = assumedStatesDict[key.key];
+                else
+                    keyState = key.IsOn(); // TODO: This probably causes a lot of calls, maybe only check it once when the flyout opens
+                
+                if ((keyState && key.onColorTiedToStandard) || (!keyState && key.offColorTiedToStandard) || noStateCheck) 
                 {
                     keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
                 }
