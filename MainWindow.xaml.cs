@@ -224,12 +224,12 @@ namespace Dynamic_Lighting_Key_Indicator
         private async void AttachToSavedDevice()
         {
             // If current device ID is null or empty it probably means the user stopped watching so it reset, so don't try to attach or else it will throw an exception
-            if (currentConfig.DeviceId == null || currentConfig.DeviceId == "")
+            if (configSavedOnDisk.DeviceId == null || configSavedOnDisk.DeviceId == "")
             {
                 return;
             }
 
-            DeviceInformation? device = availableDevices.First(d => d.Id == currentConfig.DeviceId);
+            DeviceInformation? device = availableDevices.FirstOrDefault(d => d.Id == configSavedOnDisk.DeviceId);
 
             if (device != null)
             {
