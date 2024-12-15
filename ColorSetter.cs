@@ -48,7 +48,8 @@ namespace Dynamic_Lighting_Key_Indicator
             if (lampArray == null)
             {
                 if (CurrentDevice == null)
-                    MainWindow.ShowErrorMessage("LampArray must be defined.");
+                    //MainWindow.ShowErrorMessage("LampArray must be defined.");
+                    return null;
                 else
                     lampArray = CurrentDevice;
             }
@@ -125,6 +126,34 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             lampArrayToUse.SetColorsForKeys(colors, keys);
+        }
+
+        public static void ProperlySetProperColorsAllKeys_ToKeyboard(LampArray? lampArray = null)
+        {
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
+
+            // Make arrays of each monitored key's color, the default color for all others, put into combined arrays
+            List<Windows.UI.Color> colors = [];
+            List<int> keyIndices = [];
+
+            // Add non-monitored keys and applicable monitored keys to the list of indices
+            foreach (var key in KeyStatesHandler.monitoredKeys)
+            {
+                keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
+                colors.Add(key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor));
+            }
+            foreach (int index in NonMonitoredKeyIndices)
+            {
+                keyIndices.Add(index);
+                colors.Add(KeyboardMainColor);
+            }
+
+            int[] keyIndicesArray = keyIndices.ToArray();
+            Windows.UI.Color[] colorsArray = colors.ToArray();
+
+            lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
+
         }
 
         // For when user is changing the color of a specific key in the UI

@@ -54,15 +54,15 @@ namespace Dynamic_Lighting_Key_Indicator
         // Default constructor
         public UserConfig()
         {
-            Brightness = DefaultBrightness; // Remnant from old code
+            Brightness = DefaultBrightness;
             StandardKeyColor = DefaultStandardKeyColor;
             MonitoredKeysAndColors = DefaultMonitoredKeysAndColors;
         }
 
         // Constructor with RGB values for standard key color
-        public UserConfig(RGBTuple standardKeyColor, List<MonitoredKey> monitoredKeysAndColors)
+        public UserConfig(RGBTuple standardKeyColor, List<MonitoredKey> monitoredKeysAndColors, int brightness)
         {
-            Brightness = DefaultBrightness; // Remnant from old code
+            Brightness = brightness;
             StandardKeyColor = standardKeyColor;
             MonitoredKeysAndColors = monitoredKeysAndColors;
         }

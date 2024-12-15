@@ -450,7 +450,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static async void ShowErrorMessage(string message)
+        public static async Task ShowErrorMessage(string message)
         {
             ContentDialog errorDialog = new()
             {
@@ -556,7 +556,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return null;
         }
 
-        internal async void ApplyAndSaveColorSettings(bool saveFile, UserConfig? newConfig = null, KeyColorUpdateInfo newColorInfo = null)
+        internal async void ApplyAndSaveColorSettings(bool saveFile, UserConfig? newConfig = null)
         {
             //ColorSettings colorSettings = ViewModel.ColorSettings;
 
@@ -582,12 +582,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
             KeyStatesHandler.DefineAllMonitoredKeysAndColors(monitoredKeysList);
             //KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
-            currentConfig = new UserConfig(defaultColor, monitoredKeysList);
+            currentConfig = new UserConfig(defaultColor, monitoredKeysList, ViewModel.Brightness);
 
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
             {
-                ColorSetter.SetAllColors_ToKeyboard(ColorSetter.CurrentDevice);
+                //ColorSetter.SetAllColors_ToKeyboard(ColorSetter.CurrentDevice);
+                ColorSetter.ProperlySetProperColorsAllKeys_ToKeyboard(ColorSetter.CurrentDevice);
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
@@ -774,7 +775,9 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             if (sender is not Slider slider)
                 return;
+
             ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
+            //ColorSetter.ProperlySetProperColorsAllKeys_ToKeyboard();
         }
 
         // This is the button within the flyout  menu
@@ -821,9 +824,9 @@ namespace Dynamic_Lighting_Key_Indicator
             ForceUpdateAllButtonGlyphs();
 
             // Update the button color from the settings as soon as the button is clicked. Also will be updated later
-            SolidColorBrush? newBGColor = ViewModel.GetType().GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
-            if (button != null && newBGColor != null)
-                button.Background = newBGColor;
+            //SolidColorBrush? newBGColor = ViewModel.GetType().GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
+            //if (button != null && newBGColor != null)
+            //    button.Background = newBGColor;
 
             // Next show the color picker flyout
             var flyout = new Flyout();
