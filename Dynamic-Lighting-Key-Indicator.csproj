@@ -28,6 +28,7 @@
   <ItemGroup>
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
+    <None Remove="CustomColorSpectrum.xaml" />
     <None Remove="LICENSE.txt" />
   </ItemGroup>
 
@@ -105,6 +106,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Page Update="CustomColorSpectrum.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!--

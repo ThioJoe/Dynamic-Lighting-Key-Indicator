@@ -830,6 +830,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 MinWidth = 300,
                 MinHeight = 400
             };
+
             Windows.UI.Color? currentColor = (Windows.UI.Color?)ViewModel.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
             if (currentColor == null)
             {
