@@ -131,52 +131,30 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void SetOnlyNonMonitoredKeysColor_ToKeyboard(RGBTuple color, LampArray? lampArray = null) // Overload
-        {
-            SetOnlyNonMonitoredKeysColor_ToKeyboard(RGBTuple_To_ColorObj(color), lampArray);
-        }
-        public static void SetOnlyNonMonitoredKeysColor_ToKeyboard(Windows.UI.Color? color = null, LampArray? lampArray = null)
+        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false) // Overload
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
-
-            Windows.UI.Color colorToUse = DetermineDefaultColor(color);
-
-            // Build corresponding arrays of colors and keys to pass in.
-            // The colors are all the same since these are all non-monitored keys so will always use the standard/default color
-            Windows.UI.Color[] colors = Enumerable.Repeat(colorToUse, NonMonitoredKeyIndices.Count).ToArray(); // Repeat the color into an array
-            int[] keys = NonMonitoredKeyIndices.ToArray();
-
-            // Actually sets the colors on the keyboard
-            lampArrayToUse.SetColorsForIndices(colors, keys);
-        }
-
-        public static void SetApplicableMonitoredKeysColor_ToKeyboard(RGBTuple color, LampArray? lampArray = null, bool noStateCheck = false) // Overload
-        {
-            SetApplicableMonitoredKeysColor_ToKeyboard(RGBTuple_To_ColorObj(color), lampArray, noStateCheck);
-        }
-
-        // Applies the same color to monitored keys that are linked to the standard color and their status matches the state to which the color applies
-        public static void SetApplicableMonitoredKeysColor_ToKeyboard(Windows.UI.Color? color = null, LampArray? lampArray = null, bool noStateCheck = false)
-        {
-            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
-                return;
-            Windows.UI.Color colorToUse = DetermineDefaultColor(color);
+            Windows.UI.Color colorToUse = DetermineDefaultColor(RGBTuple_To_ColorObj(colorTuple));
 
             // Check which keys have on or off colors linked to the standard color, and also whether the color is on or off, to decide which colors need to be updated on the keyboard
             List<Windows.UI.Color> colors = [];
             List<int> keyIndices = [];
 
+            // Add non-monitored keys and applicable monitored keys to the list of indices
             foreach (var key in KeyStatesHandler.monitoredKeys)
             {
                 if (noStateCheck || (key.onColorTiedToStandard && key.IsOn()) || (key.offColorTiedToStandard && !key.IsOn()))
                 {
                     keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
-                    colors.Add(colorToUse);
                 }
             }
+            keyIndices.AddRange(NonMonitoredKeyIndices);
 
-            lampArrayToUse.SetColorsForIndices(colors.ToArray(), keyIndices.ToArray()); // Might instead be able to use SetColorsForKeys and not have to convert to indices first
+            int[] keyIndicesArray = keyIndices.ToArray();
+            Windows.UI.Color[] colorsArray = Enumerable.Repeat(colorToUse, keyIndices.Count).ToArray(); // Same color for all so just fill it to the same size as the keyIndices
+
+            lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
         }
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)

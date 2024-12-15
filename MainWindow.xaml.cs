@@ -623,9 +623,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             ViewModel.UpdateAllColorSettingsFromGUI();
 
-            //TODO: Can probably combine these into one method
-            ColorSetter.SetOnlyNonMonitoredKeysColor_ToKeyboard(color);
-            ColorSetter.SetApplicableMonitoredKeysColor_ToKeyboard(color);
+            ColorSetter.SetDefaultAndApplicableKeysColor_ToKeyboard(color);
         }
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
