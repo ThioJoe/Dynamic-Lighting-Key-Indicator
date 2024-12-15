@@ -41,7 +41,6 @@ namespace Dynamic_Lighting_Key_Indicator
             _deviceStatusMessage = "";
             _attachedDevicesMessage = "";
             _deviceWatcherStatusMessage = "";
-            _colorSettings = new ColorSettings();
             mainWindow = mainWindowPassIn;
 
             InitializeStartupTaskStateAsync();
@@ -300,14 +299,6 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        // Custom object for storing colors for scroll lock, caps lock, and num lock. Contains Hex strings for on and off status of each
-        private ColorSettings _colorSettings;
-        public ColorSettings ColorSettings
-        {
-            get => _colorSettings;
-            set => SetProperty(ref _colorSettings, value);
-        }
-
         private bool _startMinimizedToTray;
         public bool StartMinimizedToTray
         {
@@ -336,7 +327,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal void CheckAndUpdateSaveButton_EnabledStatus()
         {
             // Enable it if the colors are not the same as the config
-            bool newEnabledStatus = !ColorSettings.IsColorSettingsSameAsConfig(config: mainWindow.SavedConfig);
+            bool newEnabledStatus = !IsColorSettingsSameAsConfig(config: mainWindow.SavedConfig);
 
             // Only update the property if it doesn't already match the new enabled status
             if (IsSaveButtonEnabled != newEnabledStatus)
@@ -384,125 +375,119 @@ namespace Dynamic_Lighting_Key_Indicator
         // ------------------------------------- Color Values From GUI -------------------------------------
         public string TextScrollLockOnColor
         {
-            get => ColorSettings.AsString(ColorSettings.ScrollLockOnColor);
-            set => ColorSettings.ScrollLockOnColor = ColorSettings.GetColorFromString(value);
+            get => ScrollLockOnColorHex;
+            set => ScrollLockOnColor = GetColorFromString(value);
         }
 
         public string TextScrollLockOffColor
         {
-            get => ColorSettings.AsString(ColorSettings.ScrollLockOffColor);
-            set => ColorSettings.ScrollLockOffColor = ColorSettings.GetColorFromString(value);
+            get => ScrollLockOffColorHex;
+            set => ScrollLockOffColor = GetColorFromString(value);
         }
 
         public string TextCapsLockOnColor
         {
-            get => ColorSettings.AsString(ColorSettings.CapsLockOnColor);
-            set => ColorSettings.CapsLockOnColor = ColorSettings.GetColorFromString(value);
+            get => CapsLockOnColorHex;
+            set => CapsLockOnColor = GetColorFromString(value);
         }
 
         public string TextCapsLockOffColor
         {
-            get => ColorSettings.AsString(ColorSettings.CapsLockOffColor);
-            set => ColorSettings.CapsLockOffColor = ColorSettings.GetColorFromString(value);
+            get => CapsLockOffColorHex;
+            set => CapsLockOffColor = GetColorFromString(value);
         }
 
         public string TextNumLockOnColor
         {
-            get => ColorSettings.AsString(ColorSettings.NumLockOnColor);
-            set => ColorSettings.NumLockOnColor = ColorSettings.GetColorFromString(value);
+            get => NumLockOnColorHex;
+            set => NumLockOnColor = GetColorFromString(value);
         }
 
         public string TextNumLockOffColor
         {
-            get => ColorSettings.AsString(ColorSettings.NumLockOffColor);
-            set => ColorSettings.NumLockOffColor = ColorSettings.GetColorFromString(value);
+            get => NumLockOffColorHex;
+            set => NumLockOffColor = GetColorFromString(value);
         }
 
         public string TextDefaultColor
         {
-            get => ColorSettings.AsString(ColorSettings.DefaultColor);
-            set => ColorSettings.DefaultColor = ColorSettings.GetColorFromString(value);
+            get => DefaultColorHex;
+            set => DefaultColor = GetColorFromString(value);
         }
 
+        private bool _syncScrollLockOnColor;
         public bool SyncScrollLockOnColor
         {
-            get => ColorSettings.SyncScrollLockOnColor;
+            get => _syncScrollLockOnColor;
             set
             {
-                if (ColorSettings.SyncScrollLockOnColor != value)
+                if (SetProperty(ref _syncScrollLockOnColor, value))
                 {
-                    ColorSettings.SyncScrollLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(ScrollLockOnGlyph));
                 }
             }
         }
 
+        private bool _syncScrollLockOffColor;
         public bool SyncScrollLockOffColor
         {
-            get => ColorSettings.SyncScrollLockOffColor;
+            get => _syncScrollLockOffColor;
             set
             {
-                if (ColorSettings.SyncScrollLockOffColor != value)
+                if (SetProperty(ref _syncScrollLockOffColor, value))
                 {
-                    ColorSettings.SyncScrollLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(ScrollLockOffGlyph));
                 }
             }
         }
 
+        private bool _syncCapsLockOnColor;
         public bool SyncCapsLockOnColor
         {
-            get => ColorSettings.SyncCapsLockOnColor;
+            get => _syncCapsLockOnColor;
             set
             {
-                if (ColorSettings.SyncCapsLockOnColor != value)
+                if (SetProperty(ref _syncCapsLockOnColor, value))
                 {
-                    ColorSettings.SyncCapsLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(CapsLockOnGlyph));
                 }
             }
         }
 
+        private bool _syncCapsLockOffColor;
         public bool SyncCapsLockOffColor
         {
-            get => ColorSettings.SyncCapsLockOffColor;
+            get => _syncCapsLockOffColor;
             set
             {
-                if (ColorSettings.SyncCapsLockOffColor != value)
+                if (SetProperty(ref _syncCapsLockOffColor, value))
                 {
-                    ColorSettings.SyncCapsLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(CapsLockOffGlyph));
                 }
             }
         }
 
+        private bool _syncNumLockOnColor;
         public bool SyncNumLockOnColor
         {
-            get => ColorSettings.SyncNumLockOnColor;
+            get => _syncNumLockOnColor;
             set
             {
-                if (ColorSettings.SyncNumLockOnColor != value)
+                if (SetProperty(ref _syncNumLockOnColor, value))
                 {
-                    ColorSettings.SyncNumLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(NumLockOnGlyph));
                 }
             }
         }
 
+        private bool _syncNumLockOffColor;
         public bool SyncNumLockOffColor
         {
-            get => ColorSettings.SyncNumLockOffColor;
+            get => _syncNumLockOffColor;
             set
             {
-                if (ColorSettings.SyncNumLockOffColor != value)
+                if (SetProperty(ref _syncNumLockOffColor, value))
                 {
-                    ColorSettings.SyncNumLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(NumLockOffGlyph));
                 }
             }
@@ -511,158 +496,151 @@ namespace Dynamic_Lighting_Key_Indicator
         private string _scrollLockOnGlyph;
         public string ScrollLockOnGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("ScrollLockOnColor");
+            get => SyncScrollLockOnColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _scrollLockOnGlyph, value);
         }
 
         private string _scrollLockOffGlyph;
         public string ScrollLockOffGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("ScrollLockOffColor");
+            get => SyncScrollLockOffColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _scrollLockOffGlyph, value);
         }
 
         private string _capsLockOnGlyph;
         public string CapsLockOnGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("CapsLockOnColor");
+            get => SyncCapsLockOnColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _capsLockOnGlyph, value);
         }
 
         private string _capsLockOffGlyph;
         public string CapsLockOffGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("CapsLockOffColor");
+            get => SyncCapsLockOffColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _capsLockOffGlyph, value);
         }
 
         private string _numLockOnGlyph;
         public string NumLockOnGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("NumLockOnColor");
+            get => SyncNumLockOnColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _numLockOnGlyph, value);
         }
 
         private string _numLockOffGlyph;
         public string NumLockOffGlyph
         {
-            get => GetSyncGlyph_ByPropertyName("NumLockOffColor");
+            get => SyncNumLockOffColor ? LinkedGlyph : UnlinkedGlyph;
             private set => SetProperty(ref _numLockOffGlyph, value);
         }
 
 
         // Color properties
+
+        public int Brightness { get; set; }
+        public string ScrollLockOnColorHex => AsString(ScrollLockOnColor);
+        public string ScrollLockOffColorHex => AsString(ScrollLockOffColor);
+        public string CapsLockOnColorHex => AsString(CapsLockOnColor);
+        public string CapsLockOffColorHex => AsString(CapsLockOffColor);
+        public string NumLockOnColorHex => AsString(NumLockOnColor);
+        public string NumLockOffColorHex => AsString(NumLockOffColor);
+        public string DefaultColorHex => AsString(DefaultColor);
+
+        private Windows.UI.Color _scrollLockOnColor;
         public Windows.UI.Color ScrollLockOnColor
         {
-            get => ColorSettings.ScrollLockOnColor;
+            get => _scrollLockOnColor;
             set
             {
-                if (ColorSettings.ScrollLockOnColor != value)
+                if (SetProperty(ref _scrollLockOnColor, value))
                 {
-                    ColorSettings.ScrollLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(ScrollLockOnColorHex));
                 }
             }
         }
 
-        public string ScrollLockOnColorHex => ColorSettings.AsString(ColorSettings.ScrollLockOnColor);
-
+        private Windows.UI.Color _scrollLockOffColor;
         public Windows.UI.Color ScrollLockOffColor
         {
-            get => ColorSettings.ScrollLockOffColor;
+            get => _scrollLockOffColor;
             set
             {
-                if (ColorSettings.ScrollLockOffColor != value)
+                if (SetProperty(ref _scrollLockOffColor, value))
                 {
-                    ColorSettings.ScrollLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(ScrollLockOffColorHex));
                 }
             }
         }
+        public SolidColorBrush ScrollLockOffBrush => new SolidColorBrush(ScrollLockOffColor);
 
-        public string ScrollLockOffColorHex => ColorSettings.AsString(ColorSettings.ScrollLockOffColor);
-
+        private Windows.UI.Color _capsLockOnColor;
         public Windows.UI.Color CapsLockOnColor
         {
-            get => ColorSettings.CapsLockOnColor;
+            get => _capsLockOnColor;
             set
             {
-                if (ColorSettings.CapsLockOnColor != value)
+                if (SetProperty(ref _capsLockOnColor, value))
                 {
-                    ColorSettings.CapsLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(CapsLockOnColorHex));
                 }
             }
         }
 
-        public string CapsLockOnColorHex => ColorSettings.AsString(ColorSettings.CapsLockOnColor);
-
+        private Windows.UI.Color _capsLockOffColor;
         public Windows.UI.Color CapsLockOffColor
         {
-            get => ColorSettings.CapsLockOffColor;
+            get => _capsLockOffColor;
             set
             {
-                if (ColorSettings.CapsLockOffColor != value)
+                if (SetProperty(ref _capsLockOffColor, value))
                 {
-                    ColorSettings.CapsLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(CapsLockOffColorHex));
                 }
             }
         }
 
-        public string CapsLockOffColorHex => ColorSettings.AsString(ColorSettings.CapsLockOffColor);
-
+        private Windows.UI.Color _numLockOnColor;
         public Windows.UI.Color NumLockOnColor
         {
-            get => ColorSettings.NumLockOnColor;
+            get => _numLockOnColor;
             set
             {
-                if (ColorSettings.NumLockOnColor != value)
+                if (SetProperty(ref _numLockOnColor, value))
                 {
-                    ColorSettings.NumLockOnColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(NumLockOnColorHex));
                 }
             }
         }
 
-        public string NumLockOnColorHex => ColorSettings.AsString(ColorSettings.NumLockOnColor);
-
+        private Windows.UI.Color _numLockOffColor;
         public Windows.UI.Color NumLockOffColor
         {
-            get => ColorSettings.NumLockOffColor;
+            get => _numLockOffColor;
             set
             {
-                if (ColorSettings.NumLockOffColor != value)
+                if (SetProperty(ref _numLockOffColor, value))
                 {
-                    ColorSettings.NumLockOffColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(NumLockOffColorHex));
                 }
             }
         }
 
-        public string NumLockOffColorHex => ColorSettings.AsString(ColorSettings.NumLockOffColor);
-
+        private Windows.UI.Color _defaultColor;
         public Windows.UI.Color DefaultColor
         {
-            get => ColorSettings.DefaultColor;
+            get => _defaultColor;
             set
             {
-                if (ColorSettings.DefaultColor != value)
+                if (SetProperty(ref _defaultColor, value))
                 {
-                    ColorSettings.DefaultColor = value;
-                    OnPropertyChanged();
                     OnPropertyChanged(nameof(DefaultColorHex));
                 }
             }
         }
 
-        public string DefaultColorHex => ColorSettings.AsString(ColorSettings.DefaultColor);
+
+
 
         // ------ Other methods ------
         public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
@@ -670,27 +648,27 @@ namespace Dynamic_Lighting_Key_Indicator
             // Update the relevant sync setting in ViewModel based on the colorPropertyName
             switch (colorPropertyName)
             {
-                case "NumLockOnColor":
+                case ColorPropName.NumLockOn:
                     SyncNumLockOnColor = syncSetting;
                     OnPropertyChanged(nameof(NumLockOnGlyph));
                     break;
-                case "NumLockOffColor":
+                case ColorPropName.NumLockOff:
                     SyncNumLockOffColor = syncSetting;
                     OnPropertyChanged(nameof(NumLockOffGlyph));
                     break;
-                case "CapsLockOnColor":
+                case ColorPropName.CapsLockOn:
                     SyncCapsLockOnColor = syncSetting;
                     OnPropertyChanged(nameof(CapsLockOnGlyph));
                     break;
-                case "CapsLockOffColor":
+                case ColorPropName.CapsLockOff:
                     SyncCapsLockOffColor = syncSetting;
                     OnPropertyChanged(nameof(CapsLockOffGlyph));
                     break;
-                case "ScrollLockOnColor":
+                case ColorPropName.ScrollLockOn:
                     SyncScrollLockOnColor = syncSetting;
                     OnPropertyChanged(nameof(ScrollLockOnGlyph));
                     break;
-                case "ScrollLockOffColor":
+                case ColorPropName.ScrollLockOff:
                     SyncScrollLockOffColor = syncSetting;
                     OnPropertyChanged(nameof(ScrollLockOffGlyph));
                     break;
@@ -699,36 +677,50 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public bool GetSyncSettingByPropertyName(string colorPropertyName)
+        public bool GetSyncSetting_ByPropertyName(string colorPropertyName)
         {
             return colorPropertyName switch
             {
-                "NumLockOnColor" or "buttonNumLockOn" => SyncNumLockOnColor,
-                "NumLockOffColor" or "buttonNumLockOff" => SyncNumLockOffColor,
-                "CapsLockOnColor" or "buttonCapsLockOn" => SyncCapsLockOnColor,
-                "CapsLockOffColor" or "buttonCapsLockOff" => SyncCapsLockOffColor,
-                "ScrollLockOnColor" or "buttonScrollLockOn" => SyncScrollLockOnColor,
-                "ScrollLockOffColor" or "buttonScrollLockOff" => SyncScrollLockOffColor,
+                ColorPropName.NumLockOn => SyncNumLockOnColor,
+                ColorPropName.NumLockOff => SyncNumLockOffColor,
+                ColorPropName.CapsLockOn  => SyncCapsLockOnColor,
+                ColorPropName.CapsLockOff => SyncCapsLockOffColor,
+                ColorPropName.ScrollLockOn  => SyncScrollLockOnColor,
+                ColorPropName.ScrollLockOff => SyncScrollLockOffColor,
+                _ => false,
+            };
+        }
+
+        public bool GetSyncSetting_ByButtonName(string buttonName)
+        {
+            return buttonName switch
+            {
+                "buttonNumLockOn" => SyncNumLockOnColor,
+                "buttonNumLockOff" => SyncNumLockOffColor,
+                "buttonCapsLockOn" => SyncCapsLockOnColor,
+                "buttonCapsLockOff" => SyncCapsLockOffColor,
+                "buttonScrollLockOn" => SyncScrollLockOnColor,
+                "buttonScrollLockOff" => SyncScrollLockOffColor,
                 _ => false,
             };
         }
 
         public bool GetSyncSetting_ByButtonObject(Button button)
         {
-            return GetSyncSettingByPropertyName(button.Name);
+            return GetSyncSetting_ByButtonName(button.Name);
         }
 
         //--------------------------------------------------------------
 
-        public const string LinkedGlyph = "\uE71B";
-        public const string UnlinkedGlyph = ""; // TESTING
+        public const string LinkedGlyph = "\uE71B";     // Chain link glyph
+        public const string UnlinkedGlyph = "";         // No glyph if unlinked
 
-        public string GetSyncGlyph_ByPropertyName(string colorPropertyName)
-        {
-            var glyph = GetSyncSettingByPropertyName(colorPropertyName) ? LinkedGlyph : UnlinkedGlyph;
-            System.Diagnostics.Debug.WriteLine($"GetSyncGlyph_ByPropertyName({colorPropertyName}): {glyph}");
-            return glyph;
-        }
+        //public string GetSyncGlyph_ByPropertyName(string colorPropertyName)
+        //{
+        //    var glyph = GetSyncSetting_ByPropertyName(colorPropertyName) ? LinkedGlyph : UnlinkedGlyph;
+        //    System.Diagnostics.Debug.WriteLine($"GetSyncGlyph_ByPropertyName({colorPropertyName}): {glyph}");
+        //    return glyph;
+        //}
 
         public string GetSyncGlyph_ByButtonObject(Button button)
         {
@@ -739,32 +731,6 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             StartMinimizedToTray = userConfig.StartMinimizedToTray;
         }
-
-
-    } // ----------------------- End of MainViewModel -----------------------
-
-    // Color settings has a lot of the same info as the UserConfig, but is used to store the colors in a way that can be easily bound to the GUI
-    // The settings must then be applied to the user config when the user clicks the save button
-    // This is kind of redundant and can probably be simplified to just use the currentConfig but it would require refactoring
-    public class ColorSettings
-    {
-        // Properties as strings to store hex values for colors
-        public Windows.UI.Color ScrollLockOnColor { get; set; }
-        public Windows.UI.Color ScrollLockOffColor { get; set; }
-        public Windows.UI.Color CapsLockOnColor { get; set; }
-        public Windows.UI.Color CapsLockOffColor { get; set; }
-        public Windows.UI.Color NumLockOnColor { get; set; }
-        public Windows.UI.Color NumLockOffColor { get; set; }
-        public Windows.UI.Color DefaultColor { get; set; }
-        public int Brightness { get; set; }
-
-        // Settings to sync keys to default
-        public bool SyncScrollLockOnColor { get; set; }
-        public bool SyncScrollLockOffColor { get; set; }
-        public bool SyncCapsLockOnColor { get; set; }
-        public bool SyncCapsLockOffColor { get; set; }
-        public bool SyncNumLockOnColor { get; set; }
-        public bool SyncNumLockOffColor { get; set; }
 
         public Windows.UI.Color GetColorFromString(string color)
         {
@@ -781,129 +747,12 @@ namespace Dynamic_Lighting_Key_Indicator
             byte r = Convert.ToByte(color[..2], 16);
             byte g = Convert.ToByte(color.Substring(startIndex: 2, length: 2), 16);
             byte b = Convert.ToByte(color.Substring(startIndex: 4, length: 2), 16);
-            return Windows.UI.Color.FromArgb(a:255, r, g, b);
+            return Windows.UI.Color.FromArgb(a: 255, r, g, b);
         }
 
         public static string AsString(Windows.UI.Color color)
         {
             return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-        }
-
-        internal bool IsColorSettingsSameAsConfig(UserConfig config)
-        {
-            if (config == null)
-            {
-                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
-            }
-
-            // Local function to compare two colors
-            bool ColorsAreDifferent(Windows.UI.Color color1, RGBTuple color2)
-            {
-                if      (!color1.R.Equals((byte)color2.R))
-                    return true;
-                else if (!color1.G.Equals((byte)color2.G))
-                    return true;
-                else if (!color1.B.Equals((byte)color2.B))
-                    return true;
-                else
-                    return false;
-            }
-
-            if (ColorsAreDifferent(ScrollLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColor))
-                return false;
-            if (ColorsAreDifferent(ScrollLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColor))
-                return false;
-            if (ColorsAreDifferent(CapsLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColor))
-                return false;
-            if (ColorsAreDifferent(CapsLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColor))
-                return false;
-            if (ColorsAreDifferent(NumLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColor))
-                return false;
-            if (ColorsAreDifferent(NumLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColor))
-                return false;
-            if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
-                return false;
-
-            if (Brightness != config.Brightness)
-                return false;
-            if (SyncScrollLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColorTiedToStandard)
-                return false;
-            if (SyncScrollLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColorTiedToStandard)
-                return false;
-            if (SyncCapsLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColorTiedToStandard)
-                return false;
-            if (SyncCapsLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColorTiedToStandard)
-                return false;
-            if (SyncNumLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColorTiedToStandard)
-                return false;
-            if (SyncNumLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColorTiedToStandard)
-                return false;
-
-            return true;
-        }
-
-        // Set all the colors from the text boxes in the GUI
-        public void UpdateAllColorSettingsFromGUI(MainViewModel viewModel)
-        {
-            ScrollLockOnColor = GetColorFromString(viewModel.TextScrollLockOnColor);
-            ScrollLockOffColor = GetColorFromString(viewModel.TextScrollLockOffColor);
-            CapsLockOnColor = GetColorFromString(viewModel.TextCapsLockOnColor);
-            CapsLockOffColor = GetColorFromString(viewModel.TextCapsLockOffColor);
-            NumLockOnColor = GetColorFromString(viewModel.TextNumLockOnColor);
-            NumLockOffColor = GetColorFromString(viewModel.TextNumLockOffColor);
-            DefaultColor = GetColorFromString(viewModel.TextDefaultColor);
-            Brightness = viewModel.ColorSettings.Brightness;
-
-            SyncScrollLockOnColor = viewModel.SyncScrollLockOnColor;
-            SyncScrollLockOffColor = viewModel.SyncScrollLockOffColor;
-            SyncCapsLockOnColor = viewModel.SyncCapsLockOnColor;
-            SyncCapsLockOffColor = viewModel.SyncCapsLockOffColor;
-            SyncNumLockOnColor = viewModel.SyncNumLockOnColor;
-            SyncNumLockOffColor = viewModel.SyncNumLockOffColor;
-
-            // Sync to defaults if set to do so. Janky but whatever
-            if (SyncNumLockOnColor)
-                NumLockOnColor = DefaultColor;
-            if (SyncNumLockOffColor)
-                NumLockOffColor = DefaultColor;
-            if (SyncCapsLockOnColor)
-                CapsLockOnColor = DefaultColor;
-            if (SyncCapsLockOffColor)
-                CapsLockOffColor = DefaultColor;
-            if (SyncScrollLockOnColor)
-                ScrollLockOnColor = DefaultColor;
-            if (SyncScrollLockOffColor)
-                ScrollLockOffColor = DefaultColor;
-
-            ColorSetter.DefineKeyboardMainColor(DefaultColor);
-        }
-
-        internal static VK GetKeyByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(NumLockOnColor) => VK.NumLock,
-                nameof(NumLockOffColor) => VK.NumLock,
-                nameof(CapsLockOnColor) => VK.CapsLock,
-                nameof(CapsLockOffColor) => VK.CapsLock,
-                nameof(ScrollLockOnColor) => VK.ScrollLock,
-                nameof(ScrollLockOffColor) => VK.ScrollLock,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
-        }
-
-        internal static MainWindow.StateColorApply GetStateByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(NumLockOnColor) => MainWindow.StateColorApply.On,
-                nameof(NumLockOffColor) => MainWindow.StateColorApply.Off,
-                nameof(CapsLockOnColor) => MainWindow.StateColorApply.On,
-                nameof(CapsLockOffColor) => MainWindow.StateColorApply.Off,
-                nameof(ScrollLockOnColor) => MainWindow.StateColorApply.On,
-                nameof(ScrollLockOffColor) => MainWindow.StateColorApply.Off,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
         }
 
         internal void SetAllColorSettingsFromUserConfig(UserConfig config, MainWindow window)
@@ -963,5 +812,135 @@ namespace Dynamic_Lighting_Key_Indicator
             window.ForceUpdateButtonBackgrounds();
             window.ForceUpdateAllButtonGlyphs();
         }
-    }
+
+        // Set all the colors from the text boxes in the GUI
+        public void UpdateAllColorSettingsFromGUI()
+        {
+            ScrollLockOnColor = GetColorFromString(TextScrollLockOnColor);
+            ScrollLockOffColor = GetColorFromString(TextScrollLockOffColor);
+            CapsLockOnColor = GetColorFromString(TextCapsLockOnColor);
+            CapsLockOffColor = GetColorFromString(TextCapsLockOffColor);
+            NumLockOnColor = GetColorFromString(TextNumLockOnColor);
+            NumLockOffColor = GetColorFromString(TextNumLockOffColor);
+            DefaultColor = GetColorFromString(TextDefaultColor);
+
+            SyncScrollLockOnColor = SyncScrollLockOnColor;
+            SyncScrollLockOffColor = SyncScrollLockOffColor;
+            SyncCapsLockOnColor = SyncCapsLockOnColor;
+            SyncCapsLockOffColor = SyncCapsLockOffColor;
+            SyncNumLockOnColor = SyncNumLockOnColor;
+            SyncNumLockOffColor = SyncNumLockOffColor;
+
+            // Sync to defaults if set to do so. Janky but whatever
+            if (SyncNumLockOnColor)
+                NumLockOnColor = DefaultColor;
+            if (SyncNumLockOffColor)
+                NumLockOffColor = DefaultColor;
+            if (SyncCapsLockOnColor)
+                CapsLockOnColor = DefaultColor;
+            if (SyncCapsLockOffColor)
+                CapsLockOffColor = DefaultColor;
+            if (SyncScrollLockOnColor)
+                ScrollLockOnColor = DefaultColor;
+            if (SyncScrollLockOffColor)
+                ScrollLockOffColor = DefaultColor;
+
+            ColorSetter.DefineKeyboardMainColor(DefaultColor);
+        }
+
+        internal bool IsColorSettingsSameAsConfig(UserConfig config)
+        {
+            if (config == null)
+            {
+                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
+            }
+
+            // Local function to compare two colors
+            bool ColorsAreDifferent(Windows.UI.Color color1, RGBTuple color2)
+            {
+                if (!color1.R.Equals((byte)color2.R))
+                    return true;
+                else if (!color1.G.Equals((byte)color2.G))
+                    return true;
+                else if (!color1.B.Equals((byte)color2.B))
+                    return true;
+                else
+                    return false;
+            }
+
+            if (ColorsAreDifferent(ScrollLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColor))
+                return false;
+            if (ColorsAreDifferent(ScrollLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColor))
+                return false;
+            if (ColorsAreDifferent(CapsLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColor))
+                return false;
+            if (ColorsAreDifferent(CapsLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColor))
+                return false;
+            if (ColorsAreDifferent(NumLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColor))
+                return false;
+            if (ColorsAreDifferent(NumLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColor))
+                return false;
+            if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
+                return false;
+
+            if (Brightness != config.Brightness)
+                return false;
+            if (SyncScrollLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColorTiedToStandard)
+                return false;
+            if (SyncScrollLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColorTiedToStandard)
+                return false;
+            if (SyncCapsLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).onColorTiedToStandard)
+                return false;
+            if (SyncCapsLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.CapsLock).offColorTiedToStandard)
+                return false;
+            if (SyncNumLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).onColorTiedToStandard)
+                return false;
+            if (SyncNumLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.NumLock).offColorTiedToStandard)
+                return false;
+
+            return true;
+        }
+
+        internal static VK GetKeyByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(NumLockOnColor) => VK.NumLock,
+                nameof(NumLockOffColor) => VK.NumLock,
+                nameof(CapsLockOnColor) => VK.CapsLock,
+                nameof(CapsLockOffColor) => VK.CapsLock,
+                nameof(ScrollLockOnColor) => VK.ScrollLock,
+                nameof(ScrollLockOffColor) => VK.ScrollLock,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
+        }
+
+        internal static MainWindow.StateColorApply GetStateByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(NumLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(NumLockOffColor) => MainWindow.StateColorApply.Off,
+                nameof(CapsLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(CapsLockOffColor) => MainWindow.StateColorApply.Off,
+                nameof(ScrollLockOnColor) => MainWindow.StateColorApply.On,
+                nameof(ScrollLockOffColor) => MainWindow.StateColorApply.Off,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
+        }
+
+        // TODO: Maybe use the properties directory or an enum instead of strings at some point but this works
+        internal class ColorPropName
+        {
+            public const string NumLockOn = "NumLockOnColor";
+            public const string NumLockOff = "NumLockOffColor";
+            public const string CapsLockOn = "CapsLockOnColor";
+            public const string CapsLockOff = "CapsLockOffColor";
+            public const string ScrollLockOn = "ScrollLockOnColor";
+            public const string ScrollLockOff = "ScrollLockOffColor";
+            public const string DefaultColor = "DefaultColor";
+        }
+
+    } // ----------------------- End of MainViewModel -----------------------
+
 }

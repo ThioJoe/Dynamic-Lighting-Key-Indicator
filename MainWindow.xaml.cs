@@ -33,7 +33,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         // Null forgiving because it will immediatley be set in the constructor
         public static MainWindow mainWindow { get; private set; } = null!;
-        public MainViewModel ViewModel { get; set; }
+        public MainViewModel ViewModel { get; private init; } = null!;
 
         public bool DEBUGMODE = false;
         static UserConfig currentConfig = new();
@@ -62,6 +62,12 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
 
+            ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: DEBUGMODE)
+            {
+                DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
+                DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
+            };
+
             #if DEBUG
                 DEBUGMODE = true;
             #endif
@@ -88,19 +94,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
             SendMessage((IntPtr)this.AppWindow.Id.Value, 0x0080, 1, hIcon); // WM_SETICON = 0x0080, ICON_BIG = 1
 
-            // Initialize the ViewModel
-            ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: DEBUGMODE)
-            {
-                DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
-                DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
-                ColorSettings = new ColorSettings(),
-            };
-
             // Load the user config from file
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             configSavedOnDisk = (UserConfig)currentConfig.Clone();
 
-            ViewModel.ColorSettings.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
+            ViewModel.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton_EnabledStatus();
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
@@ -484,13 +482,13 @@ namespace Dynamic_Lighting_Key_Indicator
         // This doesn't work when put in the viewmodel class for some reason
         internal void ForceUpdateButtonBackgrounds()
         {
-            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOnColor);
-            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.NumLockOffColor);
-            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.CapsLockOnColor);
-            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.CapsLockOffColor);
-            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOnColor);
-            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.ColorSettings.ScrollLockOffColor);
-            buttonDefaultColor.Background = new SolidColorBrush(ViewModel.ColorSettings.DefaultColor);
+            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.NumLockOnColor);
+            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.NumLockOffColor);
+            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.CapsLockOnColor);
+            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.CapsLockOffColor);
+            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.ScrollLockOnColor);
+            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.ScrollLockOffColor);
+            buttonDefaultColor.Background = new SolidColorBrush(ViewModel.DefaultColor);
         }
 
         // Determine whether to use white or black text based on the background color
@@ -559,27 +557,27 @@ namespace Dynamic_Lighting_Key_Indicator
 
         internal async void ApplyAndSaveColorSettings(bool saveFile, UserConfig? newConfig = null, KeyColorUpdateInfo newColorInfo = null)
         {
-            ColorSettings colorSettings = ViewModel.ColorSettings;
+            //ColorSettings colorSettings = ViewModel.ColorSettings;
 
             // Save the current color settings from the GUI to the ViewModel if no specific config is passed in
             if (newConfig == null)
             {
-                colorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
+                ViewModel.UpdateAllColorSettingsFromGUI();
             }
             // Instead of using the GUI, use the passed in premade config
             else
             {
-                colorSettings.SetAllColorSettingsFromUserConfig(config: newConfig, window:this);
+                ViewModel.SetAllColorSettingsFromUserConfig(config: newConfig, window:this);
             }
 
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredKeysList = [
-                new(VK.NumLock,    onColor: colorSettings.NumLockOnColor,    offColor: colorSettings.NumLockOffColor,      onColorTiedToStandard: colorSettings.SyncNumLockOnColor,    offColorTiedToStandard: colorSettings.SyncNumLockOffColor),
-                new(VK.CapsLock,   onColor: colorSettings.CapsLockOnColor,   offColor: colorSettings.CapsLockOffColor,     onColorTiedToStandard: colorSettings.SyncCapsLockOnColor,   offColorTiedToStandard: colorSettings.SyncCapsLockOffColor),
-                new(VK.ScrollLock, onColor: colorSettings.ScrollLockOnColor, offColor: colorSettings.ScrollLockOffColor,   onColorTiedToStandard: colorSettings.SyncScrollLockOnColor, offColorTiedToStandard: colorSettings.SyncScrollLockOffColor)
+                new(VK.NumLock,    onColor: ViewModel.NumLockOnColor,    offColor: ViewModel.NumLockOffColor,      onColorTiedToStandard: ViewModel.SyncNumLockOnColor,    offColorTiedToStandard: ViewModel.SyncNumLockOffColor),
+                new(VK.CapsLock,   onColor: ViewModel.CapsLockOnColor,   offColor: ViewModel.CapsLockOffColor,     onColorTiedToStandard: ViewModel.SyncCapsLockOnColor,   offColorTiedToStandard: ViewModel.SyncCapsLockOffColor),
+                new(VK.ScrollLock, onColor: ViewModel.ScrollLockOnColor, offColor: ViewModel.ScrollLockOffColor,   onColorTiedToStandard: ViewModel.SyncScrollLockOnColor, offColorTiedToStandard: ViewModel.SyncScrollLockOffColor)
             ];
 
-            RGBTuple defaultColor = (colorSettings.DefaultColor.R, colorSettings.DefaultColor.G, colorSettings.DefaultColor.B);
+            RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
 
             KeyStatesHandler.DefineAllMonitoredKeysAndColors(monitoredKeysList);
             //KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
@@ -605,7 +603,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
                 }
-                ViewModel.ColorSettings.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
+                ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
             }
 
             // Update the Save button enabled status
@@ -615,7 +613,7 @@ namespace Dynamic_Lighting_Key_Indicator
         // This is called when a specific key color is changed via GUI. It inherently will not update the standard keys, since it is unlinked from the standard color when changed
         internal void ApplySpecificMonitoredKeyColor(KeyColorUpdateInfo colorUpdateInfo)
         {
-            ViewModel.ColorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
+            ViewModel.UpdateAllColorSettingsFromGUI();
 
             ColorSetter.SetSpecificKeysColor_ToKeyboard(colorUpdateInfo);
         }
@@ -623,7 +621,7 @@ namespace Dynamic_Lighting_Key_Indicator
         // This is called when the standard / default key color is changed via GUI. Updates both standard keys and applicable monitored keys
         internal void ApplyNewDefaultColor(RGBTuple color)
         {
-            ViewModel.ColorSettings.UpdateAllColorSettingsFromGUI(ViewModel);
+            ViewModel.UpdateAllColorSettingsFromGUI();
 
             //TODO: Can probably combine these into one method
             ColorSetter.SetOnlyNonMonitoredKeysColor_ToKeyboard(color);
@@ -665,17 +663,7 @@ namespace Dynamic_Lighting_Key_Indicator
             DefaultColor
         }
 
-        // TODO: Or at least use this to refer to the strings
-        internal class ColorPropName
-        {
-            public const string NumLockOn = "NumLockOnColor";
-            public const string NumLockOff = "NumLockOffColor";
-            public const string CapsLockOn = "CapsLockOnColor";
-            public const string CapsLockOff = "CapsLockOffColor";
-            public const string ScrollLockOn = "ScrollLockOnColor";
-            public const string ScrollLockOff = "ScrollLockOffColor";
-            public const string DefaultColor = "DefaultColor";
-        }
+        
 
         // ----------------------------------- GENERAL EVENT HANDLERS -----------------------------------
 
@@ -827,7 +815,7 @@ namespace Dynamic_Lighting_Key_Indicator
             ForceUpdateAllButtonGlyphs();
 
             // Update the button color from the settings as soon as the button is clicked. Also will be updated later
-            SolidColorBrush? newBGColor = ViewModel?.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
+            SolidColorBrush? newBGColor = ViewModel.GetType().GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
             if (button != null && newBGColor != null)
                 button.Background = newBGColor;
 
@@ -842,7 +830,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 MinWidth = 300,
                 MinHeight = 400
             };
-            Windows.UI.Color? currentColor = (Windows.UI.Color?)ViewModel?.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
+            Windows.UI.Color? currentColor = (Windows.UI.Color?)ViewModel.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
             if (currentColor == null)
             {
                 Debug.WriteLine("Current color is null.");
@@ -856,33 +844,21 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (button == null)
                     return;
 
-                ViewModel?.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor);
+                ViewModel.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor); // Update the color setting in the ViewModel
                 button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
 
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
                 if (colorPropertyName == "DefaultColor")
                 {
-                    var syncPropertiesButtons = new List<(string SyncPropertyName, Button Button)>
-                    {
-                        ("SyncNumLockOnColor", buttonNumLockOn),
-                        ("SyncNumLockOffColor", buttonNumLockOff),
-                        ("SyncCapsLockOnColor", buttonCapsLockOn),
-                        ("SyncCapsLockOffColor", buttonCapsLockOff),
-                        ("SyncScrollLockOnColor", buttonScrollLockOn),
-                        ("SyncScrollLockOffColor", buttonScrollLockOff)
-                    };
+                    List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff];
 
-                    foreach (var (syncPropertyName, button) in syncPropertiesButtons) // Iterate through the list of tuples for each button
+                    foreach (Button button in buttonsList) // Iterate through the list of tuples for each button
                     {
                         if (button == null)
                             continue;
 
-                        // Use reflection to get the value of the sync property
-                        var syncPropertyInfo = typeof(ColorSettings).GetProperty(syncPropertyName);
-                        if (syncPropertyInfo == null)
-                            continue;
+                        bool isSynced = ViewModel.GetSyncSetting_ByButtonObject(button);
 
-                        bool isSynced = (bool)(syncPropertyInfo.GetValue(ViewModel?.ColorSettings) ?? false);
                         if (isSynced)
                         {
                             button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
@@ -903,9 +879,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 else
                 {
                     KeyColorUpdateInfo colorUpdateInfo = new KeyColorUpdateInfo(
-                        key: ColorSettings.GetKeyByPropertyName(colorPropertyName), 
+                        key: MainViewModel.GetKeyByPropertyName(colorPropertyName), 
                         color: (args.NewColor.R, args.NewColor.G, args.NewColor.B),
-                        forState: ColorSettings.GetStateByPropertyName(colorPropertyName)
+                        forState: MainViewModel.GetStateByPropertyName(colorPropertyName)
                     );
 
                     ApplySpecificMonitoredKeyColor(colorUpdateInfo);
