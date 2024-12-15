@@ -10,6 +10,8 @@ using Microsoft.UI.Xaml.Controls;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using System.Diagnostics;
+using Windows.Devices.Lights;
+using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -343,10 +345,29 @@ namespace Dynamic_Lighting_Key_Indicator
         }
         public bool IsUndoButtonEnabled => !IsSaveButtonEnabled;
 
-        public string AttachedDeviceName => MainWindow.AttachedDevice?.displayName ?? "None";
-        public bool DeviceIsAvailable => MainWindow.AttachedDevice?.lampArray.IsAvailable ?? false;
-        public bool DeviceIsConnected => MainWindow.AttachedDevice?.lampArray.IsConnected ?? false;
-        public bool DeviceIsEnabled => MainWindow.AttachedDevice?.lampArray.IsEnabled ?? false;
+        // Info about the attached device
+        internal LampArrayInfo? AttachedDeviceInfo => MainWindow.AttachedDevice;
+        internal LampArray? AttachedDevice => MainWindow.AttachedDevice?.lampArray;
+        internal string AttachedDeviceName => AttachedDeviceInfo?.displayName ?? "None";
+        internal bool DeviceIsAvailable => AttachedDevice?.IsAvailable ?? false;
+        internal bool DeviceIsConnected => AttachedDevice?.IsConnected ?? false;
+        internal bool DeviceIsEnabled => AttachedDevice?.IsEnabled ?? false;
+
+        // If the device is attached but not available, show a message to the user to set it up
+        public Visibility DeviceNeedsToBeSetup_VisibilityBool
+        {
+            get
+            {
+                if (AttachedDevice != null && DeviceIsAvailable == false)
+                {
+                    return Visibility.Visible;
+                }
+                else
+                {
+                    return Visibility.Collapsed;
+                }
+            }
+        }
 
         public void UpdateAttachedDeviceStatus()
         {

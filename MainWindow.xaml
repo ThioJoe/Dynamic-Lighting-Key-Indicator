@@ -19,7 +19,7 @@
                 <Setter Property="Height" Value="45"/>
                 <Setter Property="HorizontalAlignment" Value="Center"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="Margin" Value="3"/>
+                <Setter Property="Margin" Value="2"/>
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="4"/>
             </Style>
@@ -40,35 +40,55 @@
             <RowDefinition Height="Auto" />     <!-- Row 11 -->
         </Grid.RowDefinitions>
 
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" FontFamily="Highway Gothic" FontSize="30" FontWeight="Normal" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+
+        <!--
         <TextBlock x:Name="watcherStatusText" 
                    Grid.Row="0"
                    Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
-                   HorizontalAlignment="Center"/>
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,0"
+                   />
+        -->
         
         <!-- Row With Start/Stop monitoring buttons -->
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,20,0,0" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,15,0,0" HorizontalAlignment="Center">
 
-            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
+            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" Background="#f5fff6"
+                    IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0" Foreground="DarkGreen"/>
                     <TextBlock Text="Start Monitoring"/>
                 </StackPanel>
             </Button>
-            
-            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
+
+            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" Background="#ffe8e8" 
+                    IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0" Foreground="DarkRed"/>
                     <TextBlock Text="Stop Monitoring"/>
                 </StackPanel>
             </Button>
 
-            
-            
+            <!-- Vertical Divider 
+            <Rectangle Width="1" Height="30" Fill="Gray" Margin="20,0,20,0"/>
+            -->
+
+            <!-- Button to open lighting settings -->
+            <Button x:Name="buttonOpenLightingSettings" Click="OpenLightingSettings_Click" Margin="10,0,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE82F;" Margin="0,0,8,0"/>
+                    <TextBlock Text="Lighting Menu"/>
+                </StackPanel>
+            </Button>
+
         </StackPanel>
 
         <!-- Row with Dropdown with selectable devices and Apply Button -->
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,20,0,0" HorizontalAlignment="Center">
-            
+
+            <!-- Dropdown -->
             <ComboBox x:Name="dropdownDevices" 
                   Margin="0,0,0,0"
                   Width="300"
@@ -79,6 +99,7 @@
                   ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
             />
 
+            <!-- Apply Button -->
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
                     ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
@@ -88,13 +109,13 @@
                     <TextBlock Text="Apply To Device"/>
                 </StackPanel>
             </Button>
-            
+
         </StackPanel>
 
         <!-- Mixed Use status message: When attached, says number of attached devices, otherwise watcher status such as 'Waiting' with instructional message to start -->
         <TextBlock x:Name="statusText" 
                    Grid.Row="3" 
-                   Margin="0,20,0,0"
+                   Margin="0,10,0,0"
                    Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
                    />
@@ -257,11 +278,11 @@
             <!-- Open Config Folder (Debug Mode) -->
             <Button x:Name="buttonOpenConfigFolder" 
                     Click="openConfigFolder_Click"
-                    Margin="0,0,10,0"
+                    Margin="10,0,10,0"
                     ignore:Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
                     >
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="10,0,8,0"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
                     <TextBlock Text="Open Config Folder"/>
                 </StackPanel>
             </Button>
@@ -317,7 +338,7 @@
            TextWrapping="Wrap"
            Margin="0,10,0,0"
            HorizontalAlignment="Center">
-            <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Red"/><Run Text=": Follow these steps to set up Dynamic Lighting:"/>
+            <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Black"/><Run Text=": Follow these steps to set up Dynamic Lighting:"/>
             <LineBreak/>
             <Run Text="      1. Click here to open "/>
             <Hyperlink NavigateUri="ms-settings:personalization-lighting" Click="OpenLightingSettings_Click">Settings > Personalization > Dynamic Lighting</Hyperlink>
