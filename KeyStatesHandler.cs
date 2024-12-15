@@ -144,9 +144,13 @@ namespace Dynamic_Lighting_Key_Indicator
                 LowLevelKeyboardHookFlags flags = kbd.flags;
 
                 // Check if the key presses was one of the monitored keys
-                if (monitoredKeys.Any(mk => (int)mk.key == vkCode) && flags.HasFlag(LowLevelKeyboardHookFlags.KeyUp))
+                foreach (var mk in monitoredKeys)
                 {
-                    Task.Run(() => ColorSetter.SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys));
+                    if ((int)mk.key == vkCode && flags.HasFlag(LowLevelKeyboardHookFlags.KeyUp))
+                    {
+                        Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
+                        break;
+                    }
                 }
             }
             return CallNextHookEx(_hookID, nCode, wParam, lParam);

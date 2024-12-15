@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,6 +76,25 @@ namespace Dynamic_Lighting_Key_Indicator
             SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys);
         }
 
+        // For when the monitored key is toggled, this applies the set color to the key
+        public static void SetSingleMonitorKeyColor_ToKeyboard(KeyStatesHandler.MonitoredKey key, LampArray? lampArray = null)
+        {
+            // If it's null, it will show an error then we can return
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
+
+            VirtualKey vkCode = (VirtualKey)key.key;
+            Windows.UI.Color color;
+
+            if (key.IsOn())
+                color = RGBTuple_To_ColorObj(key.onColor);
+            else
+                color = RGBTuple_To_ColorObj(key.offColor);
+
+            lampArrayToUse.SetColorsForKey(color, vkCode);
+        }
+
+        // For when the monitored keys are toggled, this applies the set colors to all the monitored keys
         public static void SetAllMonitoredKeyColors_ToKeyboard(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
             // If it's null, it will show an error then we can return
@@ -107,6 +127,7 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArrayToUse.SetColorsForKeys(colors, keys);
         }
 
+        // For when user is changing the color of a specific key in the UI
         public static void SetSpecificKeysColor_ToKeyboard(KeyColorUpdateInfo colorUpdateInfo, LampArray? lampArray = null, bool noStateCheck = false)
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
@@ -131,6 +152,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        // For when the user is changing the color of the default color in the UI, which may include linked colors of monitored keys
         public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false) // Overload
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
