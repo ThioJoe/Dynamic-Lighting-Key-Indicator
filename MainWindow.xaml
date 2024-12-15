@@ -37,7 +37,6 @@
             <RowDefinition Height="Auto" />     <!-- Row 8 -->
             <RowDefinition Height="Auto" />     <!-- Row 9 -->
             <RowDefinition Height="Auto" />     <!-- Row 10 -->
-            <RowDefinition Height="Auto" />     <!-- Row 11 -->
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="watcherStatusText" 
@@ -139,7 +138,7 @@
                     Grid.Row="1" 
                     Grid.Column="1" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding ScrollLockOnColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="ScrollLockOnColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
@@ -149,7 +148,7 @@
                     Grid.Row="1" 
                     Grid.Column="3" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding ScrollLockOffColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="ScrollLockOffColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOffGlyph, Mode=OneWay}" />
@@ -162,7 +161,7 @@
                     Grid.Row="2" 
                     Grid.Column="1" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding CapsLockOnColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.CapsLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="CapsLockOnColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOnGlyph, Mode=OneWay}" />
@@ -172,7 +171,7 @@
                     Grid.Row="2" 
                     Grid.Column="3" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding CapsLockOffColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="CapsLockOffColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOffGlyph, Mode=OneWay}" />
@@ -185,7 +184,7 @@
                     Grid.Row="3" 
                     Grid.Column="1" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding NumLockOnColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.NumLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="NumLockOnColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOnGlyph, Mode=OneWay}" />
@@ -195,7 +194,7 @@
                     Grid.Row="3" 
                     Grid.Column="3" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding NumLockOffColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="NumLockOffColor">
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOffGlyph, Mode=OneWay}" />
@@ -208,14 +207,27 @@
                     Grid.Row="4" 
                     Grid.Column="1" 
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{Binding DefaultColor, Converter={StaticResource ColorToBrushConverter}}" 
+                    Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="DefaultColor"/>
             <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
         </Grid>
+        
+        <!-- Brightness Slider -->
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+            <TextBlock Text="Global Brightness:" VerticalAlignment="Center" Margin="0,0,0,0"/>
+            <Slider x:Name="sliderBrightness" 
+                Width="200" 
+                Minimum="0" 
+                Maximum="100"
+                Margin="10,5,0,0"
+                Value="{x:Bind ViewModel.Brightness, Mode=TwoWay}"
+                ValueChanged="OnBrightnessSliderChanged"
+                />
+        </StackPanel>
 
         <!-- Config Buttons -->
-        <StackPanel Orientation="Horizontal" Grid.Row="6" HorizontalAlignment="Center" Margin="0,20,0,0">
+        <StackPanel Orientation="Horizontal" Grid.Row="7" HorizontalAlignment="Center" Margin="0,20,0,0">
             
             <!-- Save Button -->
             <Button x:Name="buttonSaveSettings" Click="ButtonSaveSettings_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsSaveButtonEnabled, Mode=OneWay}">
@@ -256,7 +268,7 @@
         </StackPanel>
 
         <!-- Startup Setting Toggle and Message -->
-        <Grid Grid.Row="7" Margin="0,20,0,0" HorizontalAlignment="Center">
+        <Grid Grid.Row="8" Margin="0,20,0,0" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -293,14 +305,14 @@
         </Grid>
 
         <!-- Divider Line and Informational TextBlock -->
-        <Line Grid.Row="10" 
+        <Line Grid.Row="9" 
               X2="1000" 
               Stroke="Black" 
               StrokeThickness="1" 
               HorizontalAlignment="Center"
               Margin="0,10,0,0"
             />
-        <TextBlock Grid.Row="11"
+        <TextBlock Grid.Row="10"
            TextWrapping="Wrap"
            Margin="0,10,0,0"
            HorizontalAlignment="Center">

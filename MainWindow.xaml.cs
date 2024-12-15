@@ -2,6 +2,7 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Windows.AppLifecycle;
 using System;
@@ -767,6 +768,13 @@ namespace Dynamic_Lighting_Key_Indicator
         private void openConfigFolder_Click(object sender, RoutedEventArgs e)
         {
             UserConfig.OpenConfigFolder();
+        }
+
+        private void OnBrightnessSliderChanged(object sender, RangeBaseValueChangedEventArgs e)
+        {
+            if (sender is not Slider slider)
+                return;
+            ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
         }
 
         // This is the button within the flyout  menu

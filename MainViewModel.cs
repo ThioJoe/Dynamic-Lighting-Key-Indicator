@@ -535,10 +535,17 @@ namespace Dynamic_Lighting_Key_Indicator
             private set => SetProperty(ref _numLockOffGlyph, value);
         }
 
+        // Color backgrounds for buttons
+        public SolidColorBrush ScrollLockOnBrush => GetBrushFromColor(ScrollLockOnColor);
+        public SolidColorBrush ScrollLockOffBrush => GetBrushFromColor(ScrollLockOffColor);
+        public SolidColorBrush CapsLockOnBrush => GetBrushFromColor(CapsLockOnColor);
+        public SolidColorBrush CapsLockOffBrush => GetBrushFromColor(CapsLockOffColor);
+        public SolidColorBrush NumLockOnBrush => GetBrushFromColor(NumLockOnColor);
+        public SolidColorBrush NumLockOffBrush => GetBrushFromColor(NumLockOffColor);
+        public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
+
 
         // Color properties
-
-        public int Brightness { get; set; }
         public string ScrollLockOnColorHex => AsString(ScrollLockOnColor);
         public string ScrollLockOffColorHex => AsString(ScrollLockOffColor);
         public string CapsLockOnColorHex => AsString(CapsLockOnColor);
@@ -546,6 +553,17 @@ namespace Dynamic_Lighting_Key_Indicator
         public string NumLockOnColorHex => AsString(NumLockOnColor);
         public string NumLockOffColorHex => AsString(NumLockOffColor);
         public string DefaultColorHex => AsString(DefaultColor);
+
+        private int _brightness;
+        public int Brightness
+        {
+            get => _brightness;
+            set
+            {
+                SetProperty(ref _brightness, value);
+                ScaleAllColorBrightness(value);
+            }
+        }
 
         private Windows.UI.Color _scrollLockOnColor;
         public Windows.UI.Color ScrollLockOnColor
@@ -556,6 +574,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _scrollLockOnColor, value))
                 {
                     OnPropertyChanged(nameof(ScrollLockOnColorHex));
+                    OnPropertyChanged(nameof(ScrollLockOnBrush));
                 }
             }
         }
@@ -569,10 +588,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _scrollLockOffColor, value))
                 {
                     OnPropertyChanged(nameof(ScrollLockOffColorHex));
+                    OnPropertyChanged(nameof(ScrollLockOffBrush));
                 }
             }
         }
-        public SolidColorBrush ScrollLockOffBrush => new SolidColorBrush(ScrollLockOffColor);
 
         private Windows.UI.Color _capsLockOnColor;
         public Windows.UI.Color CapsLockOnColor
@@ -583,6 +602,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _capsLockOnColor, value))
                 {
                     OnPropertyChanged(nameof(CapsLockOnColorHex));
+                    OnPropertyChanged(nameof(CapsLockOnBrush));
                 }
             }
         }
@@ -596,6 +616,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _capsLockOffColor, value))
                 {
                     OnPropertyChanged(nameof(CapsLockOffColorHex));
+                    OnPropertyChanged(nameof(CapsLockOffBrush));
                 }
             }
         }
@@ -609,6 +630,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _numLockOnColor, value))
                 {
                     OnPropertyChanged(nameof(NumLockOnColorHex));
+                    OnPropertyChanged(nameof(NumLockOnBrush));
                 }
             }
         }
@@ -622,6 +644,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _numLockOffColor, value))
                 {
                     OnPropertyChanged(nameof(NumLockOffColorHex));
+                    OnPropertyChanged(nameof(NumLockOffBrush));
                 }
             }
         }
@@ -635,12 +658,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _defaultColor, value))
                 {
                     OnPropertyChanged(nameof(DefaultColorHex));
+                    OnPropertyChanged(nameof(DefaultColorBrush));
                 }
             }
         }
-
-
-
 
         // ------ Other methods ------
         public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
@@ -813,24 +834,9 @@ namespace Dynamic_Lighting_Key_Indicator
             window.ForceUpdateAllButtonGlyphs();
         }
 
-        // Set all the colors from the text boxes in the GUI
+        // Set all the colors from the text boxes in the GUI. This might be redundant now that the properties are bound to the text boxes.
         public void UpdateAllColorSettingsFromGUI()
         {
-            ScrollLockOnColor = GetColorFromString(TextScrollLockOnColor);
-            ScrollLockOffColor = GetColorFromString(TextScrollLockOffColor);
-            CapsLockOnColor = GetColorFromString(TextCapsLockOnColor);
-            CapsLockOffColor = GetColorFromString(TextCapsLockOffColor);
-            NumLockOnColor = GetColorFromString(TextNumLockOnColor);
-            NumLockOffColor = GetColorFromString(TextNumLockOffColor);
-            DefaultColor = GetColorFromString(TextDefaultColor);
-
-            SyncScrollLockOnColor = SyncScrollLockOnColor;
-            SyncScrollLockOffColor = SyncScrollLockOffColor;
-            SyncCapsLockOnColor = SyncCapsLockOnColor;
-            SyncCapsLockOffColor = SyncCapsLockOffColor;
-            SyncNumLockOnColor = SyncNumLockOnColor;
-            SyncNumLockOffColor = SyncNumLockOffColor;
-
             // Sync to defaults if set to do so. Janky but whatever
             if (SyncNumLockOnColor)
                 NumLockOnColor = DefaultColor;
@@ -846,6 +852,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 ScrollLockOffColor = DefaultColor;
 
             ColorSetter.DefineKeyboardMainColor(DefaultColor);
+        }
+
+        public void ScaleAllColorBrightness(int brightness)
+        {
+            NumLockOnColor = ColorSetter.ScaleColorBrightness(NumLockOnColor, brightness);
+            NumLockOffColor = ColorSetter.ScaleColorBrightness(NumLockOffColor, brightness);
+            CapsLockOnColor = ColorSetter.ScaleColorBrightness(CapsLockOnColor, brightness);
+            CapsLockOffColor = ColorSetter.ScaleColorBrightness(CapsLockOffColor, brightness);
+            ScrollLockOnColor = ColorSetter.ScaleColorBrightness(ScrollLockOnColor, brightness);
+            ScrollLockOffColor = ColorSetter.ScaleColorBrightness(ScrollLockOffColor, brightness);
+            DefaultColor = ColorSetter.ScaleColorBrightness(DefaultColor, brightness);
+        }
+
+        public SolidColorBrush GetBrushFromColor(Windows.UI.Color color)
+        {
+            return new SolidColorBrush(color);
         }
 
         internal bool IsColorSettingsSameAsConfig(UserConfig config)
@@ -868,6 +890,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     return false;
             }
 
+            // Colors
             if (ColorsAreDifferent(ScrollLockOnColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColor))
                 return false;
             if (ColorsAreDifferent(ScrollLockOffColor, config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColor))
@@ -883,8 +906,11 @@ namespace Dynamic_Lighting_Key_Indicator
             if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
                 return false;
 
+            // Brightness
             if (Brightness != config.Brightness)
                 return false;
+
+            // Sync on/off each key
             if (SyncScrollLockOnColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).onColorTiedToStandard)
                 return false;
             if (SyncScrollLockOffColor != config.MonitoredKeysAndColors.Find(x => x.key == VK.ScrollLock).offColorTiedToStandard)

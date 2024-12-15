@@ -209,6 +209,55 @@ namespace Dynamic_Lighting_Key_Indicator
             return Windows.UI.Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
         }
 
+        public static Windows.UI.Color ScaleColorBrightness(Windows.UI.Color color, int brightness)
+        {
+            RGBTuple colorTuple = (color.R, color.G, color.B);
+            RGBTuple newColorTuple = ScaleColorBrightness(colorTuple, brightness);
+            return RGBTuple_To_ColorObj(newColorTuple);
+        }
+
+        // Set the absolute scale of a color based on a brightness level. 100 is full brightness, 0 is off
+        // Will use relative scaling of the largest or smallest value in the color
+        public static RGBTuple ScaleColorBrightness(RGBTuple color, int brightness)
+        {
+            // Clamp brightness to the 0-100 range
+            brightness = Math.Max(0, Math.Min(100, brightness));
+
+            int R = color.R;
+            int G = color.G;
+            int B = color.B;
+
+            // Find the maximum RGB component
+            int maxComponent = Math.Max(R, Math.Max(G, B));
+
+            if (maxComponent == 0)
+            {
+                return (0, 0, 0);
+            }
+
+            // Calculate the relative proportions of each component
+            double rProportion = R / (double)maxComponent;
+            double gProportion = G / (double)maxComponent;
+            double bProportion = B / (double)maxComponent;
+
+            // Calculate the desired maximum component value based on brightness
+            double desiredMaxComponent = (brightness / 100.0) * 255.0;
+
+            // Compute new RGB values by scaling the proportions
+            int newR = (int)Math.Round(rProportion * desiredMaxComponent);
+            int newG = (int)Math.Round(gProportion * desiredMaxComponent);
+            int newB = (int)Math.Round(bProportion * desiredMaxComponent);
+
+            // Clamp the values to the 0-255 range
+            newR = Math.Min(255, Math.Max(0, newR));
+            newG = Math.Min(255, Math.Max(0, newG));
+            newB = Math.Min(255, Math.Max(0, newB));
+
+            // Update the color tuple
+            color = (newR, newG, newB);
+            return color;
+        }
+
         // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
 
         #region Unused
