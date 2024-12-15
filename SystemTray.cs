@@ -53,12 +53,42 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll")]
         static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, UIntPtr wParam, IntPtr lParam);
-
+        // For 64 Bit
         [DllImport("user32.dll")]
         static extern IntPtr SetWindowLongPtr(IntPtr hWnd, WinEnums.nIndex nIndex, IntPtr dwNewLong);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetWindowLongPtr(IntPtr hWnd, WinEnums.nIndex nIndex);
+        // For 32 Bit
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        // Auto switch between 32 and 64 bit
+        private static IntPtr SetWindowLongPtrWrapper(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
+            if (IntPtr.Size == 8) // 64-bit
+            {
+                return SetWindowLongPtr(hWnd, (WinEnums.nIndex)nIndex, dwNewLong);
+            }
+            else // 32-bit
+            {
+                return new IntPtr(SetWindowLong(hWnd, nIndex, dwNewLong.ToInt32()));
+            }
+        }
+        // For 32 Bit
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetWindowLong(IntPtr hWnd, int nIndex);
+        // For 64 Bit
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+        // Auto switch between 32 and 64 bit
+        private static IntPtr GetWindowLongPtrWrapper(IntPtr hWnd, int nIndex)
+        {
+            if (IntPtr.Size == 8) // 64-bit
+            {
+                return GetWindowLongPtr(hWnd, nIndex);
+            }
+            else // 32-bit
+            {
+                return GetWindowLong(hWnd, nIndex);
+            }
+        }
         [DllImport("user32.dll")]
         static extern IntPtr LoadIcon(IntPtr hInstance, IntPtr lpIconName);
 
@@ -89,8 +119,8 @@ namespace Dynamic_Lighting_Key_Indicator
             // Set up custom WndProc to intercept windows messages, process tray window closing and tray icon clicks, and forward the rest to the default window procedure
             Debug.WriteLine("Setting up WndProc");
             newWndProc = new WndProcDelegate(WndProc);
-            defaultWndProc = GetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC);
-            SetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(newWndProc));
+            defaultWndProc = GetWindowLongPtrWrapper(hwnd, (int)nIndex.GWLP_WNDPROC);
+            SetWindowLongPtrWrapper(hwnd, (int)nIndex.GWLP_WNDPROC, Marshal.GetFunctionPointerForDelegate(newWndProc));
         }
 
         public static System.Drawing.Icon? LoadIconFromResource(string resourceName)
