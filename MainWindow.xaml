@@ -11,7 +11,7 @@
     Title="Dynamic Lighting Key Indicator"
     >
 
-    <Grid Padding="40" Background="{ThemeResource WindowBackgroundColor}">
+    <Grid Padding="40" Background="{ThemeResource WindowBackgroundColor}" Loaded="AutoSizeWindow_OnGridLoad">
         <Grid.Resources>
             <!-- Style for color selection buttons -->
             <Style x:Key="ColorButtonStyle" TargetType="Button">
@@ -41,16 +41,7 @@
         </Grid.RowDefinitions>
 
 
-        <!-- Debug mode test toggle -->
-        <ToggleSwitch x:Name="testToggle" 
-            IsOn="{x:Bind ViewModel.DebugMode, Mode=TwoWay}" 
-            Visibility="{x:Bind ViewModel.Special_DebugMode_VisibilityBool, Mode=OneWay}" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Top"
-            Header="Debug Mode"
-            Margin="-30,-25,0,0"
-            >
-        </ToggleSwitch>
+        
         <!-- Debug mode test button 1 -->
         <Button x:Name="testButton" 
             Content="Test" 
@@ -305,7 +296,7 @@
             <Button x:Name="buttonOpenConfigFolder" 
                     Click="OpenConfigFolder_Click"
                     Margin="10,0,10,0"
-                    Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.AdvancedInfo_VisibilityBool, Mode=OneWay}"
                     >
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8B7;" Margin="0,0,8,0"/>
@@ -320,8 +311,10 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
@@ -350,6 +343,22 @@
                   HorizontalAlignment="Center"
                   MinWidth="0" 
                   Margin="10,0,0,0"/>
+
+            <!-- Debug mode test toggle -->
+            <TextBlock Grid.Row="0" Grid.Column="2" 
+               Text="Advanced Info" 
+               HorizontalAlignment="Center"
+               Margin="10,0,0,0"
+            />
+            <ToggleSwitch x:Name="AdvancedInfoToggle" 
+                Grid.Row="1" Grid.Column="2"
+                IsOn="{x:Bind ViewModel.ShowAdvancedInfo, Mode=TwoWay}"
+                Toggled="AutoSizeWindow_OnAdvancedToggle"
+                HorizontalAlignment="Center"
+                MinWidth="0" 
+                Margin="10,0,0,0"
+            />
+
         </Grid>
 
         <!-- Divider Line and Informational TextBlock -->
@@ -389,7 +398,7 @@
             </TextBlock>
         </Expander>
         <!-- Debug Information Row -->
-        <StackPanel Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}">
+        <StackPanel x:Name="AdvancedInfoStack" Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.AdvancedInfo_VisibilityBool, Mode=OneWay}">
             <TextBlock Margin="0,5,0,0" >
                 <Run Text="Name: "/>
                 <Run Text="{x:Bind ViewModel.AttachedDeviceName, Mode=OneWay}"/>

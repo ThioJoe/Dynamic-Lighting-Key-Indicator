@@ -47,7 +47,7 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeStartupTaskStateAsync();
 
             Debug.WriteLine("MainViewModel created.");
-            this._debugMode = debugMode;
+            this._showAdvancedInfo = debugMode;
         }
 
         private MainWindow mainWindow;
@@ -178,28 +178,29 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private bool _debugMode;
-        public bool DebugMode
+        private bool _showAdvancedInfo;
+        public bool ShowAdvancedInfo
         {
-            get => _debugMode;
+            get => _showAdvancedInfo;
             set
             {
-                SetProperty(ref _debugMode, value);
-                OnPropertyChanged(nameof(DebugMode_VisibilityBool));
+                SetProperty(ref _showAdvancedInfo, value);
+                OnPropertyChanged(nameof(AdvancedInfo_VisibilityBool));
+
             }
         }
-        public Visibility DebugMode_VisibilityBool
+        public Visibility AdvancedInfo_VisibilityBool
         {
             get
             {
-                if (DebugMode)
+                if (ShowAdvancedInfo)
                     return Visibility.Visible;
                 else
                     return Visibility.Collapsed;
             }
         }
         // For the special debug mode testing toggle switch, which always shows in debug mode but allows disabling regular debug controls
-        public Visibility Special_DebugMode_VisibilityBool
+        public Visibility DebugMode_VisibilityBool
         {
             get
             {

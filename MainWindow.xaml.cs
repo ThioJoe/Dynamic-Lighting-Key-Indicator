@@ -873,6 +873,70 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private void AutoSizeWindow_OnGridLoad(object sender, RoutedEventArgs e)
+        {
+            var window = this;  // assuming this is in the Window class
+            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            {
+                Double scale = windowRoot.XamlRoot.RasterizationScale;
+                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+                int height = (int)Math.Ceiling(windowRoot.ActualHeight * scale);
+                AppWindow.ResizeClient(new SizeInt32(width, height));
+            }
+        }
+
+        private void AutoSizeWindow_OnAdvancedToggle(object sender, RoutedEventArgs e)
+        {
+            var window = this;  // assuming this is in the Window class
+            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            {
+                // Get info about AdvancedInfoStack text block
+                StackPanel? advancedInfoStack = windowRoot.FindName("AdvancedInfoStack") as StackPanel;
+
+                if (advancedInfoStack == null)
+                    return;
+
+                //Expander expander = (Expander)sender;
+                Double scale = windowRoot.XamlRoot.RasterizationScale;
+                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+
+                // Desired size is the size before the toggle.
+                //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
+                Double previousRootContentHeight = windowRoot.ActualHeight;
+
+
+                int windowHeightToSet;
+                int extraBuffer = 0;
+
+                // "Desired size" is actually the size before the toggle. If it's not zero, we know it is collapsing now
+                // However the actual height is not reliable because the first time it's expanded it will be also be zero
+                bool isExpanding = advancedInfoStack.DesiredSize.Height == 0;
+
+                // First time it's expanded it will be zero, so we'll need to use our own calculation as a workaround
+                int assumedTextLineHeight = 24;
+                int assumedInfoStackHeight = assumedTextLineHeight * advancedInfoStack.Children.Count;
+
+                // 
+                Double infoStackHeight;
+                if (advancedInfoStack.DesiredSize.Height != 0)
+                    infoStackHeight = advancedInfoStack.DesiredSize.Height;
+                else
+                    infoStackHeight = assumedInfoStackHeight;
+
+
+                if (isExpanding) // Expanding
+                {
+                    windowHeightToSet = (int)Math.Ceiling((previousRootContentHeight + infoStackHeight + extraBuffer) * scale);
+                }
+                else // Collapsing
+                {
+                    windowHeightToSet = (int)Math.Ceiling((previousRootContentHeight - infoStackHeight + extraBuffer) * scale);
+                }
+
+                AppWindow.ResizeClient(new SizeInt32(width, windowHeightToSet));
+            }
+        }
+
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
             List<VK> monitoredKeysToPreviewDefaultColor = new();
