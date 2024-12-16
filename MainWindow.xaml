@@ -48,7 +48,7 @@
             HorizontalAlignment="Left" 
             VerticalAlignment="Top"
             Header="Debug Mode"
-            Margin="0,-25,0,0"
+            Margin="-30,-25,0,0"
             >
         </ToggleSwitch>
         <!-- Debug mode test button 1 -->
@@ -60,7 +60,12 @@
             Click="TestButton_Click"
         />
         <!-- Title -->
-        <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" FontFamily="Highway Gothic" FontSize="30" FontWeight="Normal" HorizontalAlignment="Center" Margin="0,-5,0,0"/>
+        <!-- <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" FontFamily="OverpassEmbedded" FontSize="35" HorizontalAlignment="Center" Margin="0,0,0,0"/> -->
+        <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" 
+                   FontFamily="{StaticResource OverpassBold}" 
+                   ignore:FontFamily="Overpass"
+                   ignore:FontWeight="Bold"
+                   FontSize="35" HorizontalAlignment="Center" Margin="0,0,0,10"/>
 
         <!--
         <TextBlock x:Name="watcherStatusText" 

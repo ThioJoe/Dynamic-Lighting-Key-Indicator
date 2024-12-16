@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Icon.ico" />
+    <Content Remove="Assets\overpass-bold.otf" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".gitattributes" />
@@ -44,6 +45,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Icon.ico" />
+    <Resource Include="Assets\overpass-bold.otf" />
   </ItemGroup>
 
   <ItemGroup>

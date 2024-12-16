@@ -24,6 +24,8 @@
                     <Color x:Key="ButtonBackground_Green">#021203</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
+            <!-- Custom Font -->
+            <FontFamily x:Key="OverpassBold">/Assets/overpass-bold.otf#Overpass Bold</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
