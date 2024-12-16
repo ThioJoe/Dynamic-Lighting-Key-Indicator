@@ -312,10 +312,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             // Capture the state we need to evaluate outside the UI thread
             int deviceCount = availableDevices.Count;
-            bool hasDeviceWatcher = m_deviceWatcher != null;
             DeviceWatcherStatus? watcherStatus = m_deviceWatcher?.Status;
-            bool isAttachedDeviceNull = AttachedDevice == null;
-            bool? isDeviceAvailable = AttachedDevice?.lampArray.IsAvailable;
 
             DispatcherQueue.TryEnqueue(() =>
             {
@@ -325,7 +322,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (deviceCount == 0)
                 {
                     // This means the watcher is running and has not yet found any devices
-                    if (hasDeviceWatcher &&
+                    if (m_deviceWatcher != null &&
                         (watcherStatus == DeviceWatcherStatus.Started ||
                          watcherStatus == DeviceWatcherStatus.EnumerationCompleted))
                     {
@@ -337,15 +334,21 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
                 // If there are devices available, but nothing attached yet, show the number of devices
-                else if (isAttachedDeviceNull)
+                else if (AttachedDevice == null)
                 {
                     statusInfo = new(DeviceStatusInfo.Msg.Available, deviceCount: deviceCount);
                 }
                 // If the device is attached but is not available, show warning
-                else if (isDeviceAvailable == false)
+                else if (AttachedDevice.lampArray.IsAvailable == false)
                 {
                     statusInfo = new(DeviceStatusInfo.Msg.NotAvailable);
                 }
+                // If the device is attached but is not a keyboard, show warning
+                else if (AttachedDevice.lampArray.LampArrayKind != LampArrayKind.Keyboard)
+                {
+                    statusInfo = new(DeviceStatusInfo.Msg.NotKeyboard);
+                }
+                // If the device is attached and available, show good status
                 else
                 {
                     statusInfo = new(DeviceStatusInfo.Msg.Good);

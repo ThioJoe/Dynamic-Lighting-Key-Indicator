@@ -75,11 +75,17 @@ namespace Dynamic_Lighting_Key_Indicator
                         MsgBody = StatusMsgBody.Empty;
                         break;
 
-                    case Msg.Error:
+                    case Msg.ErrorInitializing:
                         MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Red);
                         MsgPrefix = StatusMsgPrefix.Status;
                         MsgBody = StatusMsgBody.ErrorInitializing;
                         MsgBody += suffix ?? "Unknown Device";
+                        break;
+
+                    case Msg.NotKeyboard:
+                        MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Orange);
+                        MsgPrefix = StatusMsgPrefix.Warning;
+                        MsgBody = StatusMsgBody.NotKeyboard;
                         break;
 
                     default:
@@ -92,7 +98,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             public enum Msg
             {
-                NoneFound, Waiting, Available, NotAvailable, Good, Empty, Error
+                NoneFound, Waiting, Available, NotAvailable, Good, Empty, ErrorInitializing, NotKeyboard
             }
 
             public struct StatusMsgBody
@@ -104,15 +110,16 @@ namespace Dynamic_Lighting_Key_Indicator
                 internal const string Good = "Good";
                 internal const string Empty = "";
                 internal const string ErrorInitializing = "Error initializing LampArray: ";
+                internal const string NotKeyboard = "Device is attached, but it doesn't seem to be a keyboard. This might not work.";
             }
 
             public struct StatusMsgPrefix
             {
                 internal const string Status = "Status: ";
+                internal const string Warning = "Warning: ";
                 internal const string None = "";
             }
         }
-
 
     } // --------------------------- End of MyDefinitions ---------------------------
 }
