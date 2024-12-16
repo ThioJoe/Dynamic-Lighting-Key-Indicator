@@ -1,11 +1,6 @@
-﻿using Microsoft.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Windows.Devices.Lights;
 using Windows.System;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
@@ -196,7 +191,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // For when the user is changing the color of the default color in the UI, which may include linked colors of monitored keys
-        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false, Dictionary<VK,bool>? assumedStatesDict = null)
+        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false, Dictionary<VK, bool>? assumedStatesDict = null)
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
@@ -213,8 +208,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     keyState = assumedStatesDict[key.key];
                 else
                     keyState = key.IsOn(); // TODO: This probably causes a lot of calls, maybe only check it once when the flyout opens
-                
-                if ((keyState && key.onColorTiedToStandard) || (!keyState && key.offColorTiedToStandard) || noStateCheck) 
+
+                if ((keyState && key.onColorTiedToStandard) || (!keyState && key.offColorTiedToStandard) || noStateCheck)
                 {
                     keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
                 }

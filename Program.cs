@@ -1,10 +1,9 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.UI.Dispatching;
+﻿using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 
 

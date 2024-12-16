@@ -1,11 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.Windows.AppLifecycle;
-using Microsoft.Windows.AppNotifications;
+﻿using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 
 namespace Dynamic_Lighting_Key_Indicator

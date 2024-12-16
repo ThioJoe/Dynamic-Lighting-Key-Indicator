@@ -1,19 +1,16 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml.Data;
+﻿using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using System;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Controls;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
+using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using Windows.ApplicationModel;
 using Windows.Devices.Lights;
-using static Dynamic_Lighting_Key_Indicator.MainWindow;
 using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
-using Microsoft.VisualBasic;
+using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -54,7 +51,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         private MainWindow mainWindow;
-        
+
 
         private bool _isStartupEnabled;
         public bool IsStartupEnabled
@@ -174,7 +171,7 @@ namespace Dynamic_Lighting_Key_Indicator
             get
             {
                 // If the startup setting can't be changed, show the warning message, so set to visible
-                if (!StartupSettingCanBeChanged) 
+                if (!StartupSettingCanBeChanged)
                     return Visibility.Visible;
                 else
                     return Visibility.Collapsed;
@@ -744,9 +741,9 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ColorPropName.NumLockOn => SyncNumLockOnColor,
                 ColorPropName.NumLockOff => SyncNumLockOffColor,
-                ColorPropName.CapsLockOn  => SyncCapsLockOnColor,
+                ColorPropName.CapsLockOn => SyncCapsLockOnColor,
                 ColorPropName.CapsLockOff => SyncCapsLockOffColor,
-                ColorPropName.ScrollLockOn  => SyncScrollLockOnColor,
+                ColorPropName.ScrollLockOn => SyncScrollLockOnColor,
                 ColorPropName.ScrollLockOff => SyncScrollLockOffColor,
                 _ => false,
             };

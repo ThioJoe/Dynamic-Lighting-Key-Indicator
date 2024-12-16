@@ -11,7 +11,6 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -29,7 +28,6 @@ using Windows.Graphics;
 namespace Dynamic_Lighting_Key_Indicator
 {
     using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
-    using Brush = Microsoft.UI.Xaml.Media.Brush;
 
     public sealed partial class MainWindow : Window
     {

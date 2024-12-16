@@ -1,22 +1,13 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System.Runtime.InteropServices;
+﻿using Microsoft.UI;
 using Microsoft.UI.Windowing;
-using Windows.Foundation;
+using Microsoft.UI.Xaml;
 using System;
-using WinRT;
-using Microsoft.UI;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Media.Imaging;
-using System.IO;
-using Windows.Storage.Streams;
-using Windows.Storage.FileProperties;
-using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using System.Reflection;
-using System.Drawing;
 using System.Diagnostics;
-
+using System.Drawing;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using WinRT;
 using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -264,7 +255,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return windowNative.WindowHandle;
         }
     }
-  
+
     [ComImport]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [Guid("EECDBF0E-BAE9-4CB6-A68E-9598E1CB57BB")]

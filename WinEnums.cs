@@ -9,7 +9,7 @@ namespace Dynamic_Lighting_Key_Indicator
     internal static class WinEnums
     {
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters
-        public enum nIndex: int
+        public enum nIndex : int
         {
             GWLP_WNDPROC = -4,  // Sets a new address for the window procedure.
             GWLP_HINSTANCE = -6,
@@ -110,7 +110,7 @@ namespace Dynamic_Lighting_Key_Indicator
             HID_USAGE_GENERIC_MULTI_AXIS_CONTROLLER = 0x08
         }
 
-        public enum WM_MESSAGE: uint
+        public enum WM_MESSAGE : uint
         {
             WM_NULL = 0x0000,
             WM_CREATE = 0x0001,

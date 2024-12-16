@@ -1,9 +1,4 @@
 ﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Windowing;
-using Windows.Graphics;
-using WinRT.Interop;
-using System;
-using Microsoft.UI;
 
 namespace Dynamic_Lighting_Key_Indicator
 {

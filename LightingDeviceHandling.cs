@@ -1,14 +1,12 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
 using Windows.Devices.Lights;
-using System.ComponentModel;
 
 namespace Dynamic_Lighting_Key_Indicator
 {

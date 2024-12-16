@@ -1,8 +1,6 @@
-﻿using Dynamic_Lighting_Key_Indicator;
+﻿using System;
 using System.Collections.Generic;
-using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 
 #pragma warning disable IDE0305 // Collection expression more confusing than a simple ToArray initializer
@@ -131,7 +129,7 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string Restore = "Restore";
             public const string Restart = "Restart Process";
             public const string Exit = "Exit";
-            
+
         }
 
         internal static void CreateAndShowMenu(IntPtr hwnd, SystemTray systemTray)

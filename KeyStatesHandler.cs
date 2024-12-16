@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.UI;
@@ -129,7 +127,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             // Get the current module, throw an exception if it fails
             using Process? curProcess = System.Diagnostics.Process.GetCurrentProcess();
-            using ProcessModule? curModule = (curProcess?.MainModule) ?? throw new Exception("Failed to get current module."); 
+            using ProcessModule? curModule = (curProcess?.MainModule) ?? throw new Exception("Failed to get current module.");
 
             return SetWindowsHookEx((int)KeyboardHook.WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
         }

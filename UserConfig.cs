@@ -1,9 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -13,7 +10,7 @@ using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    internal class UserConfig: ICloneable
+    internal class UserConfig : ICloneable
     {
         // --------------------------- Properties ---------------------------
         [JsonInclude]
@@ -184,7 +181,7 @@ namespace Dynamic_Lighting_Key_Indicator
             config.Brightness = brightnessLevel; // Remnant from old code
 
             // -------- Local Function --------
-            
+
 
             List<MonitoredKey> keysList = config.MonitoredKeysAndColors;
             foreach (var key in keysList)
