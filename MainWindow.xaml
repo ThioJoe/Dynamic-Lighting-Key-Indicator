@@ -357,7 +357,7 @@
             />
         
         <Expander Grid.Row="10"
-          Header="Instructions"
+          Header="{x:Bind ViewModel.InstructionHeader, Mode=OneWay}"
           IsExpanded="False"
                   Width="700"
           Margin="0,20,0,0"
@@ -378,7 +378,7 @@
                 <Run Text="      3. Under 'Background Light Control', drag 'Dynamic Lighting Key Indicator' to the top of the list"/>
                 <LineBreak/>
                 <LineBreak/>
-                <Run Text="⚠️ Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/>
+                <Run Text="📝 Note: Be sure to change the 'Background Lighting Control' setting only within the sub-menu for your device."/>
                 <LineBreak/>
                 <Run Text="The setting in the top level 'Dynamic Lighting' menu is the global setting that will affect all devices."/>
             </TextBlock>

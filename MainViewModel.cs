@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Dispatching;
@@ -225,7 +225,27 @@ namespace Dynamic_Lighting_Key_Indicator
         public DeviceStatusInfo DeviceStatusMessage
         {
             get => _deviceStatusMessage;
-            set => SetProperty(ref _deviceStatusMessage, value);
+            set
+            {
+                SetProperty(ref _deviceStatusMessage, value);
+                OnPropertyChanged(nameof(InstructionHeader));
+            }
+        }
+
+        public string InstructionHeader
+        {
+            get
+            {
+                // Show a warning symbol if the device needs to be set up
+                if (DeviceStatusMessage.MsgBody == DeviceStatusInfo.StatusMsgBody.NotAvailable)
+                {
+                    return "⚠️ Instructions (Action Required)";
+                }
+                else
+                {
+                    return "Instructions";
+                }
+            }
         }
 
         private string _attachedDevicesMessage;
