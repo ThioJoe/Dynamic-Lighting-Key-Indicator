@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Windows.Devices.Lights;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
+using Microsoft.VisualBasic;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -41,7 +42,7 @@ namespace Dynamic_Lighting_Key_Indicator
             _startupSettingCanBeChanged = true;
             _startupSettingReason = "";
             _isStartupEnabled = false;
-            _deviceStatusMessage = "";
+            _deviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Empty);
             _attachedDevicesMessage = "";
             _deviceWatcherStatusMessage = "";
             mainWindow = mainWindowPassIn;
@@ -220,17 +221,11 @@ namespace Dynamic_Lighting_Key_Indicator
             StartupSettingReason = GetReason(startupState);
         }
 
-        private string _deviceStatusMessage;
-        public string DeviceStatusMessage
+        private DeviceStatusInfo _deviceStatusMessage;
+        public DeviceStatusInfo DeviceStatusMessage
         {
             get => _deviceStatusMessage;
             set => SetProperty(ref _deviceStatusMessage, value);
-        }
-        private SolidColorBrush _deviceStatusColor;
-        public SolidColorBrush DeviceStatusColor
-        {
-            get => _deviceStatusColor;
-            set => SetProperty(ref _deviceStatusColor, value);
         }
 
         private string _attachedDevicesMessage;

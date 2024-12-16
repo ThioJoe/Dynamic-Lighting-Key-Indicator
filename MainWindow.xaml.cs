@@ -65,6 +65,9 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
         public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
 
+        // Other random crap
+        public SolidColorBrush DefaultFontColor => MyDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
+
         // Imported Windows API functions
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
@@ -80,7 +83,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: false)
             {
-                DeviceStatusMessage = "Status: Waiting - Start device watcher to list available devices.",
+                DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Waiting),
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
             };
 
@@ -307,39 +310,48 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void UpdateStatusMessage()
         {
-            string message;
-            Windows.UI.Color statusColor = Colors.Black;
-
-            // If there are no devices available, it could be because the user has no devices, or could be because the watcher hasn't started yet, so show the appropriate message
-            if (availableDevices.Count == 0)
-            {
-                // This means the watcher is running and has not yet found any devices
-                if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
-                    message = "Status: No elegible lighting devices found";
-                else
-                    message = "Status: Waiting - Start device watcher to list available devices.";
-            }
-            // If there are devices available, but nothing attached yet, show the number of devices
-            else if (AttachedDevice == null)
-            {
-                message = $"Available Devices: {availableDevices.Count}";
-            }
-            // If the device is attached but is not available, show warning because they probably need to set it up in the lighting settings
-            else if (AttachedDevice.lampArray.IsAvailable == false)
-            {
-                message = "Status: Device attached but not controllable. See instructions below for how to enable background control.";
-                statusColor = Colors.Red;
-            }
-            else
-            {
-                message = "Status: Good";
-                statusColor = Colors.Green;
-            }
+            // Capture the state we need to evaluate outside the UI thread
+            int deviceCount = availableDevices.Count;
+            bool hasDeviceWatcher = m_deviceWatcher != null;
+            DeviceWatcherStatus? watcherStatus = m_deviceWatcher?.Status;
+            bool isAttachedDeviceNull = AttachedDevice == null;
+            bool? isDeviceAvailable = AttachedDevice?.lampArray.IsAvailable;
 
             DispatcherQueue.TryEnqueue(() =>
             {
-                ViewModel.DeviceStatusMessage = message;
-                ViewModel.DeviceStatusColor = new SolidColorBrush(statusColor);
+                DeviceStatusInfo statusInfo;
+
+                // Now create all DeviceStatusInfo objects on the UI thread
+                if (deviceCount == 0)
+                {
+                    // This means the watcher is running and has not yet found any devices
+                    if (hasDeviceWatcher &&
+                        (watcherStatus == DeviceWatcherStatus.Started ||
+                         watcherStatus == DeviceWatcherStatus.EnumerationCompleted))
+                    {
+                        statusInfo = new(DeviceStatusInfo.Msg.NoneFound);
+                    }
+                    else
+                    {
+                        statusInfo = new(DeviceStatusInfo.Msg.Waiting);
+                    }
+                }
+                // If there are devices available, but nothing attached yet, show the number of devices
+                else if (isAttachedDeviceNull)
+                {
+                    statusInfo = new(DeviceStatusInfo.Msg.Available, deviceCount: deviceCount);
+                }
+                // If the device is attached but is not available, show warning
+                else if (isDeviceAvailable == false)
+                {
+                    statusInfo = new(DeviceStatusInfo.Msg.NotAvailable);
+                }
+                else
+                {
+                    statusInfo = new(DeviceStatusInfo.Msg.Good);
+                }
+
+                ViewModel.DeviceStatusMessage = statusInfo;
             });
         }
 
@@ -828,8 +840,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void TestButton_Click(object sender, object e)
         {
+            // Get the text block object from various controls
+            TextBlock? textBlock = null;
+            Debug.WriteLine("Test button clicked.");
 
-        }
+            }
 
         private void AutoSizeWindowFromExpander(object sender, bool IsExpanding, Double previousExpanderHeight, Double newExpanderHeight)
         {

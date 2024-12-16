@@ -15,9 +15,13 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <Color x:Key="WindowBackgroundColor">#FFFFFF</Color>
+                    <Color x:Key="ButtonBackground_Green">#f5fff6</Color>
+                    <Color x:Key="ButtonBackground_Red">#ffe8e8</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="WindowBackgroundColor">#191919</Color>
+                    <Color x:Key="ButtonBackground_Green">#1a0000</Color>
+                    <Color x:Key="ButtonBackground_Red">#021203</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>

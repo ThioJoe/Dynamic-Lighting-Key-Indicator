@@ -24,7 +24,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Update on UI thread
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    ViewModel.DeviceStatusMessage = $"Status: Error initializing LampArray: \"{info.displayName}\"";
+                    ViewModel.DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Error, suffix: info.displayName);
                 });
                 return null;
             }

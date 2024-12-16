@@ -74,7 +74,7 @@
         <!-- Row With Start/Stop monitoring buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,15,0,0" HorizontalAlignment="Center">
 
-            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" Background="#f5fff6"
+            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" Background="{ThemeResource ButtonBackground_Red}"
                     IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0" Foreground="DarkGreen"/>
@@ -82,7 +82,7 @@
                 </StackPanel>
             </Button>
 
-            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" Background="#ffe8e8" 
+            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" Background="{ThemeResource ButtonBackground_Green}"
                     IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0" Foreground="DarkRed"/>
@@ -135,10 +135,11 @@
         <TextBlock x:Name="statusText" 
                    Grid.Row="3" 
                    Margin="0,10,0,0"
-                   Text="{x:Bind ViewModel.DeviceStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
-                   Foreground="{x:Bind ViewModel.DeviceStatusColor, Mode=OneWay}"
-                   />
+                   Foreground="{x:Bind ViewModel.DeviceStatusMessage.MsgColor, Mode=OneWay}">
+            <Run Text="{x:Bind ViewModel.DeviceStatusMessage.MsgPrefix, Mode=OneWay}" FontWeight="{x:Bind ViewModel.DeviceStatusMessage.PrefixWeight, Mode=OneWay}"/>
+            <Run Text="{x:Bind ViewModel.DeviceStatusMessage.MsgBody, Mode=OneWay}"/>
+        </TextBlock>
 
         <TextBlock x:Name="attachedDevices"
                    Grid.Row="4"
@@ -257,7 +258,7 @@
         
         <!-- Brightness Slider -->
         <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
-            <TextBlock Text="Global Brightness:" VerticalAlignment="Center" Margin="0,0,0,0"/>
+            <TextBlock x:Name="labelGlobalBrightness"  Text="Global Brightness:" VerticalAlignment="Center" Margin="0,0,0,0"/>
             <Slider x:Name="sliderBrightness" 
                 Width="200" 
                 Minimum="0" 
@@ -364,7 +365,7 @@
           SizeChanged="Expander_SizeChange"
           >
             <TextBlock TextWrapping="Wrap">
-                <Run Text="IMPORTANT" FontWeight="Bold" Foreground="Black"/>
+                <Run Text="IMPORTANT" FontWeight="Bold" Foreground="{x:Bind DefaultFontColor, Mode=OneWay}"/>
                 <Run Text=": Follow these steps to set up Dynamic Lighting:"/>
                 <LineBreak/>
                 <Run Text="      1. Click this to open: "/>
