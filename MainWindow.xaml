@@ -11,7 +11,8 @@
     Title="Dynamic Lighting Key Indicator"
     >
 
-    <Grid Padding="40" Background="{ThemeResource WindowBackgroundColor}" Loaded="AutoSizeWindow_OnGridLoad">
+
+    <Grid x:Name="MainGrid" Padding="40" Background="{ThemeResource WindowBackgroundColor}" Loaded="AutoSizeWindow_OnGridLoad" HorizontalAlignment="Center" VerticalAlignment="Top">
         <Grid.Resources>
             <!-- Style for color selection buttons -->
             <Style x:Key="ColorButtonStyle" TargetType="Button">
@@ -418,4 +419,5 @@
         </StackPanel>
 
     </Grid>
+
 </Window>

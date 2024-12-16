@@ -848,7 +848,23 @@ namespace Dynamic_Lighting_Key_Indicator
             // Get the text block object from various controls
             Debug.WriteLine("Test button clicked.");
 
+            var window = this;  // assuming this is in the Window class
+            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            {
+                // Get info about AdvancedInfoStack text block
+                StackPanel? advancedInfoStack = windowRoot.FindName("AdvancedInfoStack") as StackPanel;
+
+                Grid? mainContentGrid = windowRoot.FindName("MainGrid") as Grid;
+
+                //Expander expander = (Expander)sender;
+                Double scale = windowRoot.XamlRoot.RasterizationScale;
+                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+                // Desired size is the size before the toggle.
+                //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
+                Double previousRootContentHeight = windowRoot.ActualHeight;
             }
+
+        }
 
         private void AutoSizeWindowFromExpander(object sender, bool IsExpanding, Double previousExpanderHeight, Double newExpanderHeight)
         {
@@ -901,9 +917,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
 
                 // Desired size is the size before the toggle.
-                //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
                 Double previousRootContentHeight = windowRoot.ActualHeight;
-
 
                 int windowHeightToSet;
                 int extraBuffer = 0;
