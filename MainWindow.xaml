@@ -74,19 +74,19 @@
         <!-- Row With Start/Stop monitoring buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,15,0,0" HorizontalAlignment="Center">
 
-            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" Background="{ThemeResource ButtonBackground_Red}"
+            <Button x:Name="buttonStartWatch" Click="ButtonStartWatch_Click" Margin="0,0,0,0" Background="{ThemeResource ButtonBackground_Green}"
                     IsEnabled="{x:Bind ViewModel.IsWatcherStopped, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0" Foreground="DarkGreen"/>
-                    <TextBlock Text="Start Monitoring"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE768;" Margin="0,0,8,0" Foreground="DarkGreen" Opacity="{x:Bind ViewModel.WatcherButtonEnable_GlyphOpacity, Mode=OneWay}" />
+                    <TextBlock Text="Enable"/>
                 </StackPanel>
             </Button>
 
-            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" Background="{ThemeResource ButtonBackground_Green}"
+            <Button x:Name="buttonStopWatch" Click="ButtonStopWatch_Click" Margin="10,0,0,0" Background="{ThemeResource ButtonBackground_Red}"
                     IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0" Foreground="DarkRed"/>
-                    <TextBlock Text="Stop Monitoring"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE71A;" Margin="0,0,8,0" Foreground="DarkRed" Opacity="{x:Bind ViewModel.WatcherButtonDisable_GlyphOpacity, Mode=OneWay}" />
+                    <TextBlock Text="Disable"/>
                 </StackPanel>
             </Button>
 

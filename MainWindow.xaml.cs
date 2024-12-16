@@ -141,7 +141,7 @@ namespace Dynamic_Lighting_Key_Indicator
             URLHandler.ProvideWindow(this);
 
             // Set initial window size, and check if it should start minimized
-            this.AppWindow.Resize(new SizeInt32(1200, 1300));
+            this.AppWindow.Resize(new SizeInt32(1200, 1200));
             if (currentConfig.StartMinimizedToTray)
             {
                 systemTray.MinimizeToTray();

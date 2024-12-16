@@ -235,6 +235,9 @@ namespace Dynamic_Lighting_Key_Indicator
             set => SetProperty(ref _attachedDevicesMessage, value);
         }
 
+        public double WatcherButtonEnable_GlyphOpacity => IsWatcherRunning ? 0.3 : 1.0;
+        public double WatcherButtonDisable_GlyphOpacity => IsWatcherRunning ? 1.0 : 0.3;
+
         private bool _hasAttachedDevices;
         public bool HasAttachedDevices
         {
@@ -296,6 +299,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     OnPropertyChanged(nameof(IsWatcherStopped));
                     OnPropertyChanged(nameof(WatcherRunningVisibilityBool));
                     OnPropertyChanged(nameof(EnableApplyButton));
+                    OnPropertyChanged(nameof(WatcherButtonEnable_GlyphOpacity));
+                    OnPropertyChanged(nameof(WatcherButtonDisable_GlyphOpacity));
                 }
             }
         }
@@ -750,13 +755,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public const string LinkedGlyph = "\uE71B";     // Chain link glyph
         public const string UnlinkedGlyph = "";         // No glyph if unlinked
-
-        //public string GetSyncGlyph_ByPropertyName(string colorPropertyName)
-        //{
-        //    var glyph = GetSyncSetting_ByPropertyName(colorPropertyName) ? LinkedGlyph : UnlinkedGlyph;
-        //    System.Diagnostics.Debug.WriteLine($"GetSyncGlyph_ByPropertyName({colorPropertyName}): {glyph}");
-        //    return glyph;
-        //}
 
         public string GetSyncGlyph_ByButtonObject(Button button)
         {

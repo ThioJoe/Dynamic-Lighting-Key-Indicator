@@ -20,8 +20,8 @@
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="WindowBackgroundColor">#191919</Color>
-                    <Color x:Key="ButtonBackground_Green">#1a0000</Color>
-                    <Color x:Key="ButtonBackground_Red">#021203</Color>
+                    <Color x:Key="ButtonBackground_Red">#1a0000</Color>
+                    <Color x:Key="ButtonBackground_Green">#021203</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
