@@ -181,7 +181,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void SetColorToDefaultAndAdditionalIndices(RGBTuple colorTuple, List<VK> additionalKeys, LampArray lampArray)
+        public static void SetColorToDefaultAndAdditionalIndices(RGBTuple colorTuple, List<VK> additionalKeys, LampArray? lampArray)
         {
             if (lampArray == null)
                 return;
@@ -203,7 +203,6 @@ namespace Dynamic_Lighting_Key_Indicator
             Windows.UI.Color colorToUse = DetermineDefaultColor(RGBTuple_To_ColorObj(colorTuple));
 
             // Check which keys have on or off colors linked to the standard color, and also whether the color is on or off, to decide which colors need to be updated on the keyboard
-            List<Windows.UI.Color> colors = [];
             List<int> keyIndices = [];
 
             // Add non-monitored keys and applicable monitored keys to the list of indices

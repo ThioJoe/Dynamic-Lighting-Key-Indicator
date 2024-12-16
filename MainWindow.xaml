@@ -303,7 +303,7 @@
             
             <!-- Open Config Folder (Debug Mode) -->
             <Button x:Name="buttonOpenConfigFolder" 
-                    Click="openConfigFolder_Click"
+                    Click="OpenConfigFolder_Click"
                     Margin="10,0,10,0"
                     Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
                     >
@@ -370,7 +370,7 @@
           SizeChanged="Expander_SizeChange"
           >
             <TextBlock TextWrapping="Wrap">
-                <Run Text="IMPORTANT" FontWeight="Bold" Foreground="{x:Bind DefaultFontColor, Mode=OneWay}"/>
+                <Run Text="IMPORTANT" FontWeight="Bold" Foreground="{x:Bind DefaultFontColor}"/>
                 <Run Text=": Follow these steps to set up Dynamic Lighting:"/>
                 <LineBreak/>
                 <Run Text="      1. Click this to open: "/>

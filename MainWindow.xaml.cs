@@ -431,7 +431,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (selectedDeviceIndex == -1 || deviceIndexDict.Count == 0 || selectedDeviceIndex > deviceIndexDict.Count)
             {
+                #pragma warning disable CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
                 ShowErrorMessage("Please select a device from the dropdown list.");
+                #pragma warning restore CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
                 return null;
             }
 
@@ -642,7 +644,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool result = await currentConfig.WriteConfigurationFile_Async();
                 if (!result)
                 {
+                    #pragma warning disable CS4014
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
+                    #pragma warning restore CS4014
                 }
                 ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
             }
@@ -792,14 +796,14 @@ namespace Dynamic_Lighting_Key_Indicator
             ApplyAndSaveColorSettings(saveFile: true, newConfig: null);
         }
 
-        private void openConfigFolder_Click(object sender, RoutedEventArgs e)
+        private void OpenConfigFolder_Click(object sender, RoutedEventArgs e)
         {
             UserConfig.OpenConfigFolder();
         }
 
         private void OnBrightnessSliderChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
-            if (sender is not Slider slider)
+            if (sender is not Slider)
                 return;
 
             ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
@@ -844,7 +848,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private void TestButton_Click(object sender, object e)
         {
             // Get the text block object from various controls
-            TextBlock? textBlock = null;
             Debug.WriteLine("Test button clicked.");
 
             }
@@ -855,7 +858,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
             {
-                Expander expander = (Expander)sender;
+                //Expander expander = (Expander)sender;
                 Double scale = windowRoot.XamlRoot.RasterizationScale;
                 int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
 
