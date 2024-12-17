@@ -145,6 +145,8 @@
     <RepositoryUrl>https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIcon>Square150x150Logo.scale-200.png</PackageIcon>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>$(AssemblyVersion)</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <EditorConfigFiles Remove="D:\Users\Joe\Documents\Development\Dynamic-Lighting-Key-Indicator\.editorconfig" />

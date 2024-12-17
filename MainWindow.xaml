@@ -322,34 +322,34 @@
 
             <!-- Start with Windows Label and Toggle -->
             <TextBlock Grid.Row="0" Grid.Column="0" 
-               Text="Start with Windows:" 
+               Text="Start with Windows" 
                HorizontalAlignment="Center"
-               Margin="0,0,10,0"/>
+               Margin="0,0,0,0"/>
             <ToggleSwitch x:Name="toggleStartupWithWindows"
                   Grid.Row="1" Grid.Column="0"
                   IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
                   IsEnabled="{x:Bind ViewModel.StartupSettingCanBeChanged, Mode=OneWay}"
                   HorizontalAlignment="Center"
                   MinWidth="0" 
-                  Margin="0,0,10,0"/>
+                  Margin="0,0,0,0"/>
 
             <!-- Start Minimized to Tray Label and Toggle -->
             <TextBlock Grid.Row="0" Grid.Column="1" 
-               Text="Start Minimized to Tray:" 
+               Text="Start Minimized to Tray" 
                HorizontalAlignment="Center"
-               Margin="10,0,0,0"/>
+               Margin="30,0,0,0"/>
             <ToggleSwitch x:Name="toggleStartMinimizedToTray"
                   Grid.Row="1" Grid.Column="1"
                   IsOn="{x:Bind ViewModel.StartMinimizedToTray, Mode=TwoWay}"
                   HorizontalAlignment="Center"
                   MinWidth="0" 
-                  Margin="10,0,0,0"/>
+                  Margin="30,0,0,0"/>
 
             <!-- Debug mode test toggle -->
             <TextBlock Grid.Row="0" Grid.Column="2" 
                Text="Advanced Info" 
                HorizontalAlignment="Center"
-               Margin="10,0,0,0"
+               Margin="30,0,0,0"
             />
             <ToggleSwitch x:Name="AdvancedInfoToggle" 
                 Grid.Row="1" Grid.Column="2"
@@ -357,7 +357,7 @@
                 Toggled="AutoSizeWindow_OnAdvancedToggle"
                 HorizontalAlignment="Center"
                 MinWidth="0" 
-                Margin="10,0,0,0"
+                Margin="30,0,0,0"
             />
 
         </Grid>
