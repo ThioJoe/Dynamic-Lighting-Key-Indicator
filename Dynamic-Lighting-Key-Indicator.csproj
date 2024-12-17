@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.26100.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.22621.0</TargetPlatformMinVersion>
     <RootNamespace>Dynamic_Lighting_Key_Indicator</RootNamespace>
-	<PackageDisplayName>Dynamic Lighting Key Indicator</PackageDisplayName>
+    <PackageDisplayName>Dynamic Lighting Key Indicator</PackageDisplayName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
@@ -35,7 +35,6 @@
     <None Remove="LICENSE.txt" />
     <None Remove="README.md" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -45,41 +44,37 @@
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="Assets\Icon.ico" />
     <Resource Include="Resources\overpass-bold.otf" />
   </ItemGroup>
-
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
-	    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
-	    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
-    </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+  </PropertyGroup>
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
     Tools extension to be activated for this project even if the Windows App SDK Nuget
@@ -91,7 +86,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.241114003" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
@@ -115,7 +110,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-
   <!--
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
     Explorer "Package and Publish" context menu entry to be enabled for this project even if
@@ -124,13 +118,12 @@
   <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
   </PropertyGroup>
-
   <!-- Publish Properties -->
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
     <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">False</PublishTrimmed>
+    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
     <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
     <PackageCertificateThumbprint>19FA77595685223CF97E636369AD1495C1D35EE4</PackageCertificateThumbprint>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
@@ -150,6 +143,7 @@
     <PackageIcon>Square150x150Logo.scale-200.png</PackageIcon>
     <AssemblyVersion>0.9.1.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
+    <PublishAot>True</PublishAot>
   </PropertyGroup>
   <ItemGroup>
     <PRIResource Remove="Other Misc\**" />
