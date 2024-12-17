@@ -121,9 +121,9 @@
   <!-- Publish Properties -->
   <PropertyGroup>
     <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
-    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+    <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">False</PublishReadyToRun>
     <PublishTrimmed Condition="'$(Configuration)' == 'Debug'">False</PublishTrimmed>
-    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">True</PublishTrimmed>
+    <PublishTrimmed Condition="'$(Configuration)' != 'Debug'">False</PublishTrimmed>
     <SupportedOSPlatformVersion>10.0.22621.0</SupportedOSPlatformVersion>
     <PackageCertificateThumbprint>19FA77595685223CF97E636369AD1495C1D35EE4</PackageCertificateThumbprint>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
@@ -143,7 +143,7 @@
     <PackageIcon>Square150x150Logo.scale-200.png</PackageIcon>
     <AssemblyVersion>0.9.1.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
-    <PublishAot>True</PublishAot>
+    <PublishAot>False</PublishAot>
   </PropertyGroup>
   <ItemGroup>
     <PRIResource Remove="Other Misc\**" />
