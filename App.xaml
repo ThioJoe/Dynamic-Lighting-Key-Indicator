@@ -9,7 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <!-- Custom Color Spectrum style that doesn't have tooltip -->
-                <ResourceDictionary Source="/CustomColorSpectrum.xaml"/>
+                <ResourceDictionary Source="/Resources/CustomColorSpectrum.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <!-- Define theme-specific resources -->
             <ResourceDictionary.ThemeDictionaries>
@@ -25,7 +25,7 @@
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <!-- Custom Font -->
-            <FontFamily x:Key="OverpassBold">/Assets/overpass-bold.otf#Overpass Bold</FontFamily>
+            <FontFamily x:Key="OverpassBold">/Resources/overpass-bold.otf#Overpass Bold</FontFamily>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

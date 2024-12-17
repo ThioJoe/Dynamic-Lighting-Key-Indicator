@@ -20,6 +20,8 @@
     <Page Remove="Other Misc\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="Extras\RegistryHandler.cs" />
+    <Compile Remove="Extras\Unused But Potentially Useful.cs" />
     <Compile Remove="RegistryHandler.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +33,7 @@
     <None Remove=".gitignore" />
     <None Remove="CustomColorSpectrum.xaml" />
     <None Remove="LICENSE.txt" />
+    <None Remove="README.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,7 +48,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\Icon.ico" />
-    <Resource Include="Assets\overpass-bold.otf" />
+    <Resource Include="Resources\overpass-bold.otf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -148,12 +151,6 @@
     <AssemblyVersion>0.9.1.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <EditorConfigFiles Remove="D:\Users\Joe\Documents\Development\Dynamic-Lighting-Key-Indicator\.editorconfig" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="D:\Users\Joe\Documents\Development\Dynamic-Lighting-Key-Indicator\.editorconfig" />
-  </ItemGroup>
   <ItemGroup>
     <PRIResource Remove="Other Misc\**" />
   </ItemGroup>
