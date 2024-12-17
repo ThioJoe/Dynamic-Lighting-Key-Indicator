@@ -1,6 +1,17 @@
-# Dynamic Lighting Key Indicator
+<h1 align = 'center'>
+    <img 
+        src = 'https://github.com/user-attachments/assets/0ca66aff-a5a8-4ffb-9c54-949797e1d711' 
+        width = "100 
+        alt = "App icon of a rainbow light bulb" 
+    >
+    <br>
+    Dynamic Lighting Key Indicator
+    <br>
+</h1>
 
-Uses the Windows 11 "Dynamic Lighting" API to change the color of the **`Num Lock`**, **`Caps Lock`**, and **`Scroll Lock`** keyboard keys based on their toggle status.
+An app that uses the Windows 11 "Dynamic Lighting" API to change the color of the **`Num Lock`**, **`Caps Lock`**, and **`Scroll Lock`** keyboard keys based on their toggle status.
+
+-------
 
 ## Features
 - Set the On/Off color and brightness for each toggle key
@@ -64,7 +75,7 @@ Start-Process "key-lighting-indicator://set?global_brightness=100"
 
 - Set multiple parameters at once:
     ```url
-    key-lighting-indicator://set?global_brightness=75&standardkeycolor=0,0,255&numlockcolor_on=255,255,0
+    key-lighting-indicator://set?global_brightness=75&standardkeycolor=0,0,255&numlockcolor_on=50,50,0
     ```
 
 - Reset Scroll Lock colors to match the standard key color:
