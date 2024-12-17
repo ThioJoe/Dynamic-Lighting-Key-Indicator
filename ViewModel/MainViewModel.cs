@@ -12,6 +12,9 @@ using Windows.Devices.Lights;
 using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
+// BEWARE - THIS FILE IS A COMPLETE MESS. Properties and methods aren't really organized. 
+// But it has a bunch of important stuff to connect the GUI to the backend.
+
 namespace Dynamic_Lighting_Key_Indicator
 {
     public partial class MainViewModel : INotifyPropertyChanged

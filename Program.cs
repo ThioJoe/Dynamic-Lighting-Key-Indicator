@@ -6,6 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
 
+// NOTE: If Visual Studio yells at you about this file already existing, it's because this one is custom to allow a single-instance app.
+//    See: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/applifecycle/applifecycle-single-instance
+// You need to disble the auto generation of the default Program.cs code in the project file (this is all described in the link above).
+
+// As far as I'm aware this is the earliest entry point in the app. It calls App.xaml.cs which calls MainWindow.xaml.cs
+// We modify this so that when the app is activated by URL protocol, instead of creating a new window, at this early stage we redirect the
+//     activation data to the main instance of the app so it can use the URL parameters as commands while its running. Then close the new instance.
 
 #pragma warning disable IDE0060 // Remove unused parameter
 
