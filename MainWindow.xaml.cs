@@ -834,15 +834,16 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void Expander_SizeChange(object sender, SizeChangedEventArgs e) // When expanded or collapsed
         {
-            Double prevHeight = e.PreviousSize.Height;
-            Double newHeight = e.NewSize.Height;
+            // Resize the window to fit the new size with the expanded or collapsed expander element
+            if (this.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            {
+                Double scale = windowRoot.XamlRoot.RasterizationScale;
+                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+                int windowHeightToSet = (int)Math.Ceiling(windowRoot.ActualHeight * scale);
 
-            if (e.NewSize.Height > e.PreviousSize.Height)
-                AutoSizeWindowFromExpander(sender:sender, IsExpanding:true, previousExpanderHeight: prevHeight, newExpanderHeight:newHeight);
-            else
-                AutoSizeWindowFromExpander(sender: sender, IsExpanding: false, previousExpanderHeight: prevHeight, newExpanderHeight: newHeight);
+                AppWindow.ResizeClient(new SizeInt32(width, windowHeightToSet));
+            }
         }
-
         private void TestButton_Click(object sender, object e)
         {
             // Get the text block object from various controls
@@ -862,30 +863,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Desired size is the size before the toggle.
                 //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
                 Double previousRootContentHeight = windowRoot.ActualHeight;
-            }
-
-        }
-
-        private void AutoSizeWindowFromExpander(object sender, bool IsExpanding, Double previousExpanderHeight, Double newExpanderHeight)
-        {
-            var window = this;  // assuming this is in the Window class
-
-            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
-            {
-                //Expander expander = (Expander)sender;
-                Double scale = windowRoot.XamlRoot.RasterizationScale;
-                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
-
-                int windowHeightToSet;
-                int extraBuffer = 50;
-
-                if (IsExpanding)
-                    windowHeightToSet = (int)Math.Ceiling(windowRoot.ActualHeight * scale);
-                else
-                    //height = (int)Math.Ceiling((rootElement.ActualHeight - expander.ActualHeight + 20) * scale);
-                    windowHeightToSet = (int)Math.Ceiling((windowRoot.ActualHeight - previousExpanderHeight + extraBuffer) * scale);
-
-                AppWindow.ResizeClient(new SizeInt32(width, windowHeightToSet));
             }
         }
 
