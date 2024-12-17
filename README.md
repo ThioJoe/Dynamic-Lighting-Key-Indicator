@@ -73,11 +73,6 @@ Start-Process "key-lighting-indicator://set?global_brightness=100"
     key-lighting-indicator://set?capslockcolor_on=0,255,0&capslockcolor_off=255,0,0
     ```
 
-- Set multiple parameters at once:
-    ```url
-    key-lighting-indicator://set?global_brightness=75&standardkeycolor=0,0,255&numlockcolor_on=50,50,0
-    ```
-
 - Reset Scroll Lock colors to match the standard key color:
     ```url
     key-lighting-indicator://set?scrolllockcolor_on=default&scrolllockcolor_off=default
