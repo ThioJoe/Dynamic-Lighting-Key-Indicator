@@ -12,7 +12,7 @@
   <Identity
     Name="d0c925b6-90d6-4ee7-a5c8-d9b08b62723e"
     Publisher="CN=&quot;Thio Software, LLC&quot;, O=&quot;Thio Software, LLC&quot;, L=Sheridan, S=Wyoming, C=US, SERIALNUMBER=2021-001055119, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Wyoming, OID.1.3.6.1.4.1.311.60.2.1.3=US"
-    Version="0.9.0.0" />
+    Version="0.9.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="d0c925b6-90d6-4ee7-a5c8-d9b08b62723e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -22,10 +22,9 @@
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
-  <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
-  </Dependencies>
+	<Dependencies>
+		<TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22621.0" MaxVersionTested="10.0.26100.0" />
+	</Dependencies>
 
   <Resources>
     <Resource Language="x-generate"/>
