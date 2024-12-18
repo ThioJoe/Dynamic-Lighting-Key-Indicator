@@ -54,26 +54,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <NoWarn>SYSLIB1054;CsWinRT1030;WMC0001</NoWarn>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <!--
     Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
@@ -141,7 +147,7 @@
     <RepositoryUrl>https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIcon>Square150x150Logo.scale-200.png</PackageIcon>
-    <AssemblyVersion>0.9.1.0</AssemblyVersion>
+    <AssemblyVersion>0.9.2.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <PublishAot>False</PublishAot>
   </PropertyGroup>

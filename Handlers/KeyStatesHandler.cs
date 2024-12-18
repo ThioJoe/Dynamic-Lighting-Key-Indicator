@@ -162,9 +162,12 @@ namespace Dynamic_Lighting_Key_Indicator
         // Function to stop the hook
         public static void StopHook()
         {
-            UnhookWindowsHookEx(_hookID);
-            _hookID = IntPtr.Zero;
-            hookIsActive = false;
+            if (hookIsActive || _hookID != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_hookID);
+                _hookID = IntPtr.Zero;
+                hookIsActive = false;
+            }
         }
 
         // Returned as pointer in the lparam of the hook callback

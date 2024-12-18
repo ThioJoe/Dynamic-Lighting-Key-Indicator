@@ -53,7 +53,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 mainWindow.OnAttachedDeviceSet();
             }
         }
-
+        
         private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
         private readonly object _lock = new();
@@ -88,6 +88,8 @@ namespace Dynamic_Lighting_Key_Indicator
             InitializeComponent();
             this.Activated += MainWindow_Activated;
             this.Title = MainWindowTitle;
+            this.Closed += OnAppClose;
+            Application.Current.UnhandledException += OnUnhandledException;
 
             Microsoft.Windows.AppLifecycle.AppInstance thisInstance = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent();
             thisInstance.Activated += MainInstance_Activated;
@@ -281,6 +283,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started, something may have gone wrong.";
             }
         }
+
+        
 
         private void StopWatchingForLampArrays()
         {
@@ -719,6 +723,41 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             });
         }
+
+        public void OnAppClose(object sender, WindowEventArgs args)
+        {
+            // Save the current color settings to the config file
+            KeyStatesHandler.StopHook();
+        }
+
+        public void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            // Try writing a log to the temp directory for debugging
+            string logFilePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Dynamic_Lighting_Key_Indicator_Crash_Log.txt");
+            try
+            {
+                string crashLog = $"""
+                    Timestamp: {DateTime.Now}
+                    Message: {e.Message}
+                    Exception: {e.Exception}
+                    Stack Trace: {e.Exception?.StackTrace}
+                    Source: {e.Exception?.Source}
+                    Target Site: {e.Exception?.TargetSite}
+
+
+                    """;
+
+                System.IO.File.AppendAllText(logFilePath, crashLog);
+            }
+            catch
+            {
+                // If logging fails, continue to close gracefully
+            }
+
+            // Close the app
+            this.Close();
+        }
+
 
         private void OnAttachedDeviceSet()
         {

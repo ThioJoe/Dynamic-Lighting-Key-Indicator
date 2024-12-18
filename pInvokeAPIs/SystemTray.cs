@@ -194,6 +194,7 @@ namespace Dynamic_Lighting_Key_Indicator
             appWindow.Show();
         }
 
+        // Intercept window closing and minimize to tray instead
         private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
         {
             // Cancel the close
@@ -211,8 +212,7 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 SetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC, defaultWndProc);
             }
-
-            Application.Current.Exit();
+            Application.Current.Exit(); // This will automatically trigger the .closed event on MainWindow
         }
 
         private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
