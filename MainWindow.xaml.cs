@@ -27,7 +27,7 @@ using Windows.Graphics;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
+    //using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
     public sealed partial class MainWindow : Window
     {
@@ -120,7 +120,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Set up keyboard hook
             #pragma warning disable IDE0028
-            KeyStatesHandler.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
+            MonitoredKey.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
@@ -623,7 +623,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
 
-            KeyStatesHandler.DefineAllMonitoredKeysAndColors(monitoredKeysList);
+            MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredKeysList);
             //KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
             currentConfig = new UserConfig(defaultColor, monitoredKeysList, ViewModel.Brightness);
 

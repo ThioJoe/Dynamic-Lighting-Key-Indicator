@@ -18,7 +18,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static Windows.UI.Color KeyboardMainColor => _keyboardMainColor;
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
-        public static Dictionary<KeyStatesHandler.ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
+        public static Dictionary<ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
         public static List<int> NonMonitoredKeyIndices { get; set; } = []; // Maybe make this an array later
 
 
@@ -73,7 +73,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // For when the monitored key is toggled, this applies the set color to the key
-        public static void SetSingleMonitorKeyColor_ToKeyboard(KeyStatesHandler.MonitoredKey key, LampArray? lampArray = null)
+        public static void SetSingleMonitorKeyColor_ToKeyboard(MonitoredKey key, LampArray? lampArray = null)
         {
             // If it's null, it will show an error then we can return
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
@@ -91,7 +91,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // For when the monitored keys are toggled, this applies the set colors to all the monitored keys
-        public static void SetAllMonitoredKeyColors_ToKeyboard(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
+        public static void SetAllMonitoredKeyColors_ToKeyboard(List<MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
             // If it's null, it will show an error then we can return
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
@@ -157,7 +157,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
 
-            KeyStatesHandler.ToggleAbleKeys key = colorUpdateInfo.key;
+            ToggleAbleKeys key = colorUpdateInfo.key;
             RGBTuple color = colorUpdateInfo.color;
             StateColorApply forState = colorUpdateInfo.forState;
 
@@ -224,7 +224,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
         {
-            MonitoredKeyIndicesDict = new Dictionary<KeyStatesHandler.ToggleAbleKeys, int>();
+            MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
             NonMonitoredKeyIndices = new List<int>();
 
             // Build the arrays of colors and keys
@@ -311,7 +311,7 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.BrightnessLevel = 1.0f;
         }
 
-        public static void SetKeyboardColorExceptMonitoredKeys(List<KeyStatesHandler.MonitoredKey> monitoredKeys, LampArray? lampArray = null)
+        public static void SetKeyboardColorExceptMonitoredKeys(List<MonitoredKey> monitoredKeys, LampArray? lampArray = null)
         {
             if (lampArray == null)
             {

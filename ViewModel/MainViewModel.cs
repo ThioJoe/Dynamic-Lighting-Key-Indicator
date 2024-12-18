@@ -820,7 +820,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Brightness = config.Brightness;
             DefaultColor = Windows.UI.Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B);
 
-            foreach (KeyStatesHandler.MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
+            foreach (MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
             {
                 Windows.UI.Color onColor;
                 Windows.UI.Color offColor;
@@ -921,7 +921,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             MonitoredKey? GetMonitoredKeyObj(VK key)
             {
-                KeyStatesHandler.MonitoredKey? keyObj = config.MonitoredKeysAndColors.Find(x => x.key == key);
+                MonitoredKey? keyObj = config.MonitoredKeysAndColors.Find(x => x.key == key);
                 return keyObj;
             }
 
@@ -933,9 +933,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 return false;
             }
 
-            KeyStatesHandler.MonitoredKey? CapsLockKey = GetMonitoredKeyObj(VK.CapsLock);
-            KeyStatesHandler.MonitoredKey? NumLockKey = GetMonitoredKeyObj(VK.NumLock);
-            KeyStatesHandler.MonitoredKey? ScrollLockKey = GetMonitoredKeyObj(VK.ScrollLock);
+            MonitoredKey? CapsLockKey = GetMonitoredKeyObj(VK.CapsLock);
+            MonitoredKey? NumLockKey = GetMonitoredKeyObj(VK.NumLock);
+            MonitoredKey? ScrollLockKey = GetMonitoredKeyObj(VK.ScrollLock);
 
             // If any of the keys are null, return false
             if (CapsLockKey == null || NumLockKey == null || ScrollLockKey == null)

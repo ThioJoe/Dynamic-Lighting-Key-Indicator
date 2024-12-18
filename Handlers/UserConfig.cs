@@ -128,7 +128,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // ----------------- General Methods ------------------
-        public RGBTuple GetVKOnColor(KeyStatesHandler.ToggleAbleKeys key)
+        public RGBTuple GetVKOnColor(ToggleAbleKeys key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))
@@ -138,7 +138,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).onColor;
         }
 
-        public RGBTuple GetVKOffColor(KeyStatesHandler.ToggleAbleKeys key)
+        public RGBTuple GetVKOffColor(ToggleAbleKeys key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))

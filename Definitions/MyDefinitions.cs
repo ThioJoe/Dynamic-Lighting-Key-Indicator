@@ -2,7 +2,11 @@
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using System.Text.Json.Serialization;
+using System;
 using Windows.UI.Text;
+using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
+using System.Collections.Generic;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -116,4 +120,77 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
     } // --------------------------- End of MyDefinitions ---------------------------
+
+    public enum ToggleAbleKeys : Int32
+    {
+        NumLock = 0x90,
+        CapsLock = 0x14,
+        ScrollLock = 0x91
+    }
+
+    public class MonitoredKey
+    {
+        [JsonInclude]
+        public ToggleAbleKeys key;
+        [JsonInclude]
+        public RGBTuple offColor;
+        [JsonInclude]
+        public RGBTuple onColor;
+        [JsonInclude]
+        public bool onColorTiedToStandard = false;
+        [JsonInclude]
+        public bool offColorTiedToStandard = false;
+
+        public bool IsOn() => KeyStatesHandler.FetchKeyState((int)key);
+
+        [JsonConstructor]
+        public MonitoredKey(ToggleAbleKeys key, RGBTuple onColor, RGBTuple offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+        {
+            this.key = key;
+            this.offColor = offColor;
+            this.onColor = onColor;
+            this.onColorTiedToStandard = onColorTiedToStandard;
+            this.offColorTiedToStandard = offColorTiedToStandard;
+        }
+
+        public MonitoredKey(ToggleAbleKeys key, Windows.UI.Color onColor, Windows.UI.Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+        {
+            this.key = key;
+            this.onColor = (onColor.R, onColor.G, onColor.B);
+            this.offColor = (offColor.R, offColor.G, offColor.B);
+            this.onColorTiedToStandard = onColorTiedToStandard;
+            this.offColorTiedToStandard = offColorTiedToStandard;
+        }
+
+        public MonitoredKey(ToggleAbleKeys key)
+        {
+            this.key = key;
+            this.offColor = UserConfig.DefaultStandardKeyColor;
+            this.onColor = UserConfig.DefaultMonitoredKeyActiveColor;
+            this.onColorTiedToStandard = false;
+            this.offColorTiedToStandard = true;
+        }
+
+        public Windows.UI.Color? GetColorObjCurrent()
+        {
+            return Windows.UI.Color.FromArgb(255, (byte)(IsOn() ? onColor.R : offColor.R),
+                                     (byte)(IsOn() ? onColor.G : offColor.G),
+                                     (byte)(IsOn() ? onColor.B : offColor.B));
+        }
+
+        public Windows.UI.Color? GetColorObjOff()
+        {
+            return Windows.UI.Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
+        }
+
+        public Windows.UI.Color? GetColorObjOn()
+        {
+            return Windows.UI.Color.FromArgb(255, (byte)onColor.R, (byte)onColor.G, (byte)onColor.B);
+        }
+
+        public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> keys)
+        {
+            KeyStatesHandler.monitoredKeys = keys;
+        }
+    }
 }
