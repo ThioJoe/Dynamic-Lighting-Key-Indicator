@@ -34,15 +34,21 @@ An app that uses the Windows 11 "Dynamic Lighting" API to change the color of th
 
 # URL Protocol Control
 You can control the application settings using the `key-lighting-indicator://` protocol. The general format is:
-```url
+```
 key-lighting-indicator://set?parameter1=value1&parameter2=value2
 ```
 
-#### Example Using PowerShell - *(Note: the double quotes are important)*
+### Example With Command Prompt / Batch
+*(Don't put quotes around the URL)*
+```cmd
+start key-lighting-indicator://set?global_brightness=100
+```
+
+### Example Using PowerShell
+*(Qutoes seem optional)*
 ```powershell
 Start-Process "key-lighting-indicator://set?global_brightness=100"
 ```
-
 
 ## Protocol Parameters
 - `global_brightness`: Integer (0-100) - Sets brightness for all keys
