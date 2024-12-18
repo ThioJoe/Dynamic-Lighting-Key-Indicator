@@ -89,7 +89,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.Activated += MainWindow_Activated;
             this.Title = MainWindowTitle;
             this.Closed += OnAppClose;
-            Application.Current.UnhandledException += OnUnhandledException;
+            Application.Current.UnhandledException += OnUnhandledException;         
 
             Microsoft.Windows.AppLifecycle.AppInstance thisInstance = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent();
             thisInstance.Activated += MainInstance_Activated;
@@ -288,9 +288,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void StopWatchingForLampArrays()
         {
-            if (KeyStatesHandler.hookIsActive == true)
+            if (KeyStatesHandler.rawInputWatcherActive == true)
             {
-                KeyStatesHandler.StopHook(); // Stop the keyboard hook 
+                KeyStatesHandler.CleanupInputWatcher(); // Stop the keyboard hook 
             }
 
             if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
@@ -727,7 +727,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public void OnAppClose(object sender, WindowEventArgs args)
         {
             // Save the current color settings to the config file
-            KeyStatesHandler.StopHook();
+            KeyStatesHandler.CleanupInputWatcher();
         }
 
         public void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)

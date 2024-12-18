@@ -43,7 +43,9 @@ namespace Dynamic_Lighting_Key_Indicator
             currentConfig.DeviceId = device.Id;
 
             // Initialize the keyboard hook and callback to monitor key states
-            KeyStatesHandler.InitializeHookAndCallback();
+            IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            KeyStatesHandler.InitializeRawInput(hwnd);
+
 
             if (info != null)
                 ColorSetter.BuildMonitoredKeyIndicesDict(info.lampArray);
@@ -182,9 +184,9 @@ namespace Dynamic_Lighting_Key_Indicator
             Console.WriteLine("DeviceWatcher stopped.");
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Stopped.";
 
-            if (KeyStatesHandler.hookIsActive == true)
+            if (KeyStatesHandler.rawInputWatcherActive == true)
             {
-                KeyStatesHandler.StopHook(); // Stop the keyboard hook 
+                KeyStatesHandler.CleanupInputWatcher(); // Stop the keyboard hook 
             }
         }
     }

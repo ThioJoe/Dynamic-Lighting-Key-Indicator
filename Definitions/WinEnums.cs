@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression. It was saying CA1069 was unnecessary but it still gives a warning about it.
 #pragma warning disable CA1069  // Disable Warning: Enums values should not be duplicated
@@ -8,6 +9,56 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class WinEnums
     {
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RAWINPUTDEVICE
+        {
+            public ushort usUsagePage;
+            public ushort usUsage;
+            public uint dwFlags;
+            public IntPtr hwndTarget;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RAWINPUTHEADER
+        {
+            public uint dwType;
+            public uint dwSize;
+            public IntPtr hDevice;
+            public IntPtr wParam;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RAWKEYBOARD
+        {
+            public ushort MakeCode;
+            public ushort Flags;
+            public ushort Reserved;
+            public ushort VKey;
+            public uint Message;
+            public uint ExtraInformation;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RAWINPUT
+        {
+            public RAWINPUTHEADER header;
+            public RAWKEYBOARD keyboard;
+        }
+
+        public enum RawInput_dwFlags : uint
+        {
+            RIDEV_INPUTSINK = 0x00000100,
+            RID_INPUT = 0x10000003,
+            RIM_TYPEKEYBOARD = 1,
+            WM_INPUT = 0x00FF,
+        }
+
+        internal static class NativeConstants
+        {
+            
+        }
+
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters
         public enum nIndex : int
         {

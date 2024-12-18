@@ -1,10 +1,8 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Windows.UI;
 using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -12,75 +10,95 @@ namespace Dynamic_Lighting_Key_Indicator
     internal static class KeyStatesHandler
     {
         public static List<MonitoredKey> monitoredKeys = [];
+        public static bool rawInputWatcherActive = false;
 
         // Win32 API imports
         [DllImport("user32.dll")]
-        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc callback, IntPtr hInstance, uint threadId);
+        private static extern bool RegisterRawInputDevices(
+            [MarshalAs(UnmanagedType.LPArray)] RAWINPUTDEVICE[] pRawInputDevices,
+            uint uiNumDevices,
+            uint cbSize);
 
         [DllImport("user32.dll")]
-        private static extern bool UnhookWindowsHookEx(IntPtr hInstance);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr CallNextHookEx(IntPtr idHook, int nCode, IntPtr wParam, IntPtr lParam);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        private static extern IntPtr GetModuleHandle(string lpModuleName);
+        private static extern uint GetRawInputData(
+            IntPtr hRawInput,
+            uint uiCommand,
+            IntPtr pData,
+            ref uint pcbSize,
+            uint cbSizeHeader);
 
         [DllImport("user32.dll")]
         private static extern short GetKeyState(int keyCode);
 
-        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
-        private static LowLevelKeyboardProc? _proc;
-        private static IntPtr _hookID = IntPtr.Zero;
-        public static bool hookIsActive = false;
-
-        public static void InitializeHookAndCallback()
+        public static void InitializeRawInput(IntPtr hwnd)
         {
-            _proc = HookCallback;
-            _hookID = SetHook(_proc);
+            if (rawInputWatcherActive)
+                return;
 
-            if (_hookID == IntPtr.Zero)
+            // First set up the window procedure
+            SubclassWindow(hwnd);
+
+            // Then register for raw input
+            RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
+            rid[0] = new RAWINPUTDEVICE
             {
-                throw new Exception("Failed to set hook.");
-            }
-            else
+                usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
+                usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
+                dwFlags = (uint)RawInput_dwFlags.RIDEV_INPUTSINK,
+                hwndTarget = hwnd
+            };
+
+            if (!RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICE))))
             {
-                hookIsActive = true;
+                throw new Exception("Failed to register raw input device.");
             }
+
+            rawInputWatcherActive = true;
         }
 
-        private static IntPtr SetHook(LowLevelKeyboardProc proc)
+        public static void ProcessRawInput(IntPtr lParam)
         {
-            // Get the current module, throw an exception if it fails
-            using Process? curProcess = System.Diagnostics.Process.GetCurrentProcess();
-            using ProcessModule? curModule = (curProcess?.MainModule) ?? throw new Exception("Failed to get current module.");
+            uint dwSize = 0;
 
-            return SetWindowsHookEx((int)KeyboardHook.WH_KEYBOARD_LL, proc, GetModuleHandle(curModule.ModuleName), 0);
-        }
-
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            // Before processing, immediately call the next hook in the chain to not introduce unnecessary delays in the key being sent
-            IntPtr hookResult = CallNextHookEx(_hookID, nCode, wParam, lParam);
-
-            if (nCode >= 0)
+            // First call - get the size of the input data
+            if (GetRawInputData(lParam, (uint)RawInput_dwFlags.RID_INPUT, IntPtr.Zero, ref dwSize,
+                (uint)Marshal.SizeOf<RAWINPUTHEADER>()) == unchecked((uint)-1))
             {
-                // Get the data from the struct as an object
-                KBDLLHOOKSTRUCT kbd = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
-                int vkCode = (int)kbd.vkCode;
-                LowLevelKeyboardHookFlags flags = kbd.flags;
+                return; // Handle error
+            }
 
-                // Check if the key presses was one of the monitored keys
-                foreach (var mk in monitoredKeys)
+            IntPtr rawDataPtr = Marshal.AllocHGlobal((int)dwSize);
+            try
+            {
+                // Second call - get the actual data
+                if (GetRawInputData(lParam, (uint)RawInput_dwFlags.RID_INPUT, rawDataPtr, ref dwSize,
+                    (uint)Marshal.SizeOf<RAWINPUTHEADER>()) == unchecked((uint)-1))
                 {
-                    if ((int)mk.key == vkCode && flags.HasFlag(LowLevelKeyboardHookFlags.KeyUp))
+                    return; // Handle error
+                }
+
+                RAWINPUT rawInput = Marshal.PtrToStructure<RAWINPUT>(rawDataPtr);
+
+                if (rawInput.header.dwType == (uint)RawInput_dwFlags.RIM_TYPEKEYBOARD)
+                {
+                    int vkCode = rawInput.keyboard.VKey;
+                    bool isKeyUp = (rawInput.keyboard.Flags & 0x01) != 0;
+
+                    // Check if the key press was one of the monitored keys
+                    foreach (var mk in monitoredKeys)
                     {
-                        Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
-                        break;
+                        if ((int)mk.key == vkCode && isKeyUp)
+                        {
+                            Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
+                            break;
+                        }
                     }
                 }
             }
-            return hookResult;
+            finally
+            {
+                Marshal.FreeHGlobal(rawDataPtr);
+            }
         }
 
         public static bool FetchKeyState(int vkCode)
@@ -88,38 +106,65 @@ namespace Dynamic_Lighting_Key_Indicator
             return (GetKeyState(vkCode) & 1) == 1;
         }
 
-        // Function to stop the hook
-        public static void StopHook()
+        public static void CleanupInputWatcher()
         {
-            if (hookIsActive || _hookID != IntPtr.Zero)
+            if (rawInputWatcherActive)
             {
-                UnhookWindowsHookEx(_hookID);
-                _hookID = IntPtr.Zero;
-                hookIsActive = false;
+                // Unregister by registering with RIDEV_REMOVE
+                RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
+                rid[0] = new RAWINPUTDEVICE
+                {
+                    usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
+                    usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
+                    dwFlags = 0x00000001, // RIDEV_REMOVE
+                    hwndTarget = IntPtr.Zero
+                };
+
+                RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICE)));
+                rawInputWatcherActive = false;
             }
         }
 
-        // Returned as pointer in the lparam of the hook callback
-        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct
-        [StructLayout(LayoutKind.Sequential)]
-        private struct KBDLLHOOKSTRUCT
+        // -------------------------------------------------------------------------------
+
+        private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
+        private static WndProcDelegate? wndProcDelegate;
+        private static IntPtr originalWndProc;
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, WndProcDelegate newProc);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
+
+        private const int GWLP_WNDPROC = -4;
+
+        public static void SubclassWindow(IntPtr hwnd)
         {
-            public DWORD vkCode;          // Virtual key code
-            public DWORD scanCode;
-            public LowLevelKeyboardHookFlags flags;
-            public DWORD time;
-            public IntPtr dwExtraInfo;
+            // Keep a reference to the delegate to prevent garbage collection
+            wndProcDelegate = new WndProcDelegate(WndProc);
+            originalWndProc = SetWindowLongPtr(hwnd, GWLP_WNDPROC, wndProcDelegate);
         }
 
-        [Flags]
-        private enum LowLevelKeyboardHookFlags : uint
+        private static IntPtr WndProc(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam)
         {
-            Extended = 0x01,             // Bit 0: Extended key (e.g. function key or numpad)
-            LowerILInjected = 0x02,      // Bit 1: Injected from lower integrity level process
-            Injected = 0x10,             // Bit 4: Injected from any process
-            AltDown = 0x20,              // Bit 5: ALT key pressed
-            KeyUp = 0x80                 // Bit 7: Key being released (transition state)
-                                         // Bits 2-3, 6 are reserved
+            if (msg == WinEnums.WM_MESSAGE.WM_INPUT)
+            {
+                KeyStatesHandler.ProcessRawInput(lParam);
+                return DefRawInputProc(lParam, 1, (uint)Marshal.SizeOf<RAWINPUTHEADER>());
+            }
+            return CallWindowProc(originalWndProc, hwnd, (uint)msg, wParam, lParam);
         }
-    }
-}
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr DefRawInputProc(
+            IntPtr paRawInput,
+            Int32 nInput,
+            UInt32 cbSizeHeader);
+
+        // -------------------------------------------------------------------------------
+
+
+    } // ------ End class ---------
+
+} // ------ End namespace ---------
