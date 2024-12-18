@@ -134,6 +134,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
+            // Before processing, immediately call the next hook in the chain to not introduce unnecessary delays in the key being sent
+            IntPtr hookResult = CallNextHookEx(_hookID, nCode, wParam, lParam);
+
             if (nCode >= 0)
             {
                 // Get the data from the struct as an object
@@ -151,7 +154,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
             }
-            return CallNextHookEx(_hookID, nCode, wParam, lParam);
+            return hookResult;
         }
 
         public static bool FetchKeyState(int vkCode)
