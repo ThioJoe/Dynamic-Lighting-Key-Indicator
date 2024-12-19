@@ -83,7 +83,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static bool FetchKeyState(int vkCode)
         {
-            return (GetKeyState(vkCode) & 1) == 1;
+            bool state = ((GetKeyState(vkCode) & 1) == 1);
+            Task.Run(() => MainViewModel.UpdateLastKnownKeyState(vkCode, state));
+            return state;
         }
 
         public static void CleanupInputWatcher()

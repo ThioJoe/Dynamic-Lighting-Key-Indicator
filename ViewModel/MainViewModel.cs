@@ -21,6 +21,8 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
+        private static MainViewModel mainViewModelInstance;
+
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -51,6 +53,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
+
+            mainViewModelInstance = mainWindowPassIn.ViewModel;
         }
 
         private MainWindow mainWindow;
@@ -437,13 +441,11 @@ namespace Dynamic_Lighting_Key_Indicator
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 });
             }
+        }
 
-            // If anything changes, check if the current configuration is different from the saved configuration, and if so, enable the save button
-            // Don't check if it's from the save button itself to avoid infinite loop
-            //if (propertyName != nameof(IsSaveButtonEnabled))
-            //{
-            //    CheckAndUpdateSaveButton();
-            //}
+        protected static void OnPropertyChanged_Static(MainViewModel viewModel, [CallerMemberName] string? propertyName = null)
+        {
+            viewModel.OnPropertyChanged(propertyName);
         }
 
         protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -451,6 +453,14 @@ namespace Dynamic_Lighting_Key_Indicator
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;
             OnPropertyChanged(propertyName);
+            return true;
+        }
+
+        protected static bool SetProperty_Static<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged_Static(mainViewModelInstance, propertyName);
             return true;
         }
 
@@ -770,6 +780,30 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool GetSyncSetting_ByButtonObject(Button button)
         {
             return GetSyncSetting_ByButtonName(button.Name);
+        }
+
+        private static bool _LastKnownScrollLockState = false;
+        private static bool _LastKnownCapsLockState = false;
+        private static bool _LastKnownNumLockState = false;
+        public static bool LastKnownNumLockState { get => _LastKnownNumLockState; set => SetProperty_Static(ref _LastKnownNumLockState, value); }
+        public static bool LastKnownCapsLockState { get => _LastKnownCapsLockState; set => SetProperty_Static(ref _LastKnownCapsLockState, value); }
+        public static bool LastKnownScrollLockState { get => _LastKnownScrollLockState; set => SetProperty_Static(ref _LastKnownScrollLockState, value); }
+
+        public static void UpdateLastKnownKeyState(int keyInt, bool state)
+        {
+            VK key = (VK)keyInt;
+            switch (key)
+            {
+                case VK.NumLock:
+                    LastKnownNumLockState = state;
+                    break;
+                case VK.CapsLock:
+                    LastKnownCapsLockState = state;
+                    break;
+                case VK.ScrollLock:
+                    LastKnownScrollLockState = state;
+                    break;
+            }
         }
 
         //--------------------------------------------------------------
