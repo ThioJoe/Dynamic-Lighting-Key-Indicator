@@ -205,6 +205,13 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> keys)
         {
             KeyStatesHandler.monitoredKeys = keys;
+
+            // Create a dictionary for faster lookups
+            KeyStatesHandler.monitoredKeysDict = [];
+            foreach (MonitoredKey key in keys)
+            {
+                KeyStatesHandler.monitoredKeysDict.Add(key.key, key);
+            }
         }
 
     } // End of MonitoredKey class

@@ -78,11 +78,20 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
         public struct RAWKEYBOARD
         {
             public ushort MakeCode;
-            public ushort Flags;
+            public _Flags Flags;
             public ushort Reserved;
             public ushort VKey;
             public uint Message;
             public uint ExtraInformation;
+
+            [Flags]
+            public enum _Flags : ushort
+            {
+                RI_KEY_MAKE = 0,
+                RI_KEY_BREAK = 1,
+                RI_KEY_E0 = 2,
+                RI_KEY_E1 = 4,
+            }
         }
 
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinput

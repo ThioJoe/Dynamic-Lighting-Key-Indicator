@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums.RAWKEYBOARD;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class KeyStatesHandler
     {
         public static List<MonitoredKey> monitoredKeys = [];
+        public static Dictionary<VK, MonitoredKey> monitoredKeysDict = [];
         public static bool rawInputWatcherActive = false;
 
         // Win32 API imports
@@ -23,6 +25,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private static extern short GetKeyState(int keyCode);
 
         public static readonly uint rawInputHeaderSize = (uint)Marshal.SizeOf<RAWINPUTHEADER>();
+        public static readonly uint rawInputSize = (uint)Marshal.SizeOf<RAWINPUT>();
 
         public static void InitializeRawInput(IntPtr hwnd)
         {
@@ -52,25 +55,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void ProcessRawInput(IntPtr lParam)
         {
-            uint dwSize = 0;
+            uint dwSize = rawInputSize;
 
-            // First call to get the size
-            uint result = GetRawInputData(
-                hRawInput: lParam,
-                uiCommand: (uint)uiCommand.RID_INPUT,
-                pData: IntPtr.Zero,
-                pcbSize: ref dwSize,
-                cbSizeHeader: rawInputHeaderSize
-            );
-
-            if (result == 0xFFFFFFFF) // Error indicated by (UINT)-1
-                return;
-
-            // Second call to get the data
+            // We know it's a WM_INPUT message so we know the size of the data, so we can skip the first call to get the size
             IntPtr rawDataPtr = Marshal.AllocHGlobal((int)dwSize);
             try
             {
-                result = GetRawInputData(
+                uint result = GetRawInputData(
                     hRawInput: lParam,
                     uiCommand: (uint)uiCommand.RID_INPUT,
                     pData: rawDataPtr,
@@ -84,16 +75,12 @@ namespace Dynamic_Lighting_Key_Indicator
                 RAWINPUT rawInput = Marshal.PtrToStructure<RAWINPUT>(rawDataPtr);
                 if (rawInput.header.dwType == RAWINPUTHEADER._dwType.RIM_TYPEKEYBOARD)
                 {
-                    int vkCode = rawInput.keyboard.VKey;
-                    bool isKeyUp = (rawInput.keyboard.Flags & 0x01) != 0;
-
-                    // Check if the key press was one of the monitored keys
-                    foreach (var mk in monitoredKeys)
+                    if (rawInput.keyboard.Flags.HasFlag(_Flags.RI_KEY_BREAK))
                     {
-                        if ((int)mk.key == vkCode && isKeyUp)
+                        // Check the dictionary
+                        if (monitoredKeysDict.TryGetValue((VK)rawInput.keyboard.VKey, out MonitoredKey? mk))
                         {
                             Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
-                            break;
                         }
                     }
                 }
