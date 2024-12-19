@@ -21,7 +21,8 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
-        private static MainViewModel mainViewModelInstance;
+        private MainWindow mainWindow;
+        private static MainViewModel? mainViewModelInstance;
 
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
         {
@@ -53,12 +54,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
-
-            mainViewModelInstance = mainWindowPassIn.ViewModel;
         }
 
-        private MainWindow mainWindow;
-
+        public static void SetMainViewModelInstance(MainViewModel vieModelInstance)
+        {
+            mainViewModelInstance = vieModelInstance;
+        }
 
         private bool _isStartupEnabled;
         public bool IsStartupEnabled
@@ -456,14 +457,14 @@ namespace Dynamic_Lighting_Key_Indicator
             return true;
         }
 
-        protected static bool SetProperty_Static<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            if (mainViewModelInstance != null)
-                OnPropertyChanged_Static(mainViewModelInstance, propertyName);
-            return true;
-        }
+        //protected static bool SetProperty_Static<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        //{
+        //    if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        //    field = value;
+        //    if (mainViewModelInstance != null)
+        //        OnPropertyChanged_Static(mainViewModelInstance, propertyName);
+        //    return true;
+        //}
 
         // ------------------------------------- Color Values From GUI -------------------------------------
 
@@ -627,6 +628,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(ScrollLockOnColorHex));
                     OnPropertyChanged(nameof(ScrollLockOnBrush));
+                    OnPropertyChanged(nameof(ScrollLockOnShadow));
+                    
                 }
             }
         }
@@ -641,6 +644,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(ScrollLockOffColorHex));
                     OnPropertyChanged(nameof(ScrollLockOffBrush));
+                    OnPropertyChanged(nameof(ScrollLockOffShadow));
+
                 }
             }
         }
@@ -655,6 +660,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(CapsLockOnColorHex));
                     OnPropertyChanged(nameof(CapsLockOnBrush));
+                    OnPropertyChanged(nameof(CapsLockOnShadow));
+
                 }
             }
         }
@@ -669,6 +676,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(CapsLockOffColorHex));
                     OnPropertyChanged(nameof(CapsLockOffBrush));
+                    OnPropertyChanged(nameof(CapsLockOffShadow));
+
                 }
             }
         }
@@ -683,6 +692,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(NumLockOnColorHex));
                     OnPropertyChanged(nameof(NumLockOnBrush));
+                    OnPropertyChanged(nameof(NumLockOnShadow));
+
                 }
             }
         }
@@ -697,6 +708,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(NumLockOffColorHex));
                     OnPropertyChanged(nameof(NumLockOffBrush));
+                    OnPropertyChanged(nameof(NumLockOffShadow));
+
                 }
             }
         }
@@ -711,6 +724,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(DefaultColorHex));
                     OnPropertyChanged(nameof(DefaultColorBrush));
+                    OnPropertyChanged(nameof(DefaultColorShadow));
+                    mainWindow.AddShadowButtonSwitch(null, null);
                 }
             }
         }
@@ -783,14 +798,55 @@ namespace Dynamic_Lighting_Key_Indicator
             return GetSyncSetting_ByButtonName(button.Name);
         }
 
-        private static bool _LastKnownScrollLockState = false;
-        private static bool _LastKnownCapsLockState = false;
-        private static bool _LastKnownNumLockState = false;
-        public static bool LastKnownNumLockState { get => _LastKnownNumLockState; set => SetProperty_Static(ref _LastKnownNumLockState, value); }
-        public static bool LastKnownCapsLockState { get => _LastKnownCapsLockState; set => SetProperty_Static(ref _LastKnownCapsLockState, value); }
-        public static bool LastKnownScrollLockState { get => _LastKnownScrollLockState; set => SetProperty_Static(ref _LastKnownScrollLockState, value); }
+        private static float radius = 30f;
+        private static float opacityPercent = 100;
 
-        public static void UpdateLastKnownKeyState(int keyInt, bool state)
+        private UIElement shadowHostGrid = MainWindow.GetShadowHostGrid();
+
+        public Microsoft.UI.Composition.DropShadow? ScrollLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.ScrollLockOnColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? ScrollLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.ScrollLockOffColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? CapsLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.CapsLockOnColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? CapsLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.CapsLockOffColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? NumLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.NumLockOnColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? NumLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.NumLockOffColor, radius: radius, opacityPercent: opacityPercent);
+        public Microsoft.UI.Composition.DropShadow? DefaultColorShadow => MainWindow.DropShadowMaker(shadowColor: this.DefaultColor, radius: radius, opacityPercent: opacityPercent);
+
+
+        private bool _LastKnownScrollLockState = false;
+        private bool _LastKnownCapsLockState = false;
+        private bool _LastKnownNumLockState = false;
+        public bool LastKnownNumLockState 
+        { 
+            get => _LastKnownNumLockState; 
+            set 
+            { 
+                SetProperty(ref _LastKnownNumLockState, value);
+                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
+                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.NumLock, stateColorApply);
+            }
+        }
+        public bool LastKnownCapsLockState 
+        { 
+            get => _LastKnownCapsLockState; 
+            set 
+            { 
+                SetProperty(ref _LastKnownCapsLockState, value);
+                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
+                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.CapsLock, stateColorApply);
+            }
+        }
+        public bool LastKnownScrollLockState
+        {
+            get => _LastKnownScrollLockState;
+            set
+            {
+                SetProperty(ref _LastKnownScrollLockState, value);
+                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
+                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.ScrollLock, stateColorApply);
+            }
+        }
+
+        public void UpdateLastKnownKeyState(int keyInt, bool state)
         {
             VK key = (VK)keyInt;
             switch (key)
@@ -805,6 +861,12 @@ namespace Dynamic_Lighting_Key_Indicator
                     LastKnownScrollLockState = state;
                     break;
             }
+        }
+
+        public static void StaticUpdateLastKnownKeyState(int keyInt, bool state)
+        {
+            if (mainViewModelInstance != null)
+                mainViewModelInstance.UpdateLastKnownKeyState(keyInt, state);
         }
 
         //--------------------------------------------------------------

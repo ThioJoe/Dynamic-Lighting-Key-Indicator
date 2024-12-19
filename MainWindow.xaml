@@ -180,6 +180,7 @@
                     Click="ColorButton_Click" 
                     Tag="ScrollLockOnColor"
                     Loaded="buttonScrollLockOn_Loaded"
+                    BorderBrush="Black"
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
             </Button>

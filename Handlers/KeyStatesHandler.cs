@@ -84,7 +84,6 @@ namespace Dynamic_Lighting_Key_Indicator
         public static bool FetchKeyState(int vkCode)
         {
             bool state = ((GetKeyState(vkCode) & 1) == 1);
-            Task.Run(() => MainViewModel.UpdateLastKnownKeyState(vkCode, state));
             return state;
         }
 
@@ -165,6 +164,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         if (monitoredKeysDict.TryGetValue((VK)rawInput.keyboard.VKey, out MonitoredKey? mk))
                         {
                             Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
+                            Task.Run(() => MainViewModel.StaticUpdateLastKnownKeyState((int)rawInput.keyboard.VKey, false));
                         }
                     }
                 }

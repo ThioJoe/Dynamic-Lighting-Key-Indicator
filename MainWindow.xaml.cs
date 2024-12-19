@@ -89,6 +89,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Waiting),
                 DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
             };
+            MainViewModel.SetMainViewModelInstance(ViewModel);
 
             InitializeComponent();
             this.Activated += MainWindow_Activated;
@@ -918,16 +919,21 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void buttonScrollLockOn_Loaded(object sender, RoutedEventArgs e)
         {
-            buttonScrollLockOn.DispatcherQueue.TryEnqueue(() =>
-            {
-                Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(Colors.Red, 15f, 100f);
-                AddShadowBehindElement(buttonScrollLockOn, shadow);
-            });
+            //buttonScrollLockOn.DispatcherQueue.TryEnqueue(() =>
+            //{
+            //    Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(Colors.Red, 15f, 100f);
+            //    AddShadowBehindElement(buttonScrollLockOn, shadow);
+            //});
         }
 
-        private Microsoft.UI.Composition.DropShadow DropShadowMaker(Windows.UI.Color shadowColor, float radius, float opacityPercent)
+        public static UIElement GetShadowHostGrid()
         {
-            Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(ShadowHostGrid).Compositor;
+            return mainWindow.ShadowHostGrid;
+        }
+
+        public static Microsoft.UI.Composition.DropShadow DropShadowMaker(Windows.UI.Color shadowColor, float radius, float opacityPercent)
+        {
+            Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(GetShadowHostGrid()).Compositor;
 
             if (opacityPercent < 0) { opacityPercent = 0; }
             if (opacityPercent > 100) { opacityPercent = 100; }
@@ -943,8 +949,105 @@ namespace Dynamic_Lighting_Key_Indicator
             return dropShadow;
         }
 
-        private void AddShadowBehindElement(FrameworkElement element, Microsoft.UI.Composition.DropShadow shadow)
+        public void AddShadowButtonSwitch(VK? key, StateColorApply? forstate)
         {
+            // Use both null for default
+            if (key == null || forstate == null)
+            {
+                if (ViewModel.DefaultColorShadow != null)
+                    mainWindow.AddShadowBehindElement(mainWindow.buttonDefaultColor, ViewModel.DefaultColorShadow);
+                return;
+            }
+
+            Button[] buttons = new Button[2];
+            Microsoft.UI.Composition.DropShadow[] shadows = new DropShadow[2];
+
+            //if (forstate == StateColorApply.Both)
+            //{
+            //    buttons = new Button[2];
+            //    shadows = new DropShadow[2];
+            //}
+
+            switch (key)
+            {
+                case VK.NumLock:
+                    if (forstate == StateColorApply.On || forstate == StateColorApply.Both)
+                    {
+                        //buttons.Append(buttonNumLockOn);
+                        //shadows.Append(ViewModel.ScrollLockOnShadow);
+                        buttons[0] = buttonNumLockOn;
+                        shadows[0] = ViewModel.NumLockOnShadow;
+                    }
+                    if (forstate == StateColorApply.Off || forstate == StateColorApply.Both)
+                    { 
+                        //buttons.Append(buttonNumLockOff);
+                        //shadows.Append(ViewModel.ScrollLockOffShadow);
+                        buttons[1] = buttonNumLockOff;
+                        shadows[1] = ViewModel.NumLockOffShadow;
+                    }
+                    break;
+
+                case VK.CapsLock:
+                    if (forstate == StateColorApply.On || forstate == StateColorApply.Both)
+                    {
+                        //buttons.Append(buttonCapsLockOn);
+                        //shadows.Append(ViewModel.ScrollLockOnShadow);
+                        buttons[0] = buttonCapsLockOn;
+                        shadows[0] = ViewModel.CapsLockOnShadow;
+                    }
+                    if (forstate == StateColorApply.Off || forstate == StateColorApply.Both)
+                    {
+                        //buttons.Append(buttonCapsLockOff);
+                        //shadows.Append(ViewModel.ScrollLockOffShadow);
+                        buttons[1] = buttonCapsLockOff;
+                        shadows[1] = ViewModel.CapsLockOffShadow;
+                    }
+                    break;
+
+                case VK.ScrollLock:
+                    if (forstate == StateColorApply.On || forstate == StateColorApply.Both)
+                    {
+                        //buttons.Append(buttonScrollLockOn);
+                        //shadows.Append(ViewModel.ScrollLockOnShadow);
+                        buttons[0] = buttonScrollLockOn;
+                        shadows[0] = ViewModel.ScrollLockOnShadow;
+                    }
+                    if (forstate == StateColorApply.Off || forstate == StateColorApply.Both)
+                    {
+                        //buttons.Append(buttonScrollLockOff);
+                        //shadows.Append(ViewModel.ScrollLockOffShadow);
+                        buttons[1] = buttonScrollLockOff;
+                        shadows[1] = ViewModel.ScrollLockOffShadow;
+                    }
+                    break;
+            }
+
+            if (buttons == null)
+                return;
+
+            int index = 0;
+            foreach (Button? button in buttons)
+            {
+                if (button != null && shadows[index] != null)
+                {
+                    //Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(color, 15f, 100f);
+                    //DropShadow shadow = shadows[index];
+                    Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(Colors.Red, 15f, 100f);
+                    //AddShadowBehindElement(button, shadow);
+                    button.DispatcherQueue.TryEnqueue(() =>
+                    {
+                        AddShadowBehindElement(button, shadow);
+                    });
+                }
+                index++;
+            }
+        }
+
+        public void AddShadowBehindElement(FrameworkElement element, Microsoft.UI.Composition.DropShadow shadow)
+        {
+            if (ShadowHostGrid.IsLoaded == false || element.IsLoaded == false)
+                return;
+
             Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(ShadowHostGrid).Compositor;
             Microsoft.UI.Composition.ContainerVisual containerVisual = compositor.CreateContainerVisual();
 
@@ -954,7 +1057,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Position the shadow under the button by determining button's position relative to ShadowHostGrid
             var relativePoint = element.TransformToVisual(ShadowHostGrid).TransformPoint(new Windows.Foundation.Point(0, 0));
             spriteVisual.Offset = new System.Numerics.Vector3((float)relativePoint.X, (float)relativePoint.Y, 0);
-
             spriteVisual.Shadow = shadow;
             containerVisual.Children.InsertAtTop(spriteVisual);
 
@@ -1029,7 +1131,8 @@ namespace Dynamic_Lighting_Key_Indicator
             // Add keys where their current state matches their linked default state
             foreach (MonitoredKey key in KeyStatesHandler.monitoredKeys)
             {
-                bool keystate = KeyStatesHandler.FetchKeyState((int)key.key);
+                //bool keystate = KeyStatesHandler.FetchKeyState((int)key.key);
+                bool keystate = key.IsOn();
                 if (key.onColorTiedToStandard && keystate)
                 {
                     monitoredKeysToPreviewDefaultColor.Add(key.key);

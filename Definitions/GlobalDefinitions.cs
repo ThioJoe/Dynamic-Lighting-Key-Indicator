@@ -3,7 +3,9 @@
 global using DWORD = System.UInt32;        // 4 Bytes, aka uint, uint32
 global using RGBTuple = (int R, int G, int B);
 global using VK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
+
 global using Color = Windows.UI.Color;
+global using DropShadow = Microsoft.UI.Composition.DropShadow;
 // -------------------------------
 global using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 global using Dynamic_Lighting_Key_Indicator.Definitions;
@@ -37,7 +39,7 @@ namespace Dynamic_Lighting_Key_Indicator
         CapsLock = 0x14,
         ScrollLock = 0x91
     }
-    internal enum StateColorApply
+    public enum StateColorApply
     {
         On,
         Off,
