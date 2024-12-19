@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums.RAWKEYBOARD;
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -53,7 +54,7 @@ namespace Dynamic_Lighting_Key_Indicator
             rawInputWatcherActive = true;
         }
 
-        public static void ProcessRawInput(IntPtr lParam)
+        public static RAWINPUT? GetRawInput(IntPtr lParam)
         {
             uint dwSize = rawInputSize;
 
@@ -70,20 +71,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 );
                 
                 if (result == 0xFFFFFFFF) // Error indicated by (UINT)-1
-                    return;
+                    return null;
 
-                RAWINPUT rawInput = Marshal.PtrToStructure<RAWINPUT>(rawDataPtr);
-                if (rawInput.header.dwType == RAWINPUTHEADER._dwType.RIM_TYPEKEYBOARD)
-                {
-                    if (rawInput.keyboard.Flags.HasFlag(_Flags.RI_KEY_BREAK))
-                    {
-                        // Check the dictionary
-                        if (monitoredKeysDict.TryGetValue((VK)rawInput.keyboard.VKey, out MonitoredKey? mk))
-                        {
-                            Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
-                        }
-                    }
-                }
+                return Marshal.PtrToStructure<RAWINPUT>(rawDataPtr);
             }
             finally
             {
@@ -150,7 +140,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Check if the message is a raw input message, otherwise call the original window procedure so it still gets processed normally
             if (uMsg == WinEnums.WM_MESSAGE.WM_INPUT)
             {
-                KeyStatesHandler.ProcessRawInput(lParam);
+                RAWINPUT? rawInputResult = GetRawInput(lParam);
 
                 // See for wparam values: https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-input
                 if (wParam == (UIntPtr)WM_INPUT_wParam.RIM_INPUTSINK) // Window was not in the foreground
@@ -162,6 +152,20 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Goes to default window procedure
                     result = DefWindowProc(hWnd, (uint)uMsg, wParam, lParam);
                 }
+
+                // Now we can handle the raw input
+                if (rawInputResult is RAWINPUT rawInput)
+                {
+                    // We already specified to only get keyboard input, so no need to check dwType, we can just check the keyboard data
+                    if (rawInput.keyboard.Flags.HasFlag(_Flags.RI_KEY_BREAK))
+                    {
+                        // Check the dictionary
+                        if (monitoredKeysDict.TryGetValue((VK)rawInput.keyboard.VKey, out MonitoredKey? mk))
+                        {
+                            Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
+                        }
+                    }
+                }
             }
             else
             {
@@ -169,7 +173,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 result = CallWindowProc(originalWndProc, hWnd, (uint)uMsg, wParam, lParam);
             }
 
-            return result;
+            return result; // Not actually used, but return anyway
         }
 
         // -------------------------------------------------------------------------------
