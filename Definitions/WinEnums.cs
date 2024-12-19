@@ -9,25 +9,65 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
 {
     internal static class WinEnums
     {
-
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUTDEVICE
         {
             public ushort usUsagePage;
             public ushort usUsage;
-            public uint dwFlags;
+            public _dwFlags dwFlags;
             public IntPtr hwndTarget;
+
+            public enum _dwFlags : uint
+            {
+                RIDEV_REMOVE = 0x00000001,
+                RIDEV_EXCLUDE = 0x00000010,
+                RIDEV_PAGEONLY = 0x00000020,
+                RIDEV_NOLEGACY = 0x00000030,
+                RIDEV_INPUTSINK = 0x00000100,
+                RIDEV_CAPTUREMOUSE = 0x00000200,
+                RIDEV_NOHOTKEYS = 0x00000200,
+                RIDEV_APPKEYS = 0x00000400,
+                RIDEV_EXINPUTSINK = 0x00001000,
+                RIDEV_DEVNOTIFY = 0x00002000,
+
+                //RID_INPUT = 0x10000003,
+                //RIM_TYPEKEYBOARD = 1,
+                //WM_INPUT = 0x00FF,
+            }
+        }
+
+        // For use in GetRawInputData: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getrawinputdata
+        public enum uiCommand : uint
+        {
+            RID_HEADER = 0x10000005,
+            RID_INPUT = 0x10000003
         }
 
         [StructLayout(LayoutKind.Sequential)]
+        public struct RAWINPUTDEVICELIST
+        {
+            
+        }
+
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputheader
+        [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUTHEADER
         {
-            public uint dwType;
+            public _dwType dwType;
             public uint dwSize;
             public IntPtr hDevice;
             public IntPtr wParam;
+
+            public enum _dwType : uint
+            {
+                RIM_TYPEMOUSE = 0,
+                RIM_TYPEKEYBOARD = 1,
+                RIM_TYPEHID = 2
+            }
         }
 
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawkeyboard
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWKEYBOARD
         {
@@ -39,6 +79,7 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
             public uint ExtraInformation;
         }
 
+        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinput
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUT
         {
@@ -46,20 +87,7 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
             public RAWKEYBOARD keyboard;
         }
 
-        public enum RawInput_dwFlags : uint
-        {
-            RIDEV_INPUTSINK = 0x00000100,
-            RID_INPUT = 0x10000003,
-            RIM_TYPEKEYBOARD = 1,
-            WM_INPUT = 0x00FF,
-        }
-
-        internal static class NativeConstants
-        {
-
-        }
-
-        // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters
+        // For SetWindowLongPtr: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters
         public enum nIndex : int
         {
             GWLP_WNDPROC = -4,  // Sets a new address for the window procedure.
