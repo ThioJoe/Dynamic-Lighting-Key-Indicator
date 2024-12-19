@@ -8,7 +8,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using WinRT;
-using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
 {

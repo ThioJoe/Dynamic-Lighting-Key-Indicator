@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 #pragma warning disable CA1069  // Disable Warning: Enums values should not be duplicated
 #pragma warning disable IDE1006 // Naming Styles, capitalization
 
-namespace Dynamic_Lighting_Key_Indicator
+namespace Dynamic_Lighting_Key_Indicator.Definitions
 {
     internal static class WinEnums
     {
@@ -56,7 +56,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         internal static class NativeConstants
         {
-            
+
         }
 
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra#parameters

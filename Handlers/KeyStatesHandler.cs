@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static Dynamic_Lighting_Key_Indicator.WinEnums;
 
 namespace Dynamic_Lighting_Key_Indicator
 {

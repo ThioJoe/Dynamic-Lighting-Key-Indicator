@@ -64,7 +64,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
 
         // Other random crap
-        public SolidColorBrush DefaultFontColor => MyDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
+        public SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
 
         // Imported Windows API functions
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
