@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -20,6 +21,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll")]
         private static extern short GetKeyState(int keyCode);
+
+        public static readonly uint rawInputHeaderSize = (uint)Marshal.SizeOf<RAWINPUTHEADER>();
 
         public static void InitializeRawInput(IntPtr hwnd)
         {
@@ -51,35 +54,34 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             uint dwSize = 0;
 
-            // First call - get the size of the input data
-            if (GetRawInputData(
+            // First call to get the size
+            uint result = GetRawInputData(
                 hRawInput: lParam,
                 uiCommand: (uint)uiCommand.RID_INPUT,
-                pData: IntPtr.Zero, // Setting this to null will return the size of the data
-                pcbSize: ref dwSize, // Output parameter
-                cbSizeHeader: (uint)Marshal.SizeOf<RAWINPUTHEADER>()) == unchecked((uint)-1)
-            )
-            {
-                return; // Handle error
-            }
+                pData: IntPtr.Zero,
+                pcbSize: ref dwSize,
+                cbSizeHeader: rawInputHeaderSize
+            );
 
+            if (result == 0xFFFFFFFF) // Error indicated by (UINT)-1
+                return;
+
+            // Second call to get the data
             IntPtr rawDataPtr = Marshal.AllocHGlobal((int)dwSize);
             try
             {
-                // Second call - get the actual data
-                if (GetRawInputData(
+                result = GetRawInputData(
                     hRawInput: lParam,
                     uiCommand: (uint)uiCommand.RID_INPUT,
                     pData: rawDataPtr,
                     pcbSize: ref dwSize,
-                    cbSizeHeader: (uint)Marshal.SizeOf<RAWINPUTHEADER>()) == unchecked((uint)-1)
-                )
-                {
-                    return; // Handle error
-                }
+                    cbSizeHeader: rawInputHeaderSize
+                );
+                
+                if (result == 0xFFFFFFFF) // Error indicated by (UINT)-1
+                    return;
 
                 RAWINPUT rawInput = Marshal.PtrToStructure<RAWINPUT>(rawDataPtr);
-
                 if (rawInput.header.dwType == RAWINPUTHEADER._dwType.RIM_TYPEKEYBOARD)
                 {
                     int vkCode = rawInput.keyboard.VKey;
@@ -137,6 +139,9 @@ namespace Dynamic_Lighting_Key_Indicator
         [DllImport("user32.dll")]
         private static extern IntPtr DefRawInputProc(IntPtr paRawInput, Int32 nInput, UInt32 cbSizeHeader);
 
+        [DllImport("user32.dll")]
+        static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, UIntPtr wParam, IntPtr lParam);
+
         private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
         private static WndProcDelegate? wndProcDelegate;
 
@@ -150,20 +155,35 @@ namespace Dynamic_Lighting_Key_Indicator
             originalWndProc = SetWindowLongPtr(hwnd, GWLP_WNDPROC, wndProcDelegate);
         }
 
-        private static IntPtr WndProc(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam)
+        //See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
+        private static IntPtr WndProc(IntPtr hWnd, WinEnums.WM_MESSAGE uMsg, UIntPtr wParam, IntPtr lParam)
         {
+            nint result = 0;
+
             // Check if the message is a raw input message, otherwise call the original window procedure so it still gets processed normally
-            if (msg == WinEnums.WM_MESSAGE.WM_INPUT)
+            if (uMsg == WinEnums.WM_MESSAGE.WM_INPUT)
             {
                 KeyStatesHandler.ProcessRawInput(lParam);
-                return DefRawInputProc(lParam, 1, (uint)Marshal.SizeOf<RAWINPUTHEADER>());
+
+                // See for wparam values: https://learn.microsoft.com/en-us/windows/win32/inputdev/wm-input
+                if (wParam == (UIntPtr)WM_INPUT_wParam.RIM_INPUTSINK) // Window was not in the foreground
+                {
+                    result = DefRawInputProc(lParam, 1, rawInputHeaderSize); // This might not actually do anything, apparently used as a black hole
+                }
+                else if (wParam == (UIntPtr)WM_INPUT_wParam.RIM_INPUT)
+                {
+                    // Goes to default window procedure
+                    result = DefWindowProc(hWnd, (uint)uMsg, wParam, lParam);
+                }
+            }
+            else
+            {
+                // Any other messages besides the raw input will be passed to the original window procedure
+                result = CallWindowProc(originalWndProc, hWnd, (uint)uMsg, wParam, lParam);
             }
 
-            return CallWindowProc(originalWndProc, hwnd, (uint)msg, wParam, lParam);
+            return result;
         }
-
-        
-
 
         // -------------------------------------------------------------------------------
 

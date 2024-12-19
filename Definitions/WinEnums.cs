@@ -44,6 +44,12 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
             RID_INPUT = 0x10000003
         }
 
+        public enum  WM_INPUT_wParam : uint
+        {
+            RIM_INPUT = 0,
+            RIM_INPUTSINK = 1
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUTDEVICELIST
         {
