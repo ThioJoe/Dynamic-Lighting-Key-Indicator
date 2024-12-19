@@ -3,6 +3,7 @@
 global using DWORD = System.UInt32;        // 4 Bytes, aka uint, uint32
 global using RGBTuple = (int R, int G, int B);
 global using VK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
+global using Color = Windows.UI.Color;
 // -------------------------------
 global using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 global using Dynamic_Lighting_Key_Indicator.Definitions;

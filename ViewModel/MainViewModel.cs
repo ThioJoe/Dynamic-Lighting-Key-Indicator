@@ -460,7 +460,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             if (EqualityComparer<T>.Default.Equals(field, value)) return false;
             field = value;
-            OnPropertyChanged_Static(mainViewModelInstance, propertyName);
+            if (mainViewModelInstance != null)
+                OnPropertyChanged_Static(mainViewModelInstance, propertyName);
             return true;
         }
 

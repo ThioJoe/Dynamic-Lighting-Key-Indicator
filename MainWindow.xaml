@@ -41,7 +41,8 @@
             <RowDefinition Height="Auto" />     <!-- Row 11 -->
         </Grid.RowDefinitions>
 
-
+        <!-- Shadow host panel: declared first, so it's at a lower Z-index -->
+        <Grid x:Name="ShadowHostGrid" />
         
         <!-- Debug mode test button 1 -->
         <Button x:Name="testButton" 
@@ -147,10 +148,7 @@
                    />
 
         <!-- Color Settings Grid -->
-        <Grid Grid.Row="5" Margin="0,20,0,0" HorizontalAlignment="Center">
-            <Grid.Resources>
-                <converters:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
-            </Grid.Resources>
+        <Grid x:Name="ColorButtonGrid" Grid.Row="5" Margin="0,20,0,0" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
@@ -180,7 +178,9 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="ScrollLockOnColor">
+                    Tag="ScrollLockOnColor"
+                    Loaded="buttonScrollLockOn_Loaded"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ScrollLockOnColorHex}" Margin="5,2"/>

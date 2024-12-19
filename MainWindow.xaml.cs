@@ -1,9 +1,12 @@
 using Microsoft.UI;
+using Microsoft.UI.Composition;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
@@ -11,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -18,6 +22,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
 using Windows.Graphics;
+using Windows.UI.Composition;
 
 #nullable enable
 #pragma warning disable IDE0079 // Remove unnecessary suppression
@@ -906,6 +911,57 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         private void AutoSizeWindow_OnGridLoad(object sender, RoutedEventArgs e)
+        {
+            AutoSizeWindow_UponLoaded(sender, e);
+
+        }
+
+        private void buttonScrollLockOn_Loaded(object sender, RoutedEventArgs e)
+        {
+            buttonScrollLockOn.DispatcherQueue.TryEnqueue(() =>
+            {
+                Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(Colors.Red, 15f, 100f);
+                AddShadowBehindElement(buttonScrollLockOn, shadow);
+            });
+        }
+
+        private Microsoft.UI.Composition.DropShadow DropShadowMaker(Windows.UI.Color shadowColor, float radius, float opacityPercent)
+        {
+            Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(ShadowHostGrid).Compositor;
+
+            if (opacityPercent < 0) { opacityPercent = 0; }
+            if (opacityPercent > 100) { opacityPercent = 100; }
+
+            float opacity = opacityPercent / 100;
+            Microsoft.UI.Composition.DropShadow dropShadow = compositor.CreateDropShadow();
+            dropShadow.Color = shadowColor;
+            dropShadow.BlurRadius = radius; // Example: 15f
+            dropShadow.Opacity = opacity; // Example: 0.8f
+            Windows.UI.Color maskColor = Windows.UI.Color.FromArgb(255, 255, 255, 255);
+            dropShadow.Mask = compositor.CreateColorBrush(maskColor);
+
+            return dropShadow;
+        }
+
+        private void AddShadowBehindElement(FrameworkElement element, Microsoft.UI.Composition.DropShadow shadow)
+        {
+            Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(ShadowHostGrid).Compositor;
+            Microsoft.UI.Composition.ContainerVisual containerVisual = compositor.CreateContainerVisual();
+
+            var spriteVisual = compositor.CreateSpriteVisual();
+            spriteVisual.Size = new System.Numerics.Vector2((float)element.ActualWidth, (float)element.ActualHeight);
+
+            // Position the shadow under the button by determining button's position relative to ShadowHostGrid
+            var relativePoint = element.TransformToVisual(ShadowHostGrid).TransformPoint(new Windows.Foundation.Point(0, 0));
+            spriteVisual.Offset = new System.Numerics.Vector3((float)relativePoint.X, (float)relativePoint.Y, 0);
+
+            spriteVisual.Shadow = shadow;
+            containerVisual.Children.InsertAtTop(spriteVisual);
+
+            ElementCompositionPreview.SetElementChildVisual(ShadowHostGrid, containerVisual);
+        }
+
+        private void AutoSizeWindow_UponLoaded(object sender, RoutedEventArgs e)
         {
             var window = this;  // assuming this is in the Window class
             if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
