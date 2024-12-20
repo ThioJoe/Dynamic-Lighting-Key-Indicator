@@ -15,6 +15,9 @@ namespace Dynamic_Lighting_Key_Indicator
         private const uint MF_SEPARATOR = 0x00000800;
         private const uint TPM_RIGHTBUTTON = 0x0002;
         private const uint TPM_LEFTBUTTON = 0x0000;
+        private const uint TPM_RIGHTALIGN = 0x0008;
+        private const uint TPM_LEFTALIGN = 0x0000;
+        private const uint TPM_BOTTOMALIGN = 0x0020;
 
         // Win32 API structures
         [StructLayout(LayoutKind.Sequential)]
@@ -70,7 +73,7 @@ namespace Dynamic_Lighting_Key_Indicator
             SetForegroundWindow(hwnd);
 
             // Tells the OS to show the context menu and wait for a selection. But if the user clicks elsewhere, it will return 0.
-            uint flags = TPM_RIGHTBUTTON | TPM_LEFTBUTTON | TPM_RETURNCMD;
+            uint flags = TPM_RIGHTBUTTON | TPM_LEFTBUTTON | TPM_RETURNCMD | TPM_LEFTALIGN | TPM_BOTTOMALIGN;
             uint clickedItem = TrackPopupMenu(hMenu, flags, pt.X, pt.Y, 0, hwnd, IntPtr.Zero);
 
             // Clean up
