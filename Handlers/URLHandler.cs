@@ -63,11 +63,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         //  -----------------------------------------------------------------
 
-        public static void ProvideUserConfig(UserConfig config)
-        {
-            _currentConfig = config;
-        }
-
         public static void ProvideWindow(MainWindow mainWindow)
         {
             _mainWindow = mainWindow;
@@ -150,6 +145,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             UserConfig config;
+            _currentConfig = _mainWindow.CurrentConfig;
             // Get the various keys from the config
             if (_currentConfig != null && _currentConfig.MonitoredKeysAndColors != null)
             {
@@ -174,18 +170,43 @@ namespace Dynamic_Lighting_Key_Indicator
                     addKeyToConfig = true;
                 }
 
-                if (ParseColor(value, standardColorFromConfig) is RGBTuple color)
+                RGBTuple? color = null;
+                if (ParseColor(value, standardColorFromConfig) is RGBTuple outColor)
+                {
+                    color = outColor;
+                }
+
+                // Update the default linking status if the value is 'default', and unlink if it was previously linked
+                if (value.Equals("default", StringComparison.OrdinalIgnoreCase))
+                {
+                   if (on)
+                        key.onColorTiedToStandard = true;
+                    else
+                        key.offColorTiedToStandard = true;
+                }
+                else
                 {
                     if (on)
-                        key.onColor = color;
+                        key.onColorTiedToStandard = false;
                     else
-                        key.offColor = color;
+                        key.offColorTiedToStandard = false;
+                }
+
+                // Set the actual color
+                if (color != null)
+                {
+                    if (on)
+                        key.onColor = (RGBTuple)color;
+                    else
+                        key.offColor = (RGBTuple)color;
 
                     if (addKeyToConfig)
                     {
                         config.MonitoredKeysAndColors.Add(key);
                     }
                 }
+                
+
             }
             // --------------------------------------
 

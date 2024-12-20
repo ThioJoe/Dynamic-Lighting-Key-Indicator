@@ -143,7 +143,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 // After this, the OnEnumerationCompleted event will try to attach to the saved device
             }
 
-            URLHandler.ProvideUserConfig(currentConfig);
             URLHandler.ProvideWindow(this);
 
             // Set initial window size, and check if it should start minimized
