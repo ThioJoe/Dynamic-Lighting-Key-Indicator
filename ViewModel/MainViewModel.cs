@@ -457,15 +457,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return true;
         }
 
-        //protected static bool SetProperty_Static<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        //{
-        //    if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        //    field = value;
-        //    if (mainViewModelInstance != null)
-        //        OnPropertyChanged_Static(mainViewModelInstance, propertyName);
-        //    return true;
-        //}
-
         // ------------------------------------- Color Values From GUI -------------------------------------
 
         private bool _syncScrollLockOnColor;
@@ -628,7 +619,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(ScrollLockOnColorHex));
                     OnPropertyChanged(nameof(ScrollLockOnBrush));
-                    OnPropertyChanged(nameof(ScrollLockOnShadow));
                     
                 }
             }
@@ -644,7 +634,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(ScrollLockOffColorHex));
                     OnPropertyChanged(nameof(ScrollLockOffBrush));
-                    OnPropertyChanged(nameof(ScrollLockOffShadow));
 
                 }
             }
@@ -660,7 +649,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(CapsLockOnColorHex));
                     OnPropertyChanged(nameof(CapsLockOnBrush));
-                    OnPropertyChanged(nameof(CapsLockOnShadow));
 
                 }
             }
@@ -676,7 +664,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(CapsLockOffColorHex));
                     OnPropertyChanged(nameof(CapsLockOffBrush));
-                    OnPropertyChanged(nameof(CapsLockOffShadow));
 
                 }
             }
@@ -692,7 +679,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(NumLockOnColorHex));
                     OnPropertyChanged(nameof(NumLockOnBrush));
-                    OnPropertyChanged(nameof(NumLockOnShadow));
 
                 }
             }
@@ -708,7 +694,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(NumLockOffColorHex));
                     OnPropertyChanged(nameof(NumLockOffBrush));
-                    OnPropertyChanged(nameof(NumLockOffShadow));
 
                 }
             }
@@ -724,8 +709,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     OnPropertyChanged(nameof(DefaultColorHex));
                     OnPropertyChanged(nameof(DefaultColorBrush));
-                    OnPropertyChanged(nameof(DefaultColorShadow));
-                    mainWindow.AddShadowButtonSwitch(null, null);
                 }
             }
         }
@@ -798,31 +781,62 @@ namespace Dynamic_Lighting_Key_Indicator
             return GetSyncSetting_ByButtonName(button.Name);
         }
 
-        private static float radius = 30f;
-        private static float opacityPercent = 100;
+        public static readonly Microsoft.UI.Xaml.Thickness ActiveThickness = new Microsoft.UI.Xaml.Thickness(1);
+        public static readonly Microsoft.UI.Xaml.Thickness InactiveThickness = new Microsoft.UI.Xaml.Thickness(0);
 
-        private UIElement shadowHostGrid = MainWindow.GetShadowHostGrid();
+        private Microsoft.UI.Xaml.Thickness _scrollLockOnBorderThickness;
+        private Microsoft.UI.Xaml.Thickness _scrollLockOffBorderThickness;
+        private Microsoft.UI.Xaml.Thickness _capsLockOnBorderThickness;
+        private Microsoft.UI.Xaml.Thickness _capsLockOffBorderThickness;
+        private Microsoft.UI.Xaml.Thickness _numLockOnBorderThickness;
+        private Microsoft.UI.Xaml.Thickness _numLockOffBorderThickness;
 
-        public Microsoft.UI.Composition.DropShadow? ScrollLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.ScrollLockOnColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? ScrollLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.ScrollLockOffColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? CapsLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.CapsLockOnColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? CapsLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.CapsLockOffColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? NumLockOnShadow => MainWindow.DropShadowMaker(shadowColor: this.NumLockOnColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? NumLockOffShadow => MainWindow.DropShadowMaker(shadowColor: this.NumLockOffColor, radius: radius, opacityPercent: opacityPercent);
-        public Microsoft.UI.Composition.DropShadow? DefaultColorShadow => MainWindow.DropShadowMaker(shadowColor: this.DefaultColor, radius: radius, opacityPercent: opacityPercent);
-
+        public Microsoft.UI.Xaml.Thickness ScrollLockOnBorderThickness
+        {
+            get => _scrollLockOnBorderThickness;
+            set => SetProperty(ref _scrollLockOnBorderThickness, value);
+        }
+        public Microsoft.UI.Xaml.Thickness ScrollLockOffBorderThickness
+        {
+            get => _scrollLockOffBorderThickness;
+            set => SetProperty(ref _scrollLockOffBorderThickness, value);
+        }
+        public Microsoft.UI.Xaml.Thickness CapsLockOnBorderThickness
+        {
+            get => _capsLockOnBorderThickness;
+            set => SetProperty(ref _capsLockOnBorderThickness, value);
+        }
+        public Microsoft.UI.Xaml.Thickness CapsLockOffBorderThickness
+        {
+            get => _capsLockOffBorderThickness;
+            set => SetProperty(ref _capsLockOffBorderThickness, value);
+        }
+        public Microsoft.UI.Xaml.Thickness NumLockOnBorderThickness
+        {
+            get => _numLockOnBorderThickness;
+            set => SetProperty(ref _numLockOnBorderThickness, value);
+        }
+        public Microsoft.UI.Xaml.Thickness NumLockOffBorderThickness
+        {
+            get => _numLockOffBorderThickness;
+            set => SetProperty(ref _numLockOffBorderThickness, value);
+        }
 
         private bool _LastKnownScrollLockState = false;
         private bool _LastKnownCapsLockState = false;
         private bool _LastKnownNumLockState = false;
+
         public bool LastKnownNumLockState 
         { 
             get => _LastKnownNumLockState; 
             set 
             { 
                 SetProperty(ref _LastKnownNumLockState, value);
-                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
-                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.NumLock, stateColorApply);
+                bool onIsActive = value ? true : false;
+                NumLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                NumLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(NumLockOnBorderThickness));
+                OnPropertyChanged(nameof(NumLockOffBorderThickness));
             }
         }
         public bool LastKnownCapsLockState 
@@ -831,8 +845,11 @@ namespace Dynamic_Lighting_Key_Indicator
             set 
             { 
                 SetProperty(ref _LastKnownCapsLockState, value);
-                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
-                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.CapsLock, stateColorApply);
+                bool onIsActive = value ? true : false;
+                CapsLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                CapsLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(CapsLockOnBorderThickness));
+                OnPropertyChanged(nameof(CapsLockOffBorderThickness));
             }
         }
         public bool LastKnownScrollLockState
@@ -841,14 +858,17 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _LastKnownScrollLockState, value);
-                StateColorApply stateColorApply = value ? StateColorApply.On : StateColorApply.Off;
-                mainWindow.AddShadowButtonSwitch(ToggleAbleKeys.ScrollLock, stateColorApply);
+                bool onIsActive = value ? true : false;
+                ScrollLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                ScrollLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(ScrollLockOnBorderThickness));
+                OnPropertyChanged(nameof(ScrollLockOffBorderThickness));
+
             }
         }
 
-        public void UpdateLastKnownKeyState(int keyInt, bool state)
+        public void UpdateLastKnownKeyState(VK key, bool state)
         {
-            VK key = (VK)keyInt;
             switch (key)
             {
                 case VK.NumLock:
@@ -863,10 +883,17 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void StaticUpdateLastKnownKeyState(int keyInt, bool state)
+        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock)
+        {
+            LastKnownNumLockState = numLock;
+            LastKnownCapsLockState = capsLock;
+            LastKnownScrollLockState = scrollLock;
+        }
+
+        public static void StaticUpdateLastKnownKeyState(MonitoredKey key)
         {
             if (mainViewModelInstance != null)
-                mainViewModelInstance.UpdateLastKnownKeyState(keyInt, state);
+                mainViewModelInstance.UpdateLastKnownKeyState(key.key, key.IsOn());
         }
 
         //--------------------------------------------------------------

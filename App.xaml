@@ -17,11 +17,13 @@
                     <Color x:Key="WindowBackgroundColor">#FFFFFF</Color>
                     <Color x:Key="ButtonBackground_Green">#f5fff6</Color>
                     <Color x:Key="ButtonBackground_Red">#ffe8e8</Color>
+                    <Color x:Key="ButtonBorder">#262626</Color>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="WindowBackgroundColor">#191919</Color>
                     <Color x:Key="ButtonBackground_Red">#1a0000</Color>
                     <Color x:Key="ButtonBackground_Green">#021203</Color>
+                    <Color x:Key="ButtonBorder">#a3a3a3</Color>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
             <!-- Custom Font -->

@@ -179,8 +179,8 @@
                     Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
                     Tag="ScrollLockOnColor"
-                    Loaded="buttonScrollLockOn_Loaded"
-                    BorderBrush="Black"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.ScrollLockOnBorderThickness, Mode=OneWay}"
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
             </Button>
@@ -191,7 +191,10 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="ScrollLockOffColor">
+                    Tag="ScrollLockOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.ScrollLockOffBorderThickness, Mode=OneWay}"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOffGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ScrollLockOffColorHex}" Margin="5,2"/>
@@ -204,7 +207,10 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.CapsLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="CapsLockOnColor">
+                    Tag="CapsLockOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.CapsLockOnBorderThickness, Mode=OneWay}"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding CapsLockOnColorHex}" Margin="5,2"/>
@@ -214,7 +220,10 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="CapsLockOffColor">
+                    Tag="CapsLockOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.CapsLockOffBorderThickness, Mode=OneWay}"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOffGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding CapsLockOffColorHex}" Margin="5,2"/>
@@ -227,7 +236,10 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.NumLockOnBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="NumLockOnColor">
+                    Tag="NumLockOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.NumLockOnBorderThickness, Mode=OneWay}"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding NumLockOnColorHex}" Margin="5,2"/>
@@ -237,7 +249,10 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="NumLockOffColor">
+                    Tag="NumLockOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.NumLockOffBorderThickness, Mode=OneWay}"
+                    >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOffGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding NumLockOffColorHex}" Margin="5,2"/>
@@ -250,7 +265,8 @@
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
-                    Tag="DefaultColor"/>
+                    Tag="DefaultColor"
+                    />
             <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
         </Grid>
         
