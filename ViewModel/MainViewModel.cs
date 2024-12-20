@@ -589,15 +589,6 @@ namespace Dynamic_Lighting_Key_Indicator
         public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
 
 
-        // Color properties
-        public string ScrollLockOnColorHex => AsString(ScrollLockOnColor);
-        public string ScrollLockOffColorHex => AsString(ScrollLockOffColor);
-        public string CapsLockOnColorHex => AsString(CapsLockOnColor);
-        public string CapsLockOffColorHex => AsString(CapsLockOffColor);
-        public string NumLockOnColorHex => AsString(NumLockOnColor);
-        public string NumLockOffColorHex => AsString(NumLockOffColor);
-        public string DefaultColorHex => AsString(DefaultColor);
-
         private int _brightness;
         public int Brightness
         {
@@ -617,7 +608,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _scrollLockOnColor, value))
                 {
-                    OnPropertyChanged(nameof(ScrollLockOnColorHex));
                     OnPropertyChanged(nameof(ScrollLockOnBrush));
                     
                 }
@@ -632,7 +622,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _scrollLockOffColor, value))
                 {
-                    OnPropertyChanged(nameof(ScrollLockOffColorHex));
                     OnPropertyChanged(nameof(ScrollLockOffBrush));
 
                 }
@@ -647,7 +636,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _capsLockOnColor, value))
                 {
-                    OnPropertyChanged(nameof(CapsLockOnColorHex));
                     OnPropertyChanged(nameof(CapsLockOnBrush));
 
                 }
@@ -662,7 +650,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _capsLockOffColor, value))
                 {
-                    OnPropertyChanged(nameof(CapsLockOffColorHex));
                     OnPropertyChanged(nameof(CapsLockOffBrush));
 
                 }
@@ -677,7 +664,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _numLockOnColor, value))
                 {
-                    OnPropertyChanged(nameof(NumLockOnColorHex));
                     OnPropertyChanged(nameof(NumLockOnBrush));
 
                 }
@@ -692,7 +678,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _numLockOffColor, value))
                 {
-                    OnPropertyChanged(nameof(NumLockOffColorHex));
                     OnPropertyChanged(nameof(NumLockOffBrush));
 
                 }
@@ -707,7 +692,6 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (SetProperty(ref _defaultColor, value))
                 {
-                    OnPropertyChanged(nameof(DefaultColorHex));
                     OnPropertyChanged(nameof(DefaultColorBrush));
                 }
             }
