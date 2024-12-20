@@ -24,6 +24,24 @@
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="4"/>
             </Style>
+            
+            <Style x:Key="SwapButtonStyle" TargetType="Button">
+                <Setter Property="Width" Value="30"/>
+                <Setter Property="Height" Value="30"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="2"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+
+            <Style x:Key="SwapIconGlyphStyle" TargetType="FontIcon">
+                <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                <Setter Property="Glyph" Value="&#xF1CB;"/>
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -158,17 +176,17 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="50"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>    <!-- Key Label -->
+                <ColumnDefinition Width="50"/>      <!-- On Column -->
+                <ColumnDefinition Width="0"/>
+                <ColumnDefinition Width="40"/>      <!-- Swap Column -->
+                <ColumnDefinition Width="50"/>      <!-- Off Column -->
             </Grid.ColumnDefinitions>
 
             <!-- Headers -->
             <TextBlock Grid.Row="0" Grid.Column="0" Text="Key" FontWeight="Bold" Margin="0,0,10,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             <TextBlock Grid.Row="0" Grid.Column="1" Text="On" FontWeight="Bold" Margin="5,0,5,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <TextBlock Grid.Row="0" Grid.Column="3" Text="Off" FontWeight="Bold" Margin="5,0,5,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <TextBlock Grid.Row="0" Grid.Column="4" Text="Off" FontWeight="Bold" Margin="5,0,5,5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
             <!-- Scroll Lock -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
@@ -185,9 +203,19 @@
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding ScrollLockOnColorHex}" Margin="5,2"/>
-            <Button x:Name="buttonScrollLockOff" 
+            <Button x:Name="buttonSwapScrollLock" 
                     Grid.Row="1" 
                     Grid.Column="3" 
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click" 
+                    Tag="ScrollLock"
+                    HorizontalAlignment="Center"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonScrollLockOff" 
+                    Grid.Row="1" 
+                    Grid.Column="4" 
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
@@ -197,7 +225,7 @@
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOffGlyph, Mode=OneWay}" />
             </Button>
-            <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding ScrollLockOffColorHex}" Margin="5,2"/>
+            <TextBlock Grid.Row="1" Grid.Column="5" Text="{Binding ScrollLockOffColorHex}" Margin="5,2"/>
 
             <!-- Caps Lock -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Caps Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
@@ -214,9 +242,18 @@
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding CapsLockOnColorHex}" Margin="5,2"/>
-            <Button x:Name="buttonCapsLockOff" 
+            <Button x:Name="buttonSwapCapsLock" 
                     Grid.Row="2" 
                     Grid.Column="3" 
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click" 
+                    Tag="CapsLock"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonCapsLockOff" 
+                    Grid.Row="2" 
+                    Grid.Column="4" 
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
@@ -226,7 +263,7 @@
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOffGlyph, Mode=OneWay}" />
             </Button>
-            <TextBlock Grid.Row="2" Grid.Column="4" Text="{Binding CapsLockOffColorHex}" Margin="5,2"/>
+            <TextBlock Grid.Row="2" Grid.Column="5" Text="{Binding CapsLockOffColorHex}" Margin="5,2"/>
 
             <!-- Num Lock -->
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Num Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
@@ -243,9 +280,17 @@
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOnGlyph, Mode=OneWay}" />
             </Button>
             <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding NumLockOnColorHex}" Margin="5,2"/>
-            <Button x:Name="buttonNumLockOff" 
+            <Button x:Name="buttonSwapNumLock" 
                     Grid.Row="3" 
                     Grid.Column="3" 
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click" 
+                    Tag="NumLock">
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonNumLockOff" 
+                    Grid.Row="3" 
+                    Grid.Column="4" 
                     Style="{StaticResource ColorButtonStyle}"
                     Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}" 
                     Click="ColorButton_Click" 
@@ -255,7 +300,7 @@
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOffGlyph, Mode=OneWay}" />
             </Button>
-            <TextBlock Grid.Row="3" Grid.Column="4" Text="{Binding NumLockOffColorHex}" Margin="5,2"/>
+            <TextBlock Grid.Row="3" Grid.Column="5" Text="{Binding NumLockOffColorHex}" Margin="5,2"/>
 
             <!-- Default -->
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>

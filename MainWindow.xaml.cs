@@ -822,6 +822,63 @@ namespace Dynamic_Lighting_Key_Indicator
             // Upon applying the settings, it should trigger event handlers in MainViewModel for HasAttachedDevices, attachedDevicesMessage, EnableApplyButton etc.
         }
 
+        private void SwapOnOffColor_Click(object sender, RoutedEventArgs e)
+        {
+            // Get the button object
+            Button button = (Button)sender;
+            string keyName = (string)button.Tag;
+
+            switch (keyName)
+            {
+                case "NumLock":
+                    // Store the current color settings, then swapp them
+                    Color numLockOnColor = ViewModel.NumLockOnColor;
+                    Color numLockOffColor = ViewModel.NumLockOffColor;
+                    ViewModel.NumLockOnColor = numLockOffColor;
+                    ViewModel.NumLockOffColor = numLockOnColor;
+
+                    // Swap their sync status
+                    bool syncNumLockOnColor = ViewModel.SyncNumLockOnColor;
+                    bool syncNumLockOffColor = ViewModel.SyncNumLockOffColor;
+                    ViewModel.SyncNumLockOnColor = syncNumLockOffColor;
+                    ViewModel.SyncNumLockOffColor = syncNumLockOnColor;
+
+                    break;
+
+                case "CapsLock":
+                    Color capsLockOnColor = ViewModel.CapsLockOnColor;
+                    Color capsLockOffColor = ViewModel.CapsLockOffColor;
+                    ViewModel.CapsLockOnColor = capsLockOffColor;
+                    ViewModel.CapsLockOffColor = capsLockOnColor;
+
+                    bool syncCapsLockOnColor = ViewModel.SyncCapsLockOnColor;
+                    bool syncCapsLockOffColor = ViewModel.SyncCapsLockOffColor;
+                    ViewModel.SyncCapsLockOnColor = syncCapsLockOffColor;
+                    ViewModel.SyncCapsLockOffColor = syncCapsLockOnColor;
+
+                    break;
+
+                case "ScrollLock":
+                    Color scrollLockOnColor = ViewModel.ScrollLockOnColor;
+                    Color scrollLockOffColor = ViewModel.ScrollLockOffColor;
+                    ViewModel.ScrollLockOnColor = scrollLockOffColor;
+                    ViewModel.ScrollLockOffColor = scrollLockOnColor;
+
+                    bool syncScrollLockOnColor = ViewModel.SyncScrollLockOnColor;
+                    bool syncScrollLockOffColor = ViewModel.SyncScrollLockOffColor;
+                    ViewModel.SyncScrollLockOnColor = syncScrollLockOffColor;
+                    ViewModel.SyncScrollLockOffColor = syncScrollLockOnColor;
+
+                    break;
+
+                default:
+                    break;
+            }
+
+            ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
+
+        }
+
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)
         {
             ApplyAndSaveColorSettings(saveFile: false, newConfig: new UserConfig());
