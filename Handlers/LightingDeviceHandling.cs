@@ -167,6 +167,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
             availableDevices.Add(args);
 
+            // Don't update the UI until enumeration is done to avoid interupting the creation of availableDevices
+            if (m_deviceWatcher == null || m_deviceWatcher.Status != DeviceWatcherStatus.EnumerationCompleted)
+            {
+                return;
+            }
+
             // Update UI on the UI thread. Only update the available devices since we might not attach to it.
             DispatcherQueue.TryEnqueue(() =>
             {
