@@ -147,7 +147,7 @@
     <RepositoryUrl>https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageIcon>Square150x150Logo.scale-200.png</PackageIcon>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <FileVersion>$(AssemblyVersion)</FileVersion>
     <PublishAot>False</PublishAot>
   </PropertyGroup>

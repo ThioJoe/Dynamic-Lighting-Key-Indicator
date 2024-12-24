@@ -60,39 +60,66 @@ namespace Dynamic_Lighting_Key_Indicator
             string lampArraySelector = LampArray.GetDeviceSelector();
 
             // Get both sets of devices
-            var keyboardDevices = await DeviceInformation.FindAllAsync(keyboardSelector);
-            var lampArrayDevices = await DeviceInformation.FindAllAsync(lampArraySelector);
+            DeviceInformationCollection keyboardDevices = await DeviceInformation.FindAllAsync(keyboardSelector);
+            DeviceInformationCollection lampArrayDevices = await DeviceInformation.FindAllAsync(lampArraySelector);
 
-            var keyboardDict = new Dictionary<string, DeviceInformation>();
+            // Use list of devices for each container ID in case there are multiple devices with the same container ID
+            Dictionary<string, List<DeviceInformation>> keyboardDict = [];
+            Dictionary<string, List<DeviceInformation>> lampArrayDevicesDict = [];
+
+            // Process keyboard devices by container ID
             foreach (var keyboardDevice in keyboardDevices)
             {
-                var containerId = keyboardDevice.Properties["System.Devices.ContainerId"].ToString();
-                if (containerId != null)
-                {
-                    keyboardDict.Add(containerId, keyboardDevice);
+                string? containerId = keyboardDevice.Properties["System.Devices.ContainerId"].ToString();
+
+                if (containerId != null) {
+                    // If the container ID isn't already in the dictionary, add it with a new list
+                    if (!keyboardDict.ContainsKey(containerId))
+                    {
+                        keyboardDict.Add(containerId, new List<DeviceInformation> { keyboardDevice });
+                    }
+                    // Otherwise add the device to the existing list
+                    else
+                    {
+                        keyboardDict[containerId].Add(keyboardDevice);
+                    }
                 }
             }
 
-            var lampArrayDevicesDict = new Dictionary<string, DeviceInformation>();
+            // Process lamp array devices by container ID
             foreach (var lampArrayDevice in lampArrayDevices)
             {
-                var containerId = lampArrayDevice.Properties["System.Devices.ContainerId"].ToString();
-                if (containerId != null && !lampArrayDevicesDict.ContainsKey(containerId)) // Check if it's not null and not already in the dictionary
+                string? containerId = lampArrayDevice.Properties["System.Devices.ContainerId"].ToString();
+
+                if (containerId != null)
                 {
-                    lampArrayDevicesDict.Add(containerId, lampArrayDevice);
+                    // If the container ID isn't already in the dictionary, add it with a new list
+                    if (!lampArrayDevicesDict.ContainsKey(containerId))
+                    {
+                        lampArrayDevicesDict.Add(containerId, new List<DeviceInformation> { lampArrayDevice });
+                    }
+                    // Otherwise add the device to the existing list
+                    else
+                    {
+                        lampArrayDevicesDict[containerId].Add(lampArrayDevice);
+                    }
                 }
             }
 
             // Find devices that have both interfaces by comparing their container IDs
             BindingList<DeviceInformation> matchingDevices = [];
-            foreach (var containerId in keyboardDict.Keys.Intersect(lampArrayDevicesDict.Keys))
+            foreach (string containerId in keyboardDict.Keys.Intersect(lampArrayDevicesDict.Keys))
             {
-                matchingDevices.Add(lampArrayDevicesDict[containerId]);
+                foreach (DeviceInformation device in lampArrayDevicesDict[containerId])
+                {
+                    matchingDevices.Add(device);
+                }
             }
 
             return matchingDevices;
         }
 
+        // TODO: See why I still get the device selector stuff after already getting the devices
         private static async Task<string> GetKeyboardLampArrayDeviceSelectorAsync()
         {
             BindingList<DeviceInformation> matchingDevices = await FindKeyboardLampArrayDevices();
