@@ -209,6 +209,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
+            // Update UI on the UI thread. Only update the available devices since we might not attach to it.
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                UpdatAvailableLampArrayDisplayList();
+            });
+
             DispatcherQueue.TryEnqueue(() => AttachToSavedDevice());
         }
 

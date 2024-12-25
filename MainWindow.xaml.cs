@@ -265,9 +265,10 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             ViewModel.HasAttachedDevices = false;
 
-            string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
+            //string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
+            string lampArraySelector = LampArray.GetDeviceSelector();
 
-            m_deviceWatcher = DeviceInformation.CreateWatcher(combinedSelector);
+            m_deviceWatcher = DeviceInformation.CreateWatcher(lampArraySelector);
 
             m_deviceWatcher.Added += Watcher_Added;
             m_deviceWatcher.Removed += Watcher_Removed;
