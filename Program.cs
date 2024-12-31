@@ -27,7 +27,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Add global exception handler first thing
             AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
             {
-                MainWindow.WriteCrashLog(exception:(Exception)error.ExceptionObject);
+                Logging.WriteCrashLog(exception:(Exception)error.ExceptionObject);
             };
 
             try
@@ -50,7 +50,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                     catch (Exception ex)
                     {
-                        MainWindow.WriteCrashLog(exception: ex);
+                        Logging.WriteCrashLog(exception: ex);
                         throw; // Re-throw to be caught by outer handler
                     }
                 }
@@ -77,7 +77,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                     catch (Exception ex)
                     {
-                        MainWindow.WriteCrashLog(exception: ex);
+                        Logging.WriteCrashLog(exception: ex);
                         throw; // Re-throw to be caught by outer handler
                     }
                 });
@@ -89,7 +89,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Final catch-all for any unhandled exceptions
                 try
                 {
-                    MainWindow.WriteCrashLog(exception: ex);
+                    Logging.WriteCrashLog(exception: ex);
                 }
                 catch(Exception exOuter)
                 {
