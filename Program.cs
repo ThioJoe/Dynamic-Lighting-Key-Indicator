@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
+using System.Diagnostics;
 
 // NOTE: If Visual Studio yells at you about this file already existing, it's because this one is custom to allow a single-instance app.
 //    See: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/applifecycle/applifecycle-single-instance
@@ -23,43 +24,79 @@ namespace Dynamic_Lighting_Key_Indicator
         [STAThread]
         static int Main(string[] args)
         {
-            WinRT.ComWrappersSupport.InitializeComWrappers();
-
-            var currentInstance = AppInstance.GetCurrent();
-            var activatedEventArgs = currentInstance.GetActivatedEventArgs();
-            var mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
-
-            // If this isn't the main instance and it's a protocol activation, redirect it to the main instance.
-            // It will be captured by the MainInstance_Activated handler we created in MainWindow.xaml.cs attached to the main instance.
-            if (!mainInstance.IsCurrent && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+            // Add global exception handler first thing
+            AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
             {
-                // Redirect activation (for window focus)
-                Task.Run(() => mainInstance.RedirectActivationToAsync(activatedEventArgs)).Wait();
+                MainWindow.WriteCrashLog(exception:(Exception)error.ExceptionObject);
+            };
+
+            try
+            {
+                WinRT.ComWrappersSupport.InitializeComWrappers();
+
+                var currentInstance = AppInstance.GetCurrent();
+                var activatedEventArgs = currentInstance.GetActivatedEventArgs();
+                var mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
+
+                // If this isn't the main instance and it's a protocol activation, redirect it to the main instance.
+                // It will be captured by the MainInstance_Activated handler we created in MainWindow.xaml.cs attached to the main instance.
+                if (!mainInstance.IsCurrent && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+                {
+                    try
+                    {
+                        // Redirect activation (for window focus)
+                        Task.Run(() => mainInstance.RedirectActivationToAsync(activatedEventArgs)).Wait();
+                        return 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.WriteCrashLog(exception: ex);
+                        throw; // Re-throw to be caught by outer handler
+                    }
+                }
+
+                // Main instance
+                Application.Start((application_Initialization_Callback_Params) =>
+                {
+                    try
+                    {
+                        var context = new DispatcherQueueSynchronizationContext(
+                            DispatcherQueue.GetForCurrentThread());
+                        SynchronizationContext.SetSynchronizationContext(context);
+                        var app = new App();
+
+                        // Handle direct protocol activation if present
+                        if (activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+                        {
+                            var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
+                            if (protocolArgs?.Uri != null)
+                            {
+                                URLHandler.ProcessUri(protocolArgs.Uri);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MainWindow.WriteCrashLog(exception: ex);
+                        throw; // Re-throw to be caught by outer handler
+                    }
+                });
 
                 return 0;
             }
-
-            // Main instance
-            Application.Start((application_Initialization_Callback_Params) =>
+            catch (Exception ex)
             {
-                var context = new DispatcherQueueSynchronizationContext(
-                    DispatcherQueue.GetForCurrentThread());
-                SynchronizationContext.SetSynchronizationContext(context);
-
-                var app = new App();
-
-                // Handle direct protocol activation if present
-                if (activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+                // Final catch-all for any unhandled exceptions
+                try
                 {
-                    var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
-                    if (protocolArgs?.Uri != null)
-                    {
-                        URLHandler.ProcessUri(protocolArgs.Uri);
-                    }
+                    MainWindow.WriteCrashLog(exception: ex);
                 }
-            });
-
-            return 0;
+                catch(Exception exOuter)
+                {
+                    Debug.WriteLine("Error:" + exOuter?.Message);
+                }
+                return -1; // Return error code
+            }
         }
     }
 }
