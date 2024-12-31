@@ -148,7 +148,7 @@ namespace Dynamic_Lighting_Key_Indicator
             URLHandler.ProvideWindow(this);
 
             // Set initial window size, and check if it should start minimized
-            this.AppWindow.Resize(new SizeInt32(1200, 1200));
+            this.AppWindow.Resize(new SizeInt32(1200, 1225));
             if (currentConfig.StartMinimizedToTray)
             {
                 systemTray.MinimizeToTray();
@@ -979,6 +979,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void Expander_SizeChange(object sender, SizeChangedEventArgs e) // When expanded or collapsed
         {
+            if (this.Visible == false)
+                return;
+
             // Resize the window to fit the new size with the expanded or collapsed expander element
             if (this.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
             {
@@ -1049,9 +1052,13 @@ namespace Dynamic_Lighting_Key_Indicator
             return dropShadow;
         }
 
-        private void AutoSizeWindow_UponLoaded(object sender, RoutedEventArgs e)
+        private void AutoSizeWindow_UponLoaded(object? sender, RoutedEventArgs? e)
         {
-            var window = this;  // assuming this is in the Window class
+            if (this.Visible == false)
+                return;
+
+            MainWindow window = this;  // assuming this is in the Window class
+
             if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
             {
                 Double scale = windowRoot.XamlRoot.RasterizationScale;
