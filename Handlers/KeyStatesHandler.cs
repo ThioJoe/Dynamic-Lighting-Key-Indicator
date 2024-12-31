@@ -36,8 +36,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 SubclassWindow(hwnd);
 
                 // Then register for raw input
-            RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1]; // Create an array of 1 device
-            rid[0] = new RAWINPUTDEVICE // Assign value to the first (and only) device in the array
+                RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1]; // Create an array of 1 device
+                rid[0] = new RAWINPUTDEVICE // Assign value to the first (and only) device in the array
                 {
                     usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
                     usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,

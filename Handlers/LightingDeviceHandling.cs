@@ -14,30 +14,40 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private async Task<LampArrayInfo?> AttachToDevice_Async(DeviceInformation device)
         {
-            var lampArray = await LampArray.FromIdAsync(device.Id); // This actually takes control of the device
-            var info = new LampArrayInfo(device.Id, device.Name, lampArray);
+            Logging.WriteDebug("Attempting to attach to device: " + device.Id);
 
-            if (info.lampArray == null)
+            LampArray? lampArray = null;
+            try
             {
+                lampArray = await LampArray.FromIdAsync(device.Id).AsTask(); // This actually takes control of the device
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteDebug($"Failed to initialize lamp array. Exception: {ex.Message}");
+            }
+
+            LampArrayInfo? info = new LampArrayInfo(device.Id, device.Name, lampArray);
+
+            if (lampArray == null || info?.lampArray == null)
+            {
+                Logging.WriteDebug("Failed to initialize lamp array. Null lampArray returned from 'FromIdAsync' method.");
+                string displayName = info?.displayName ?? "Unknown";
+
                 // Update on UI thread
                 DispatcherQueue.TryEnqueue(() =>
                 {
-                    ViewModel.DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.ErrorInitializing, suffix: info.displayName);
+                    ViewModel.DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.ErrorInitializing, suffix: displayName);
                 });
                 return null;
             }
+
+            Logging.WriteDebug("   > Successfully attached to device");
 
             // Set up the AvailabilityChanged event callback
             info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
 
             // Add to the list (thread-safe)
             AttachedDevice = info;
-
-            // Update UI on the UI thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateAttachedLampArrayDisplayList();
-            });
 
             // Set user config device ID
             currentConfig.DeviceId = device.Id;
@@ -155,12 +165,6 @@ namespace Dynamic_Lighting_Key_Indicator
         // for the specified LampArray.
         private void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
-            // Update UI on the UI thread
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdateAttachedLampArrayDisplayList();
-            });
-
             UpdateStatusMessage();
         }
 
@@ -177,7 +181,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Update UI on the UI thread
             DispatcherQueue.TryEnqueue(() =>
             {
-                UpdateAttachedLampArrayDisplayList();
                 UpdatAvailableLampArrayDisplayList();
             });
         }
@@ -209,6 +212,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
+            Logging.WriteDebug("Device enumeration completed.");
             // Update UI on the UI thread. Only update the available devices since we might not attach to it.
             DispatcherQueue.TryEnqueue(() =>
             {

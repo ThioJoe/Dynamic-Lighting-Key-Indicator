@@ -374,6 +374,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Start with Windows Label and Toggle -->
@@ -401,7 +402,7 @@
                   MinWidth="0" 
                   Margin="30,0,0,0"/>
 
-            <!-- Debug mode test toggle -->
+            <!-- Advanced Info Mode Toggle -->
             <TextBlock Grid.Row="0" Grid.Column="2" 
                Text="Advanced Info" 
                HorizontalAlignment="Center"
@@ -415,6 +416,18 @@
                 MinWidth="0" 
                 Margin="30,0,0,0"
             />
+
+            <!-- Debug logging toggle -->
+            <TextBlock Grid.Row="0" Grid.Column="3" 
+               Text="Debug Logging" 
+               HorizontalAlignment="Center"
+               Margin="30,0,0,0"/>
+            <ToggleSwitch x:Name="toggleDebugLogging"
+                  Grid.Row="1" Grid.Column="3"
+                  IsOn="{x:Bind ViewModel.DebugFileLoggingEnabled, Mode=TwoWay}"
+                  HorizontalAlignment="Center"
+                  MinWidth="0" 
+                  Margin="30,0,0,0"/>
 
         </Grid>
 

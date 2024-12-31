@@ -24,10 +24,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             try
             {
-                // Debug that received command
-                string currentTime = DateTime.Now.ToString("HH:mm:ss");
-                System.Diagnostics.Debug.WriteLine($"Inside RegisterForProtocolActivation at" + currentTime);
-
+                Logging.WriteDebug("Registering protocol activation.");
 
                 // Get the current activation arguments
                 var args = AppInstance.GetCurrent().GetActivatedEventArgs();
@@ -40,24 +37,25 @@ namespace Dynamic_Lighting_Key_Indicator
             catch (Exception ex)
             {
                 // Handle any initialization errors
-                System.Diagnostics.Debug.WriteLine($"Error in protocol registration: {ex.Message}");
+                Logging.WriteDebug($"Error in protocol registration: {ex.Message}");
             }
         }
 
         public static void HandleActivation(AppActivationArguments args)
         {
-            string currentTime = DateTime.Now.ToString("HH:mm:ss");
-            System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (1) at" + currentTime);
-
+            Logging.WriteDebug("App activation event triggered.");
             if (args.Kind == ExtendedActivationKind.Protocol)
             {
-                System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (2) at" + currentTime);
                 if (args.Data is IProtocolActivatedEventArgs protocolArgs)
                 {
+                    Logging.WriteDebug("URI protocol activation event triggered by url: " + protocolArgs.Uri.ToString());
                     // Process the URI
-                    System.Diagnostics.Debug.WriteLine($"Inside HandleActivation (3) at" + currentTime);
                     ProcessUri(protocolArgs.Uri);
                 }
+            }
+            else
+            {
+                Logging.WriteDebug("Unknown activation event. It was not URI protocol activation.");
             }
         }
 

@@ -23,6 +23,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public string DeviceId { get; set; } = string.Empty;
         [JsonInclude]
         public bool StartMinimizedToTray { get; set; } = false;
+        [JsonInclude]
+        public bool DebugLoggingEnabled { get; set; } = false;
 
         public readonly static int DefaultBrightness = 100;
         public readonly static RGBTuple DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
@@ -67,15 +69,90 @@ namespace Dynamic_Lighting_Key_Indicator
         // --------------------------- Read / Write Methods ---------------------------
         public async Task<bool> WriteConfigurationFile_Async()
         {
+            Logging.WriteDebug("Writing configuration file...");
             string configuration = System.Text.Json.JsonSerializer.Serialize(value: this, options: jsonSerializerOptions);
+            try
+                {
+                    StorageFile configFile = await localFolder.CreateFileAsync(configFileName, CreationCollisionOption.ReplaceExisting);
+                    await FileIO.WriteTextAsync(configFile, configuration);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(Console.Error);
+                    Logging.WriteDebug("Failed to write configuration file: " + ex);
+                    return false;
+                }
+            return true;
+        }
+
+        public static async Task<bool> UpdateConfigFile_SpecificSetting_Async(StandaloneSettings setting, UserConfig configSavedOnDisk, UserConfig currentConfig, object value)
+        {
+            bool DiskSettingWasDifferent = false;
+
+            #pragma warning disable CS0219
+            bool CurrentSettingWasDifferent = false; // Not currently used but could be useful in the future
+            #pragma warning restore CS0219
+            
+            (string settingName, string valueString) = GetStandaloneSettingStringAndValue(setting, value);
+            Logging.WriteDebug($"Updating configuration file for setting {settingName} to: {valueString}");
+
+            // Change the specific setting, serialize and write it back
+            switch (setting)
+            {
+                case StandaloneSettings.DeviceId:
+                    // Check if any change
+                    if (configSavedOnDisk.DeviceId != (string)value)
+                        DiskSettingWasDifferent = true;
+                    if (currentConfig.DeviceId != (string)value)
+                        CurrentSettingWasDifferent = true;
+                    // Apply new value
+                    configSavedOnDisk.DeviceId = (string)value;
+                    currentConfig.DeviceId = (string)value;
+                    break;
+
+                case StandaloneSettings.StartMinimizedToTray:
+                    // Check if any change
+                    if (configSavedOnDisk.StartMinimizedToTray != (bool)value)
+                        DiskSettingWasDifferent = true;
+                    if (currentConfig.StartMinimizedToTray != (bool)value)
+                        CurrentSettingWasDifferent = true;
+                    // Apply new value
+                    configSavedOnDisk.StartMinimizedToTray = (bool)value;
+                    currentConfig.StartMinimizedToTray = (bool)value;
+                    break;
+
+                case StandaloneSettings.DebugLoggingEnabled:
+                    // Check if any change
+                    if (configSavedOnDisk.DebugLoggingEnabled != (bool)value)
+                        DiskSettingWasDifferent = true;
+                    if (currentConfig.DebugLoggingEnabled != (bool)value)
+                        CurrentSettingWasDifferent = true;
+                    // Apply new value
+                    configSavedOnDisk.DebugLoggingEnabled = (bool)value;
+                    currentConfig.DebugLoggingEnabled = (bool)value;
+                    break;
+
+                default:
+                    return false;
+            }
+
+            // Return early if the disk setting was the same
+            if (!DiskSettingWasDifferent)
+            {
+                Logging.WriteDebug("Setting in the config file already set to desired value. Not writing to disk.");
+                return true;
+            }
+
+            string configuration = System.Text.Json.JsonSerializer.Serialize(value: configSavedOnDisk, options: jsonSerializerOptions);
             try
             {
                 StorageFile configFile = await localFolder.CreateFileAsync(configFileName, CreationCollisionOption.ReplaceExisting);
                 await FileIO.WriteTextAsync(configFile, configuration);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 Console.WriteLine(Console.Error);
+                Logging.WriteDebug("Failed to write configuration file: " + ex);
                 return false;
             }
             return true;
@@ -178,10 +255,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (brightnessLevel > 100)
                 brightnessLevel = 100;
 
-            config.Brightness = brightnessLevel; // Remnant from old code
-
-            // -------- Local Function --------
-
+            config.Brightness = brightnessLevel;
 
             List<MonitoredKey> keysList = config.MonitoredKeysAndColors;
             foreach (var key in keysList)
@@ -207,10 +281,50 @@ namespace Dynamic_Lighting_Key_Indicator
                 StandardKeyColor = this.StandardKeyColor,
                 MonitoredKeysAndColors = this.MonitoredKeysAndColors.Select(mk => new MonitoredKey(mk.key, mk.onColor, mk.offColor, mk.onColorTiedToStandard, mk.offColorTiedToStandard)).ToList(),
                 DeviceId = this.DeviceId,
-                StartMinimizedToTray = this.StartMinimizedToTray
+                StartMinimizedToTray = this.StartMinimizedToTray,
+                DebugLoggingEnabled = this.DebugLoggingEnabled
             };
 
             return clonedConfig;
+        }
+
+        // ---------------- Enum Definitions ----------------
+
+        // Settings that might want to be saved to the disk file without updating the rest of the saved config
+        public enum StandaloneSettings
+        {
+            DeviceId,
+            StartMinimizedToTray,
+            DebugLoggingEnabled
+        }
+
+        private static (string, string) GetStandaloneSettingStringAndValue(StandaloneSettings setting, object value)
+        {
+            try
+            {
+                string settingName = setting switch
+                {
+                    StandaloneSettings.DeviceId => "DeviceId",
+                    StandaloneSettings.StartMinimizedToTray => "StartMinimizedToTray",
+                    StandaloneSettings.DebugLoggingEnabled => "DebugLoggingEnabled",
+                    _ => "Unknown"
+                };
+
+                string valueString = value switch
+                {
+                    bool b => b.ToString(),
+                    string s => s,
+                    _ => "Unknown"
+                };
+
+                return (settingName, valueString);
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteDebug($"Failed to get setting string and value: {ex}");
+                return ("Unknown", "Unknown");
+            }
+
         }
 
     } // ----------------- End of UserConfig class ------------------

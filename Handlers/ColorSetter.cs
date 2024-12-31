@@ -43,11 +43,14 @@ namespace Dynamic_Lighting_Key_Indicator
             if (lampArray == null)
             {
                 if (CurrentDevice == null)
-                    //MainWindow.ShowErrorMessage("LampArray must be defined.");
                     return null;
                 else
                     lampArray = CurrentDevice;
             }
+
+            if (lampArray == null)
+                Logging.WriteDebug("LampArray could not be determined.");
+
             return lampArray;
         }
 

@@ -75,6 +75,47 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        public bool DebugFileLoggingEnabled
+        {
+            get
+            {
+                //return _DebugFileLoggingEnabled;
+                //bool mode = Logging.DebugFileLoggingEnabled;
+                //// If the mode is different from the property, update the property
+                //if (mode != _DebugFileLoggingEnabled)
+                //{
+                //    _DebugFileLoggingEnabled = mode;
+                //    OnPropertyChanged(nameof(DebugFileLoggingEnabled));
+                //}
+                //return mode;
+                return Logging.DebugFileLoggingEnabled;
+            }
+            set
+            {
+                if (value == Logging.DebugFileLoggingEnabled)
+                    return;
+
+                if (value == true)
+                {
+                    Logging.EnableDebugLog();
+                }
+                else
+                {
+                    Logging.DisableDebugLog();
+                }
+
+                OnPropertyChanged(nameof(DebugFileLoggingEnabled));
+
+                UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.DebugLoggingEnabled;
+                _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
+                    setting: setting,
+                    configSavedOnDisk: mainWindow.SavedConfig,
+                    currentConfig: mainWindow.CurrentConfig,
+                    value: value
+                );
+            }
+        }
+
         // Whether to show a special message if the startup setting is set by policy, or was manually disabled by the user and therefore can't be toggled.
         // Also whether to disable the toggle switch if it won't work because of the above reasons.
         private bool _startupSettingCanBeChanged;
@@ -361,9 +402,14 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _startMinimizedToTray, value);
-                mainWindow.CurrentConfig.StartMinimizedToTray = value;
-                mainWindow.SavedConfig.StartMinimizedToTray = value;
-                _ = mainWindow.SavedConfig.WriteConfigurationFile_Async();
+                UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.StartMinimizedToTray;
+
+                _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
+                    setting: setting, 
+                    configSavedOnDisk: mainWindow.SavedConfig, 
+                    currentConfig: mainWindow.CurrentConfig, 
+                    value: value
+                );
             }
         }
 

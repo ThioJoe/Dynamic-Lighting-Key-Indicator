@@ -32,6 +32,16 @@ namespace Dynamic_Lighting_Key_Indicator
         public static readonly SolidColorBrush DefaultFontColor = (SolidColorBrush)Application.Current.Resources["SystemControlForegroundBaseHighBrush"];
     }
 
+    public static class Globals
+    {
+        private static bool _debugFileLoggingEnabled = false;
+        public static bool DebugFileLoggingEnabled
+        {
+            get => _debugFileLoggingEnabled;
+            set => _debugFileLoggingEnabled = value;
+        }
+    }
+
     // ------------------ Global Enums ------------------
     public enum ToggleAbleKeys : Int32
     {

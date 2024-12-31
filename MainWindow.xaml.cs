@@ -23,6 +23,7 @@ using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
 using Windows.Graphics;
 using Windows.UI.Composition;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 #nullable enable
 #pragma warning disable IDE0079 // Remove unnecessary suppression
@@ -122,6 +123,7 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton_EnabledStatus();
+            ViewModel.DebugFileLoggingEnabled = currentConfig.DebugLoggingEnabled;
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
@@ -242,27 +244,42 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void AttachToSavedDevice()
         {
+            Logging.WriteDebug("Attempting to attach to saved device, if any.");
             // If current device ID is null or empty it probably means the user stopped watching so it reset, so don't try to attach or else it will throw an exception
             if (configSavedOnDisk.DeviceId == null || configSavedOnDisk.DeviceId == "")
             {
+                Logging.WriteDebug("Device ID from config file is null or empty, not attempting to attach.");
                 return;
             }
 
+            Logging.WriteDebug("Found device ID in config file: " + configSavedOnDisk.DeviceId);
             DeviceInformation? device = availableDevices.FirstOrDefault(d => d.Id == configSavedOnDisk.DeviceId);
 
             if (device != null)
             {
+                Logging.WriteDebug("   > Found matching device to the one in the config.");
                 LampArrayInfo? lampArrayInfo = await AttachToDevice_Async(device);
+
                 if (lampArrayInfo != null)
                 {
                     ApplyLightingToDevice_AndSaveIdToConfig(lampArrayInfo);
                     UpdateSelectedDeviceDropdown();
                 }
+                else
+                {
+                    Logging.WriteDebug("Failed to attach to the device from the config file.");
+                }
+            }
+            else
+            {
+                Logging.WriteDebug("Device ID from config file not found in available devices.");
             }
         }
 
         private async void StartWatchingForLampArrays()
         {
+            Logging.WriteDebug("Starting to watch for lamp arrays.");
+
             ViewModel.HasAttachedDevices = false;
 
             //string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
@@ -283,10 +300,12 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Started.";
                 ViewModel.IsWatcherRunning = true;
+                Logging.WriteDebug("DeviceWatcher started.");
             }
             else
             {
                 ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started, something may have gone wrong.";
+                Logging.WriteDebug("DeviceWatcher not started. Something may have gone wrong.");
             }
         }
 
@@ -294,19 +313,27 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void StopWatchingForLampArrays()
         {
+            Logging.WriteDebug("Stopping to watch for lamp arrays.");
+
             if (KeyStatesHandler.rawInputWatcherActive == true)
             {
-                KeyStatesHandler.CleanupInputWatcher(); // Stop the keyboard hook 
+                KeyStatesHandler.CleanupInputWatcher();
             }
 
             if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
             {
                 m_deviceWatcher.Stop();
                 ViewModel.IsWatcherRunning = false;
+                Logging.WriteDebug("Stopped device watcher.");
             }
             else if (m_deviceWatcher == null)
             {
                 ViewModel.IsWatcherRunning = false;
+                Logging.WriteDebug("Device watcher was already null.");
+            }
+            else
+            {
+                Logging.WriteDebug("Device watcher was not running. The status was: " + m_deviceWatcher.Status);
             }
 
             ColorSetter.DefineCurrentDevice(null);
@@ -393,6 +420,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
 
+                Logging.WriteDebug("Available devices updated. Count: " + devicesListForDropdown.Count);
+
                 UpdateStatusMessage();
 
                 // Update ViewModel on UI thread
@@ -409,7 +438,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             lock (_lock)
             {
-                if (AttachedDevice != null)
+                if (AttachedDevice != null && AttachedDevice.lampArray != null)
                 {
                     lock (AttachedDevice)
                     {
@@ -428,12 +457,14 @@ namespace Dynamic_Lighting_Key_Indicator
                     ViewModel.HasAttachedDevices = (AttachedDevice != null);
                 });
             }
-            ViewModel.UpdateAttachedDeviceStatus();
             UpdateStatusMessage();
+            Logging.WriteDebug("Updated attached device display: " + message);
         }
 
         async Task<LampArrayInfo?> AttachSelectedDeviceFromDropdown_Async()
         {
+            Logging.WriteDebug("Attempting to attach to selected device from dropdown.");
+
             // Get the index of the selection from the GUI dropdown
             int selectedDeviceIndex = ViewModel.SelectedDeviceIndex;
 
@@ -442,6 +473,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 #pragma warning disable CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
                 ShowErrorMessage("Please select a device from the dropdown list.");
                 #pragma warning restore CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
+                Logging.WriteDebug($"No device selected from dropdown. Selected device index was: {selectedDeviceIndex}. Number of devices was {deviceIndexDict.Count}");
                 return null;
             }
 
@@ -450,6 +482,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (selectedDeviceObj == null)
             {
+                Logging.WriteDebug("Failed to find the selected device object from the dropdown list using device ID: " + selectedDeviceID);
+                Logging.WriteDebug("   > Number of devices in availableDevices was: " + availableDevices.Count);
                 return null;
             }
             else
@@ -514,16 +548,36 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
         {
+            if (lampArrayInfo.lampArray == null)
+            {
+                Logging.WriteDebug("Failed to apply lighting to device, lampArray was passed into ApplyLightingToDevice_AndSaveIdToConfig as null.");
+                return;
+            }
+
             LampArray lampArray = lampArrayInfo.lampArray;
 
             // Update the current and saved config to reflect the new device ID
             currentConfig.DeviceId = lampArrayInfo.id;
+
+            Logging.WriteDebug("Beginning to apply lighting to device and saving device ID to config: " + lampArrayInfo.id);
+
             if (configSavedOnDisk.DeviceId != currentConfig.DeviceId)
             {
-                configSavedOnDisk.DeviceId = lampArrayInfo.id;
-                await configSavedOnDisk.WriteConfigurationFile_Async();
+                // Update the device ID in the config file
+                UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.DeviceId;
+                await UserConfig.UpdateConfigFile_SpecificSetting_Async(
+                    setting: setting,
+                    configSavedOnDisk: configSavedOnDisk,
+                    currentConfig: currentConfig,
+                    value: lampArrayInfo.id
+                );
+            }
+            else
+            {
+                Logging.WriteDebug("Device ID in config file already matches the current device ID. Skipping writing to file.");
             }
 
+            Logging.WriteDebug("Setting colors on device...");
             ColorSetter.DefineCurrentDevice(lampArray);
             ColorSetter.SetAllColors_ToKeyboard(lampArray);
         }
@@ -655,6 +709,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     #pragma warning disable CS4014
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
                     #pragma warning restore CS4014
+
+                    Logging.WriteDebug("Failed to save the color settings to the configuration file.");
                 }
                 ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
             }
@@ -693,11 +749,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
-        internal class LampArrayInfo(string id, string displayName, LampArray lampArray)
+        internal class LampArrayInfo(string id, string displayName, LampArray? lampArray)
         {
             public readonly string id = id;
             public readonly string displayName = displayName;
-            public readonly LampArray lampArray = lampArray;
+            public readonly LampArray? lampArray = lampArray;
         }
 
         // Stores info about the color a key is being updated to, for which state (on/off/both), etc. For more precise control over color updates
@@ -767,7 +823,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Clear the current list of attached devices
             AttachedDevice = null;
             availableDevices.Clear();
-            UpdateAttachedLampArrayDisplayList();
 
             StartWatchingForLampArrays();
         }
@@ -776,7 +831,6 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             AttachedDevice = null;
             availableDevices.Clear();
-            UpdateAttachedLampArrayDisplayList();
             UpdatAvailableLampArrayDisplayList();
             StopWatchingForLampArrays();
         }
