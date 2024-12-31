@@ -127,7 +127,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public struct StatusMsgBody
         {
             internal const string NoneFound = "No elegible lighting devices found";
-            internal const string Waiting = "Waiting - Start device watcher to list available devices.";
+            internal const string Waiting = "Waiting - Click Enable to list available devices.";
             internal const string Available = $"Available Devices: "; // Append device names to this string
             internal const string NotAvailable = "Device attached but not controllable. See instructions below for how to enable background control.";
             internal const string Good = "Good";

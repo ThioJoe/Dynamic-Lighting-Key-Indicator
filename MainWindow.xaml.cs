@@ -87,7 +87,7 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: false)
             {
                 DeviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Waiting),
-                DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started.",
+                DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started (Click Enable)",
             };
             MainViewModel.SetMainViewModelInstance(ViewModel);
 
