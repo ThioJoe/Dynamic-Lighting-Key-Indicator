@@ -30,28 +30,26 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void InitializeRawInput(IntPtr hwnd)
         {
-            if (rawInputWatcherActive)
-                return;
+            if (originalWndProc == IntPtr.Zero)
+            {
+                // First set up the window procedure
+                SubclassWindow(hwnd);
 
-            // First set up the window procedure
-            SubclassWindow(hwnd);
-
-            // Then register for raw input
+                // Then register for raw input
             RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1]; // Create an array of 1 device
             rid[0] = new RAWINPUTDEVICE // Assign value to the first (and only) device in the array
-            {
-                usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
-                usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
-                dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_INPUTSINK,
-                hwndTarget = hwnd
-            };
+                {
+                    usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
+                    usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
+                    dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_INPUTSINK,
+                    hwndTarget = hwnd
+                };
 
-            if (!RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf<RAWINPUTDEVICE>()))
-            {
-                throw new Exception("Failed to register raw input device.");
+                if (!RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf<RAWINPUTDEVICE>()))
+                {
+                    throw new Exception("Failed to register raw input device.");
+                }
             }
-
-            rawInputWatcherActive = true;
         }
 
         public static RAWINPUT? GetRawInput(IntPtr lParam)
@@ -108,11 +106,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // --------------------------------- WndProc Handling ----------------------------------------
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, WndProcDelegate newProc);
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
+        private static extern IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
+   
 
         [DllImport("user32.dll")]
         private static extern IntPtr DefRawInputProc(IntPtr paRawInput, Int32 nInput, UInt32 cbSizeHeader);
@@ -123,14 +122,18 @@ namespace Dynamic_Lighting_Key_Indicator
         private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
         private static WndProcDelegate? wndProcDelegate;
 
-        private static IntPtr originalWndProc;
+        private static IntPtr originalWndProc = IntPtr.Zero;
         private const int GWLP_WNDPROC = -4;
 
         public static void SubclassWindow(IntPtr hwnd)
         {
-            // Keep a reference to the delegate to prevent garbage collection
-            wndProcDelegate = new WndProcDelegate(WndProc);
-            originalWndProc = SetWindowLongPtr(hwnd, GWLP_WNDPROC, wndProcDelegate);
+            if (originalWndProc == IntPtr.Zero)
+            {
+                // Keep a reference to the delegate to prevent garbage collection
+                wndProcDelegate ??= WndProc;
+                IntPtr wndProcPtr = Marshal.GetFunctionPointerForDelegate(wndProcDelegate);
+                originalWndProc = SetWindowLongPtr(hwnd, GWLP_WNDPROC, wndProcPtr);
+            }
         }
 
         //See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nc-winuser-wndproc
