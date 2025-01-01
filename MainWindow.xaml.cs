@@ -72,6 +72,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // Other random crap
         public SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
+        bool alreadyShowedDebugLogMessage = false;
 
         // Imported Windows API functions
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -536,15 +537,39 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static async Task ShowErrorMessage(string message)
         {
+            if (mainWindow.Content.XamlRoot == null)
+            {
+                Logging.WriteDebug("XamlRoot was null when trying to show error message.");
+                return;
+            }
+
             ContentDialog errorDialog = new()
             {
                 Title = "Error",
                 Content = message,
                 CloseButtonText = "OK",
-                XamlRoot = mainWindow.Content.XamlRoot // Ensure the dialog is associated with the current window
+                XamlRoot = mainWindow.Content.XamlRoot
             };
 
             await errorDialog.ShowAsync();
+        }
+
+        public static async Task ShowInfoMessage(string message)
+        {
+            if (mainWindow.Content.XamlRoot == null)
+            {
+                Logging.WriteDebug("XamlRoot was null when trying to show info message.");
+                return;
+            }
+
+            ContentDialog infoDialog = new()
+            {
+                Title = "Info",
+                Content = message,
+                CloseButtonText = "OK",
+                XamlRoot = mainWindow.Content.XamlRoot
+            };
+            await infoDialog.ShowAsync();
         }
 
         private async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
@@ -872,6 +897,21 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // Upon applying the settings, it should trigger event handlers in MainViewModel for HasAttachedDevices, attachedDevicesMessage, EnableApplyButton etc.
+        }
+
+        private async void ToggleDebugLogging_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (mainWindow.Content.XamlRoot == null)
+                return;
+
+            if (sender is ToggleSwitch toggleSwitch)
+            {
+                if (toggleSwitch.IsOn && !alreadyShowedDebugLogMessage)
+                {
+                    await ShowInfoMessage("Debug text file log will appear on the desktop.");
+                    alreadyShowedDebugLogMessage = true;
+                }
+            }
         }
 
         private void SwapOnOffColor_Click(object sender, RoutedEventArgs e)

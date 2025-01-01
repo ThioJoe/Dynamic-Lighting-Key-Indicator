@@ -421,13 +421,18 @@
             <TextBlock Grid.Row="0" Grid.Column="3" 
                Text="Debug Logging" 
                HorizontalAlignment="Center"
-               Margin="30,0,0,0"/>
+               Margin="30,0,0,0"
+               ToolTipService.ToolTip="Creates debug log on the desktop."
+            />
             <ToggleSwitch x:Name="toggleDebugLogging"
                   Grid.Row="1" Grid.Column="3"
                   IsOn="{x:Bind ViewModel.DebugFileLoggingEnabled, Mode=TwoWay}"
                   HorizontalAlignment="Center"
                   MinWidth="0" 
-                  Margin="30,0,0,0"/>
+                  Margin="30,0,0,0"
+                  ToolTipService.ToolTip="Creates debug log on the desktop."
+                  Toggled="ToggleDebugLogging_Toggled"
+            />
 
         </Grid>
 
