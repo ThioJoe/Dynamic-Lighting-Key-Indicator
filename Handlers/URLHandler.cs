@@ -141,7 +141,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             UserConfig config;
-            _currentConfig = _mainWindow.CurrentConfig;
+            _currentConfig = MainWindow.CurrentConfig;
             // Get the various keys from the config
             if (_currentConfig != null && _currentConfig.MonitoredKeysAndColors != null)
             {

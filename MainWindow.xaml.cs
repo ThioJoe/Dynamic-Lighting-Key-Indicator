@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -32,10 +33,11 @@ namespace Dynamic_Lighting_Key_Indicator
     public sealed partial class MainWindow : Window
     {
         // Null forgiving because it will immediatley be set in the constructor
-        public static MainWindow mainWindow { get; private set; } = null!;
         public MainViewModel ViewModel { get; private init; } = null!;
 
-        public static bool DEBUGMODE = false;
+        private static bool _DEBUGMODE = false;
+        public static bool DEBUGMODE => _DEBUGMODE;
+
         static UserConfig currentConfig = new();
         static UserConfig configSavedOnDisk = new();
 
@@ -43,20 +45,20 @@ namespace Dynamic_Lighting_Key_Indicator
         private readonly ObservableCollection<DeviceInformation> availableDevices = [];
         ObservableCollection<string> devicesListForDropdown = [];
 
-        private static LampArrayInfo? _attachedDevice = null;
-        internal static LampArrayInfo? AttachedDevice
+        private LampArrayInfo? _attachedDevice = null;
+        internal LampArrayInfo? AttachedDevice
         {
             get => _attachedDevice;
             private set
             {
                 _attachedDevice = value;
-                mainWindow.OnAttachedDeviceSet();
+                this.OnAttachedDeviceSet();
             }
         }
 
         private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
-        private readonly object _lock = new();
+        private readonly System.Threading.Lock _lock = new();
 
         // Constants
         public const string MainIconFileName = "Icon.ico";
@@ -65,7 +67,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string UpdatesURL = @"https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator/releases";
 
         // Other random crap
-        public static SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
+        public SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
         bool alreadyShowedDebugLogMessage = false;
 
         // Imported Windows API functions
@@ -75,11 +77,10 @@ namespace Dynamic_Lighting_Key_Indicator
         // --------------------------------------------------- CONSTRUCTOR ---------------------------------------------------
         public MainWindow(string[] args)
         {
-#if DEBUG
-                DEBUGMODE = true;
-#endif
-
-            mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
+            _DEBUGMODE = false; // To get rid of the warning to make it readonly
+            #if DEBUG
+                _DEBUGMODE = true;
+            #endif
 
             ViewModel = new MainViewModel(mainWindowPassIn: this, debugMode: false)
             {
@@ -123,13 +124,13 @@ namespace Dynamic_Lighting_Key_Indicator
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
-#pragma warning disable IDE0028
+            #pragma warning disable IDE0028
             MonitoredKey.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
-#pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
+            #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
             ForceUpdateButtonBackgrounds(); // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
             ForceUpdateAllButtonGlyphs();   // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
@@ -158,13 +159,13 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ------------------------------- Getters / Setters -------------------------------
         // Getter and setter for user config
-        internal UserConfig CurrentConfig
+        internal static UserConfig CurrentConfig
         {
             get => currentConfig;
             set => currentConfig = value;
         }
 
-        internal UserConfig SavedConfig
+        internal static UserConfig SavedConfig
         {
             get => configSavedOnDisk;
             set => configSavedOnDisk = value;
@@ -272,7 +273,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private async void StartWatchingForLampArrays()
+        private void StartWatchingForLampArrays()
         {
             Logging.WriteDebug("Starting to watch for lamp arrays.");
 
@@ -365,7 +366,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     }
                 }
                 // If there are devices available, but nothing attached yet, show the number of devices
-                else if (AttachedDevice == null)
+                else if (AttachedDevice == null || AttachedDevice.lampArray == null)
                 {
                     statusInfo = new(DeviceStatusInfo.Msg.Available, deviceCount: deviceCount);
                 }
@@ -466,9 +467,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (selectedDeviceIndex == -1 || deviceIndexDict.Count == 0 || selectedDeviceIndex > deviceIndexDict.Count)
             {
-#pragma warning disable CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
-                ShowErrorMessage("Please select a device from the dropdown list.");
-#pragma warning restore CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
+                _ = ShowErrorMessage("Please select a device from the dropdown list.");
                 Logging.WriteDebug($"No device selected from dropdown. Selected device index was: {selectedDeviceIndex}. Number of devices was {deviceIndexDict.Count}");
                 return null;
             }
@@ -529,9 +528,9 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static async Task ShowErrorMessage(string message)
+        public async Task ShowErrorMessage(string message)
         {
-            if (mainWindow.Content.XamlRoot == null)
+            if (this.Content.XamlRoot == null)
             {
                 Logging.WriteDebug("XamlRoot was null when trying to show error message.");
                 return;
@@ -542,15 +541,15 @@ namespace Dynamic_Lighting_Key_Indicator
                 Title = "Error",
                 Content = message,
                 CloseButtonText = "OK",
-                XamlRoot = mainWindow.Content.XamlRoot
+                XamlRoot = this.Content.XamlRoot
             };
 
             await errorDialog.ShowAsync();
         }
 
-        public static async Task ShowInfoMessage(string message)
+        public async Task ShowInfoMessage(string message)
         {
-            if (mainWindow.Content.XamlRoot == null)
+            if (this.Content.XamlRoot == null)
             {
                 Logging.WriteDebug("XamlRoot was null when trying to show info message.");
                 return;
@@ -561,12 +560,12 @@ namespace Dynamic_Lighting_Key_Indicator
                 Title = "Info",
                 Content = message,
                 CloseButtonText = "OK",
-                XamlRoot = mainWindow.Content.XamlRoot
+                XamlRoot = this.Content.XamlRoot
             };
             await infoDialog.ShowAsync();
         }
 
-        private async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
+        private static async void ApplyLightingToDevice_AndSaveIdToConfig(LampArrayInfo lampArrayInfo)
         {
             if (lampArrayInfo.lampArray == null)
             {
@@ -726,9 +725,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool result = await currentConfig.WriteConfigurationFile_Async();
                 if (!result)
                 {
-#pragma warning disable CS4014
-                    ShowErrorMessage("Failed to save the color settings to the configuration file.");
-#pragma warning restore CS4014
+                    _ = ShowErrorMessage("Failed to save the color settings to the configuration file.");
 
                     Logging.WriteDebug("Failed to save the color settings to the configuration file.");
                 }
@@ -895,7 +892,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private async void ToggleDebugLogging_Toggled(object sender, RoutedEventArgs e)
         {
-            if (mainWindow.Content.XamlRoot == null)
+            if (this.Content.XamlRoot == null)
                 return;
 
             if (sender is ToggleSwitch toggleSwitch)
@@ -1044,67 +1041,38 @@ namespace Dynamic_Lighting_Key_Indicator
                 AppWindow.ResizeClient(new SizeInt32(width, windowHeightToSet));
             }
         }
+
+
         private void TestButton_Click(object sender, object e)
         {
             // Get the text block object from various controls
             Debug.WriteLine("Test button clicked.");
 
-            var window = this;  // assuming this is in the Window class
-            if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
-            {
-                // Get info about AdvancedInfoStack text block
-                StackPanel? advancedInfoStack = windowRoot.FindName("AdvancedInfoStack") as StackPanel;
+            //var window = this;  // assuming this is in the Window class
+            //if (window.Content is FrameworkElement windowRoot && windowRoot.XamlRoot != null)
+            //{
+            //    // Get info about AdvancedInfoStack text block
+            //    StackPanel? advancedInfoStack = windowRoot.FindName("AdvancedInfoStack") as StackPanel;
 
-                Grid? mainContentGrid = windowRoot.FindName("MainGrid") as Grid;
+            //    Grid? mainContentGrid = windowRoot.FindName("MainGrid") as Grid;
 
-                //Expander expander = (Expander)sender;
-                Double scale = windowRoot.XamlRoot.RasterizationScale;
-                int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
-                // Desired size is the size before the toggle.
-                //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
-                Double previousRootContentHeight = windowRoot.ActualHeight;
-            }
+            //    //Expander expander = (Expander)sender;
+            //    Double scale = windowRoot.XamlRoot.RasterizationScale;
+            //    int width = (int)Math.Ceiling(windowRoot.ActualWidth * scale);
+            //    // Desired size is the size before the toggle.
+            //    //Double previousRootContentHeight = windowRoot.DesiredSize.Height;
+            //    Double previousRootContentHeight = windowRoot.ActualHeight;
+            //}
         }
+
 
         private void AutoSizeWindow_OnGridLoad(object sender, RoutedEventArgs e)
         {
-            AutoSizeWindow_UponLoaded(sender, e);
+            AutoSizeWindow_UponLoaded();
             SetInitialKeyStates();
         }
 
-        private void buttonScrollLockOn_Loaded(object sender, RoutedEventArgs e)
-        {
-            //buttonScrollLockOn.DispatcherQueue.TryEnqueue(() =>
-            //{
-            //    Microsoft.UI.Composition.DropShadow shadow = DropShadowMaker(Colors.Red, 15f, 100f);
-            //    AddShadowBehindElement(buttonScrollLockOn, shadow);
-            //});
-        }
-
-        public static UIElement GetShadowHostGrid()
-        {
-            return mainWindow.ShadowHostGrid;
-        }
-
-        public static Microsoft.UI.Composition.DropShadow DropShadowMaker(Color shadowColor, float radius, float opacityPercent)
-        {
-            Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(GetShadowHostGrid()).Compositor;
-
-            if (opacityPercent < 0) { opacityPercent = 0; }
-            if (opacityPercent > 100) { opacityPercent = 100; }
-
-            float opacity = opacityPercent / 100;
-            Microsoft.UI.Composition.DropShadow dropShadow = compositor.CreateDropShadow();
-            dropShadow.Color = shadowColor;
-            dropShadow.BlurRadius = radius; // Example: 15f
-            dropShadow.Opacity = opacity; // Example: 0.8f
-            Color maskColor = Color.FromArgb(255, 255, 255, 255);
-            dropShadow.Mask = compositor.CreateColorBrush(maskColor);
-
-            return dropShadow;
-        }
-
-        private void AutoSizeWindow_UponLoaded(object? sender, RoutedEventArgs? e)
+        private void AutoSizeWindow_UponLoaded()
         {
             if (this.Visible == false)
                 return;
@@ -1172,7 +1140,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void ColorButton_Click(object sender, RoutedEventArgs e)
         {
-            List<VK> monitoredKeysToPreviewDefaultColor = new();
+            List<VK> monitoredKeysToPreviewDefaultColor = [];
             // Add keys where their current state matches their linked default state
             foreach (MonitoredKey key in KeyStatesHandler.monitoredKeys)
             {

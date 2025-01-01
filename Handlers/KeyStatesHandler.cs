@@ -33,14 +33,16 @@ namespace Dynamic_Lighting_Key_Indicator
                 SubclassWindow(hwnd);
 
                 // Then register for raw input
-                RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1]; // Create an array of 1 device
-                rid[0] = new RAWINPUTDEVICE // Assign value to the first (and only) device in the array
-                {
-                    usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
-                    usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
-                    dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_INPUTSINK,
-                    hwndTarget = hwnd
-                };
+                RAWINPUTDEVICE[] rid =
+                [
+                    new() // Assign value to the first (and only) device in the array
+                    {
+                        usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
+                        usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
+                        dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_INPUTSINK,
+                        hwndTarget = hwnd
+                    },
+                ]; // Create an array of 1 device
 
                 if (!RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf<RAWINPUTDEVICE>()))
                 {
@@ -87,16 +89,17 @@ namespace Dynamic_Lighting_Key_Indicator
             if (rawInputWatcherActive)
             {
                 // Unregister by registering with RIDEV_REMOVE
-                RAWINPUTDEVICE[] rid = new RAWINPUTDEVICE[1];
-                rid[0] = new RAWINPUTDEVICE
-                {
-                    usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
-                    usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
-                    dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_REMOVE,
-                    hwndTarget = IntPtr.Zero
-                };
-
-                RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf(typeof(RAWINPUTDEVICE)));
+                RAWINPUTDEVICE[] rid =
+                [
+                    new()
+                    {
+                        usUsagePage = (ushort)HIDUsagePage.HID_USAGE_PAGE_GENERIC,
+                        usUsage = (ushort)HIDGenericDesktopUsage.HID_USAGE_GENERIC_KEYBOARD,
+                        dwFlags = RAWINPUTDEVICE._dwFlags.RIDEV_REMOVE,
+                        hwndTarget = IntPtr.Zero
+                    },
+                ];
+                RegisterRawInputDevices(rid, 1, (uint)Marshal.SizeOf<RAWINPUTDEVICE>());
                 rawInputWatcherActive = false;
             }
         }

@@ -139,7 +139,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             notifyIcon = new NOTIFYICONDATAW
             {
-                cbSize = (uint)Marshal.SizeOf(typeof(NOTIFYICONDATAW)),
+                cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
                 hWnd = hwnd,
                 uID = 1,
                 uFlags = NOTIFYICONDATAA_uFlags.NIF_ICON | NOTIFYICONDATAA_uFlags.NIF_MESSAGE | NOTIFYICONDATAA_uFlags.NIF_TIP,

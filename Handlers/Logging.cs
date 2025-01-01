@@ -8,7 +8,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private static readonly string _CrashlogFilePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "Dynamic_Lighting_Key_Indicator_Log.txt");
         private static readonly string _DebugLogFilePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "DebugLog_Dynamic_Lighting_Key_Indicator.txt");
-        private static readonly string timestamp = DateTime.Now.ToString("MM-dd_HH-mm-ss");
+        //private static readonly string timestamp = DateTime.Now.ToString("MM-dd_HH-mm-ss");
 
         private static StreamWriter? debugLogFileStream = null;
 

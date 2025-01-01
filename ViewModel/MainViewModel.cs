@@ -20,7 +20,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private readonly DispatcherQueue _dispatcherQueue;
 
-        private MainWindow mainWindow;
+        private readonly MainWindow mainWindow;
         private static MainViewModel? mainViewModelInstance;
 
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
@@ -108,8 +108,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.DebugLoggingEnabled;
                 _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
                     setting: setting,
-                    configSavedOnDisk: mainWindow.SavedConfig,
-                    currentConfig: mainWindow.CurrentConfig,
+                    configSavedOnDisk: MainWindow.SavedConfig,
+                    currentConfig: MainWindow.CurrentConfig,
                     value: value
                 );
             }
@@ -405,8 +405,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
                 _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
                     setting: setting,
-                    configSavedOnDisk: mainWindow.SavedConfig,
-                    currentConfig: mainWindow.CurrentConfig,
+                    configSavedOnDisk: MainWindow.SavedConfig,
+                    currentConfig: MainWindow.CurrentConfig,
                     value: value
                 );
             }
@@ -427,7 +427,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal void CheckAndUpdateSaveButton_EnabledStatus()
         {
             // Enable it if the colors are not the same as the config
-            bool newEnabledStatus = !IsColorSettingsSameAsConfig(config: mainWindow.SavedConfig);
+            bool newEnabledStatus = !IsColorSettingsSameAsConfig(config: MainWindow.SavedConfig);
 
             // Only update the property if it doesn't already match the new enabled status
             if (IsSaveButtonEnabled != newEnabledStatus)
@@ -439,8 +439,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool IsUndoButtonEnabled => !IsSaveButtonEnabled;
 
         // Info about the attached device
-        internal LampArrayInfo? AttachedDeviceInfo => MainWindow.AttachedDevice;
-        internal LampArray? AttachedDevice => MainWindow.AttachedDevice?.lampArray;
+        internal LampArrayInfo? AttachedDeviceInfo => mainWindow.AttachedDevice;
+        internal LampArray? AttachedDevice => mainWindow.AttachedDevice?.lampArray;
         internal string AttachedDeviceName => AttachedDeviceInfo?.displayName ?? "None";
         internal bool DeviceIsAvailable => AttachedDevice?.IsAvailable ?? false;
         internal bool DeviceIsConnected => AttachedDevice?.IsConnected ?? false;
@@ -861,7 +861,7 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _LastKnownNumLockState, value);
-                bool onIsActive = value ? true : false;
+                bool onIsActive = value;
                 NumLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
                 NumLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
                 OnPropertyChanged(nameof(NumLockOnBorderThickness));
@@ -874,7 +874,7 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _LastKnownCapsLockState, value);
-                bool onIsActive = value ? true : false;
+                bool onIsActive = value;
                 CapsLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
                 CapsLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
                 OnPropertyChanged(nameof(CapsLockOnBorderThickness));
@@ -887,7 +887,7 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _LastKnownScrollLockState, value);
-                bool onIsActive = value ? true : false;
+                bool onIsActive = value;
                 ScrollLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
                 ScrollLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
                 OnPropertyChanged(nameof(ScrollLockOnBorderThickness));
@@ -1052,7 +1052,7 @@ namespace Dynamic_Lighting_Key_Indicator
             DefaultColor = ColorSetter.ScaleColorBrightness(DefaultColor, brightness);
         }
 
-        public SolidColorBrush GetBrushFromColor(Color color)
+        public static SolidColorBrush GetBrushFromColor(Color color)
         {
             return new SolidColorBrush(color);
         }

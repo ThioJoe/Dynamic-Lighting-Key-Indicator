@@ -11,8 +11,8 @@ namespace Dynamic_Lighting_Key_Indicator.Utils
     // Used to print to console any time any event is triggered on a target object. Useful for testing purposes.
     public class AllEventsWatcher
     {
-        private Dictionary<string, Delegate> EventHandlersHolder = [];
-        private static List<AllEventsWatcher> Instances = [];  // Keep track of instances of this class so the user can see how many are watching
+        private readonly Dictionary<string, Delegate> EventHandlersHolder = [];
+        private static readonly List<AllEventsWatcher> Instances = [];  // Keep track of instances of this class so the user can see how many are watching
         private object? Target { get; init; }
         private string? TargetTypeName { get; init; }
 
@@ -294,7 +294,7 @@ namespace Dynamic_Lighting_Key_Indicator.Utils
 
             // Create expression to call Debug.WriteLine($"Event: {eventName}")
             ConstantExpression eventNameExpression = Expression.Constant($"Event: {eventName}");
-            MethodInfo? debugWriteLineMethod = typeof(Debug).GetMethod(nameof(Debug.WriteLine), new Type[] { typeof(string) });
+            MethodInfo? debugWriteLineMethod = typeof(Debug).GetMethod(name: nameof(Debug.WriteLine), types: [typeof(string)]);
 
             if (debugWriteLineMethod == null)
             {

@@ -5,8 +5,6 @@ using Windows.Devices.Lights;
 using Windows.System;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
-#pragma warning disable IDE0305 // Simplify collection initialization
-
 namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class ColorSetter
