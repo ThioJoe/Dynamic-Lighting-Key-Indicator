@@ -9,15 +9,19 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     public class NativeContextMenu
     {
-        // Win32 API constants
+        // Win32 System Tray constants
         private const uint TPM_RETURNCMD = 0x0100;
-        private const uint MF_STRING = 0x00000000;
-        private const uint MF_SEPARATOR = 0x00000800;
+        
         private const uint TPM_RIGHTBUTTON = 0x0002;
         private const uint TPM_LEFTBUTTON = 0x0000;
         private const uint TPM_RIGHTALIGN = 0x0008;
         private const uint TPM_LEFTALIGN = 0x0000;
         private const uint TPM_BOTTOMALIGN = 0x0020;
+
+        // Win32 Menu item constants. See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-appendmenua
+        private const uint MF_SEPARATOR = 0x00000800;
+        private const uint MF_DISABLED = 0x00000002;
+        private const uint MF_STRING = 0x00000000;
 
         // Win32 API structures
         [StructLayout(LayoutKind.Sequential)]
@@ -59,6 +63,10 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     InsertMenu(hMenu, itemId, MF_SEPARATOR, itemId, string.Empty);
                 }
+                else if (item.IsDisabled)
+                {
+                    InsertMenu(hMenu, itemId, MF_STRING | MF_DISABLED, itemId, item.Text);
+                }
                 else
                 {
                     InsertMenu(hMenu, itemId, MF_STRING, itemId, item.Text);
@@ -82,15 +90,16 @@ namespace Dynamic_Lighting_Key_Indicator
             return clickedItem;
         }
 
-        public class MenuItem(string text, int index)
+        public class MenuItem(string text, int index, bool isDisabled)
         {
             public string Text { get; set; } = text;
             public bool IsSeparator { get; set; } = false;
+            public bool IsDisabled { get; set; } = isDisabled;
             public int Index { get; set; } = index;
 
             public static MenuItem Separator(int index)
             {
-                return new MenuItem(string.Empty, index) { IsSeparator = true };
+                return new MenuItem(string.Empty, index, false) { IsSeparator = true };
             }
         }
 
@@ -98,9 +107,15 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             private readonly List<MenuItem> _menuItems = [];
 
-            public void AddMenuItem(string text)
+            public void AddMenuItem(string text, bool isDisabled = false)
             {
-                _menuItems.Add(new MenuItem(text, _menuItems.Count + 1)); // 1-based index because 0 is reserved for no selection
+                _menuItems.Add(
+                    new MenuItem(
+                        text,
+                        _menuItems.Count + 1,  // 1-based index because 0 is reserved for no selection
+                        isDisabled
+                    )
+                ); 
             }
 
             public void AddSeparator()
@@ -129,10 +144,12 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         private static class MenuItemNames
         {
+            public const string CheckUpdates = "Check for Updates";
             public const string Restore = "Restore";
             public const string Restart = "Restart Process";
             public const string Exit = "Exit";
 
+            public static string AppVersion = "Version " + Globals.AppVersion;
         }
 
         internal static void CreateAndShowMenu(IntPtr hwnd, SystemTray systemTray)
@@ -140,7 +157,9 @@ namespace Dynamic_Lighting_Key_Indicator
             var menuItemSet = new NativeContextMenu.MenuItemSet();
 
             //menuItemSet.AddMenuItem(MenuItemNames.Restore);
-            //menuItemSet.AddSeparator();
+            menuItemSet.AddMenuItem(MenuItemNames.CheckUpdates);
+            menuItemSet.AddMenuItem(MenuItemNames.AppVersion, isDisabled: true);
+            menuItemSet.AddSeparator();
             menuItemSet.AddMenuItem(MenuItemNames.Restart);
             menuItemSet.AddMenuItem(MenuItemNames.Exit);
 
@@ -160,6 +179,9 @@ namespace Dynamic_Lighting_Key_Indicator
                         break;
                     case MenuItemNames.Restart:
                         RestartApplication();
+                        break;
+                    case MenuItemNames.CheckUpdates:
+                        MainWindow.OpenUpdatesWebsite();
                         break;
                     case MenuItemNames.Exit:
                         systemTray.ExitApplication();

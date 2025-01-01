@@ -40,6 +40,16 @@ namespace Dynamic_Lighting_Key_Indicator
             get => _debugFileLoggingEnabled;
             set => _debugFileLoggingEnabled = value;
         }
+
+        // Get the app's package version
+        public static string AppVersion
+        {
+            get
+            {
+                var version = Windows.ApplicationModel.Package.Current.Id.Version;
+                return $"{version.Major}.{version.Minor}.{version.Build}.{version.Revision}";
+            }
+        }
     }
 
     // ------------------ Global Enums ------------------

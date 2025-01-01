@@ -68,6 +68,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
         public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
+        public const string UpdatesURL = @"https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator/releases";
 
         // Other random crap
         public SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
@@ -745,6 +746,23 @@ namespace Dynamic_Lighting_Key_Indicator
             bool scrollLockState = KeyStatesHandler.FetchKeyState((int)VK.ScrollLock);
 
             ViewModel.UpdateAllKeyStates(numLockState, capsLockState, scrollLockState);
+        }
+
+        public static void OpenUpdatesWebsite()
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = UpdatesURL,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception e)
+            {
+                Logging.WriteDebug("Failed to open the updates website: " + e.Message);
+            }
         }
 
 
