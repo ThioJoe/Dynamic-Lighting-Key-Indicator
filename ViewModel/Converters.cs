@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml;
 using System;
 
 namespace Dynamic_Lighting_Key_Indicator.Converters
@@ -8,7 +9,7 @@ namespace Dynamic_Lighting_Key_Indicator.Converters
     {
         public object? Convert(object value, Type targetType, object parameter, string language)
         {
-            if (value is Windows.UI.Color color)
+            if (value is Color color)
             {
                 return new SolidColorBrush(color);
             }

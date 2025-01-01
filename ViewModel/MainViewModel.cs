@@ -646,8 +646,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _scrollLockOnColor;
-        public Windows.UI.Color ScrollLockOnColor
+        private Color _scrollLockOnColor;
+        public Color ScrollLockOnColor
         {
             get => _scrollLockOnColor;
             set
@@ -660,8 +660,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _scrollLockOffColor;
-        public Windows.UI.Color ScrollLockOffColor
+        private Color _scrollLockOffColor;
+        public Color ScrollLockOffColor
         {
             get => _scrollLockOffColor;
             set
@@ -674,8 +674,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _capsLockOnColor;
-        public Windows.UI.Color CapsLockOnColor
+        private Color _capsLockOnColor;
+        public Color CapsLockOnColor
         {
             get => _capsLockOnColor;
             set
@@ -688,8 +688,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _capsLockOffColor;
-        public Windows.UI.Color CapsLockOffColor
+        private Color _capsLockOffColor;
+        public Color CapsLockOffColor
         {
             get => _capsLockOffColor;
             set
@@ -702,8 +702,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _numLockOnColor;
-        public Windows.UI.Color NumLockOnColor
+        private Color _numLockOnColor;
+        public Color NumLockOnColor
         {
             get => _numLockOnColor;
             set
@@ -716,8 +716,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _numLockOffColor;
-        public Windows.UI.Color NumLockOffColor
+        private Color _numLockOffColor;
+        public Color NumLockOffColor
         {
             get => _numLockOffColor;
             set
@@ -730,8 +730,8 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Windows.UI.Color _defaultColor;
-        public Windows.UI.Color DefaultColor
+        private Color _defaultColor;
+        public Color DefaultColor
         {
             get => _defaultColor;
             set
@@ -811,42 +811,42 @@ namespace Dynamic_Lighting_Key_Indicator
             return GetSyncSetting_ByButtonName(button.Name);
         }
 
-        public static readonly Microsoft.UI.Xaml.Thickness ActiveThickness = new Microsoft.UI.Xaml.Thickness(1);
-        public static readonly Microsoft.UI.Xaml.Thickness InactiveThickness = new Microsoft.UI.Xaml.Thickness(0);
+        public static readonly Thickness ActiveThickness = new Thickness(1);
+        public static readonly Thickness InactiveThickness = new Thickness(0);
 
-        private Microsoft.UI.Xaml.Thickness _scrollLockOnBorderThickness;
-        private Microsoft.UI.Xaml.Thickness _scrollLockOffBorderThickness;
-        private Microsoft.UI.Xaml.Thickness _capsLockOnBorderThickness;
-        private Microsoft.UI.Xaml.Thickness _capsLockOffBorderThickness;
-        private Microsoft.UI.Xaml.Thickness _numLockOnBorderThickness;
-        private Microsoft.UI.Xaml.Thickness _numLockOffBorderThickness;
+        private Thickness _scrollLockOnBorderThickness;
+        private Thickness _scrollLockOffBorderThickness;
+        private Thickness _capsLockOnBorderThickness;
+        private Thickness _capsLockOffBorderThickness;
+        private Thickness _numLockOnBorderThickness;
+        private Thickness _numLockOffBorderThickness;
 
-        public Microsoft.UI.Xaml.Thickness ScrollLockOnBorderThickness
+        public Thickness ScrollLockOnBorderThickness
         {
             get => _scrollLockOnBorderThickness;
             set => SetProperty(ref _scrollLockOnBorderThickness, value);
         }
-        public Microsoft.UI.Xaml.Thickness ScrollLockOffBorderThickness
+        public Thickness ScrollLockOffBorderThickness
         {
             get => _scrollLockOffBorderThickness;
             set => SetProperty(ref _scrollLockOffBorderThickness, value);
         }
-        public Microsoft.UI.Xaml.Thickness CapsLockOnBorderThickness
+        public Thickness CapsLockOnBorderThickness
         {
             get => _capsLockOnBorderThickness;
             set => SetProperty(ref _capsLockOnBorderThickness, value);
         }
-        public Microsoft.UI.Xaml.Thickness CapsLockOffBorderThickness
+        public Thickness CapsLockOffBorderThickness
         {
             get => _capsLockOffBorderThickness;
             set => SetProperty(ref _capsLockOffBorderThickness, value);
         }
-        public Microsoft.UI.Xaml.Thickness NumLockOnBorderThickness
+        public Thickness NumLockOnBorderThickness
         {
             get => _numLockOnBorderThickness;
             set => SetProperty(ref _numLockOnBorderThickness, value);
         }
-        public Microsoft.UI.Xaml.Thickness NumLockOffBorderThickness
+        public Thickness NumLockOffBorderThickness
         {
             get => _numLockOffBorderThickness;
             set => SetProperty(ref _numLockOffBorderThickness, value);
@@ -941,7 +941,7 @@ namespace Dynamic_Lighting_Key_Indicator
             StartMinimizedToTray = userConfig.StartMinimizedToTray;
         }
 
-        public Windows.UI.Color GetColorFromString(string color)
+        public Color GetColorFromString(string color)
         {
             if (string.IsNullOrEmpty(color))
             {
@@ -956,10 +956,10 @@ namespace Dynamic_Lighting_Key_Indicator
             byte r = Convert.ToByte(color[..2], 16);
             byte g = Convert.ToByte(color.Substring(startIndex: 2, length: 2), 16);
             byte b = Convert.ToByte(color.Substring(startIndex: 4, length: 2), 16);
-            return Windows.UI.Color.FromArgb(a: 255, r, g, b);
+            return Color.FromArgb(a: 255, r, g, b);
         }
 
-        public static string AsString(Windows.UI.Color color)
+        public static string AsString(Color color)
         {
             return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
         }
@@ -972,12 +972,12 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             Brightness = config.Brightness;
-            DefaultColor = Windows.UI.Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B);
+            DefaultColor = Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B);
 
             foreach (MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
             {
-                Windows.UI.Color onColor;
-                Windows.UI.Color offColor;
+                Color onColor;
+                Color offColor;
                 bool onColorTiedToStandard = monitoredKey.onColorTiedToStandard;
                 bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
 
@@ -985,12 +985,12 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (onColorTiedToStandard)
                     onColor = DefaultColor;
                 else
-                    onColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
+                    onColor = Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
 
                 if (offColorTiedToStandard)
                     offColor = DefaultColor;
                 else
-                    offColor = Windows.UI.Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
+                    offColor = Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
 
                 // Actually apply the colors to the correct properties in the view model after processing
                 switch (monitoredKey.key)
@@ -1053,7 +1053,7 @@ namespace Dynamic_Lighting_Key_Indicator
             DefaultColor = ColorSetter.ScaleColorBrightness(DefaultColor, brightness);
         }
 
-        public SolidColorBrush GetBrushFromColor(Windows.UI.Color color)
+        public SolidColorBrush GetBrushFromColor(Color color)
         {
             return new SolidColorBrush(color);
         }
@@ -1061,7 +1061,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal bool IsColorSettingsSameAsConfig(UserConfig config)
         {
             // ----------------------- Local Functions -----------------------
-            bool ColorsAreDifferent(Windows.UI.Color color1, RGBTuple color2)
+            bool ColorsAreDifferent(Color color1, RGBTuple color2)
             {
                 if (!color1.R.Equals((byte)color2.R))
                     return true;

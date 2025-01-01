@@ -11,11 +11,11 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class ColorSetter
     {
-        private static Windows.UI.Color _keyboardMainColor;
+        private static Color _keyboardMainColor;
         private static LampArray? _currentDevice;
         private static List<int>? _monitoredIndices;
 
-        public static Windows.UI.Color KeyboardMainColor => _keyboardMainColor;
+        public static Color KeyboardMainColor => _keyboardMainColor;
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
         public static Dictionary<ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
@@ -27,7 +27,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             _keyboardMainColor = RGBTuple_To_ColorObj(color);
         }
-        public static void DefineKeyboardMainColor(Windows.UI.Color color)
+        public static void DefineKeyboardMainColor(Color color)
         {
             _keyboardMainColor = color;
         }
@@ -54,7 +54,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return lampArray;
         }
 
-        public static Windows.UI.Color DetermineDefaultColor(Windows.UI.Color? color)
+        public static Color DetermineDefaultColor(Color? color)
         {
             return color ?? KeyboardMainColor;
         }
@@ -83,7 +83,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 return;
 
             VirtualKey vkCode = (VirtualKey)key.key;
-            Windows.UI.Color color;
+            Color color;
 
             if (key.IsOn())
                 color = RGBTuple_To_ColorObj(key.onColor);
@@ -100,22 +100,22 @@ namespace Dynamic_Lighting_Key_Indicator
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
 
-            Windows.UI.Color[] colors = new Windows.UI.Color[monitoredKeys.Count];
+            Color[] colors = new Color[monitoredKeys.Count];
             VirtualKey[] keys = new VirtualKey[monitoredKeys.Count];
 
             // Build arrays of colors and keys
             foreach (var key in monitoredKeys)
             {
                 VirtualKey vkCode = (VirtualKey)key.key;
-                Windows.UI.Color color;
+                Color color;
 
                 if (key.IsOn())
                 {
-                    color = Windows.UI.Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
+                    color = Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
                 }
                 else
                 {
-                    color = Windows.UI.Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
+                    color = Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
                 }
 
                 int index = monitoredKeys.IndexOf(key);
@@ -132,7 +132,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 return;
 
             // Make arrays of each monitored key's color, the default color for all others, put into combined arrays
-            List<Windows.UI.Color> colors = [];
+            List<Color> colors = [];
             List<int> keyIndices = [];
 
             // Add non-monitored keys and applicable monitored keys to the list of indices
@@ -148,7 +148,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             int[] keyIndicesArray = keyIndices.ToArray();
-            Windows.UI.Color[] colorsArray = colors.ToArray();
+            Color[] colorsArray = colors.ToArray();
 
             lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
 
@@ -184,7 +184,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (lampArray == null)
                 return;
 
-            Windows.UI.Color colorToUse = Windows.UI.Color.FromArgb(255, (byte)colorTuple.R, (byte)colorTuple.G, (byte)colorTuple.B);
+            Color colorToUse = Color.FromArgb(255, (byte)colorTuple.R, (byte)colorTuple.G, (byte)colorTuple.B);
 
             List<int> keyIndices = [];
             keyIndices.AddRange(NonMonitoredKeyIndices);
@@ -198,7 +198,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
-            Windows.UI.Color colorToUse = DetermineDefaultColor(RGBTuple_To_ColorObj(colorTuple));
+            Color colorToUse = DetermineDefaultColor(RGBTuple_To_ColorObj(colorTuple));
 
             // Check which keys have on or off colors linked to the standard color, and also whether the color is on or off, to decide which colors need to be updated on the keyboard
             List<int> keyIndices = [];
@@ -220,7 +220,7 @@ namespace Dynamic_Lighting_Key_Indicator
             keyIndices.AddRange(NonMonitoredKeyIndices);
 
             int[] keyIndicesArray = keyIndices.ToArray();
-            Windows.UI.Color[] colorsArray = Enumerable.Repeat(colorToUse, keyIndices.Count).ToArray(); // Same color for all so just fill it to the same size as the keyIndices
+            Color[] colorsArray = Enumerable.Repeat(colorToUse, keyIndices.Count).ToArray(); // Same color for all so just fill it to the same size as the keyIndices
 
             lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
         }
@@ -250,12 +250,12 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static Windows.UI.Color RGBTuple_To_ColorObj(RGBTuple color)
+        public static Color RGBTuple_To_ColorObj(RGBTuple color)
         {
-            return Windows.UI.Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
+            return Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
         }
 
-        public static Windows.UI.Color ScaleColorBrightness(Windows.UI.Color color, int brightness)
+        public static Color ScaleColorBrightness(Color color, int brightness)
         {
             RGBTuple colorTuple = (color.R, color.G, color.B);
             RGBTuple newColorTuple = ScaleColorBrightness(colorTuple, brightness);
@@ -307,9 +307,9 @@ namespace Dynamic_Lighting_Key_Indicator
         // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
 
         #region Unused
-        public static void SetSpecificKeysToColor(LampArray lampArray, VirtualKey[] keys, Windows.UI.Color color)
+        public static void SetSpecificKeysToColor(LampArray lampArray, VirtualKey[] keys, Color color)
         {
-            Windows.UI.Color[] colors = Enumerable.Repeat(color, keys.Length).ToArray();
+            Color[] colors = Enumerable.Repeat(color, keys.Length).ToArray();
             lampArray.SetColorsForKeys(colors, keys);
             lampArray.BrightnessLevel = 1.0f;
         }
@@ -331,7 +331,7 @@ namespace Dynamic_Lighting_Key_Indicator
             List<int>? monitoredKeyIndices = MonitoredIndices;
             monitoredKeyIndices ??= UpdateMonitoredLampArrayIndices(lampArray); // If the monitored indices are null, update them
 
-            Windows.UI.Color[] colors = new Windows.UI.Color[lampArray.LampCount - monitoredKeys.Count];
+            Color[] colors = new Color[lampArray.LampCount - monitoredKeys.Count];
             int[] keys = new int[lampArray.LampCount - monitoredKeys.Count];
 
             // Build the arrays of colors and keys

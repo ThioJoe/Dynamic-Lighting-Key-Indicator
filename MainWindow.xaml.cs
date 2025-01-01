@@ -12,9 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -110,7 +108,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Use WM_SETICON message to set the window title bar icon
             IntPtr hIcon;
-            Icon? icon = SystemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            System.Drawing.Icon? icon = SystemTray.LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
             if (icon == null)
                 hIcon = SystemTray.GetDefaultIconHandle();
             else
@@ -625,7 +623,7 @@ namespace Dynamic_Lighting_Key_Indicator
         static SolidColorBrush DetermineGlyphColor(Button button)
         {
             var buttonBackgroundColorBrush = button.Background as SolidColorBrush;
-            Windows.UI.Color? bgColor = buttonBackgroundColorBrush?.Color;
+            Color? bgColor = buttonBackgroundColorBrush?.Color;
 
             // If it's null just return the original color
             if (bgColor == null || bgColor?.R == null || bgColor?.G == null || bgColor?.R == null)
@@ -1015,11 +1013,11 @@ namespace Dynamic_Lighting_Key_Indicator
         private void SyncToStandardColor_Click(string colorPropertyName, ColorPicker colorPicker, Button parentButton, Flyout colorPickerFlyout)
         {
             string defaultColorPropertyName = "DefaultColor";
-            Windows.UI.Color? defaultColor = (Windows.UI.Color?)ViewModel?.GetType()?.GetProperty(defaultColorPropertyName)?.GetValue(ViewModel);
+            Color? defaultColor = (Color?)ViewModel?.GetType()?.GetProperty(defaultColorPropertyName)?.GetValue(ViewModel);
             if (defaultColor == null)
                 return;
 
-            colorPicker.Color = (Windows.UI.Color)defaultColor;
+            colorPicker.Color = (Color)defaultColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {
@@ -1092,7 +1090,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return mainWindow.ShadowHostGrid;
         }
 
-        public static Microsoft.UI.Composition.DropShadow DropShadowMaker(Windows.UI.Color shadowColor, float radius, float opacityPercent)
+        public static Microsoft.UI.Composition.DropShadow DropShadowMaker(Color shadowColor, float radius, float opacityPercent)
         {
             Microsoft.UI.Composition.Compositor compositor = ElementCompositionPreview.GetElementVisual(GetShadowHostGrid()).Compositor;
 
@@ -1104,7 +1102,7 @@ namespace Dynamic_Lighting_Key_Indicator
             dropShadow.Color = shadowColor;
             dropShadow.BlurRadius = radius; // Example: 15f
             dropShadow.Opacity = opacity; // Example: 0.8f
-            Windows.UI.Color maskColor = Windows.UI.Color.FromArgb(255, 255, 255, 255);
+            Color maskColor = Color.FromArgb(255, 255, 255, 255);
             dropShadow.Mask = compositor.CreateColorBrush(maskColor);
 
             return dropShadow;
@@ -1229,14 +1227,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 MinHeight = 400
             };
 
-            Windows.UI.Color? currentColor = (Windows.UI.Color?)ViewModel.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
+            Color? currentColor = (Color?)ViewModel.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
             if (currentColor == null)
             {
                 Debug.WriteLine("Current color is null.");
                 return;
             }
 
-            colorPicker.Color = (Windows.UI.Color)currentColor;
+            colorPicker.Color = (Color)currentColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {

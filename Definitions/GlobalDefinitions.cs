@@ -6,6 +6,7 @@ global using VK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
 
 global using Color = Windows.UI.Color;
 global using DropShadow = Microsoft.UI.Composition.DropShadow;
+global using Thickness = Microsoft.UI.Xaml.Thickness;
 // -------------------------------
 global using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 global using Dynamic_Lighting_Key_Indicator.Definitions;
@@ -82,7 +83,7 @@ namespace Dynamic_Lighting_Key_Indicator
             switch (message)
             {
                 case Msg.NoneFound:
-                    MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Red);
+                    MsgColor = new SolidColorBrush((Color)Colors.Red);
                     MsgPrefix = StatusMsgPrefix.Status;
                     MsgBody = StatusMsgBody.NoneFound;
                     break;
@@ -94,13 +95,13 @@ namespace Dynamic_Lighting_Key_Indicator
                     break;
 
                 case Msg.NotAvailable:
-                    MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Red);
+                    MsgColor = new SolidColorBrush((Color)Colors.Red);
                     MsgPrefix = StatusMsgPrefix.Status;
                     MsgBody = StatusMsgBody.NotAvailable;
                     break;
 
                 case Msg.Good:
-                    MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Green);
+                    MsgColor = new SolidColorBrush((Color)Colors.Green);
                     MsgPrefix = StatusMsgPrefix.Status;
                     MsgBody = StatusMsgBody.Good;
                     break;
@@ -119,14 +120,14 @@ namespace Dynamic_Lighting_Key_Indicator
                     break;
 
                 case Msg.ErrorInitializing:
-                    MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Red);
+                    MsgColor = new SolidColorBrush((Color)Colors.Red);
                     MsgPrefix = StatusMsgPrefix.Status;
                     MsgBody = StatusMsgBody.ErrorInitializing;
                     MsgBody += suffix ?? "Unknown Device";
                     break;
 
                 case Msg.NotKeyboard:
-                    MsgColor = new SolidColorBrush((Windows.UI.Color)Colors.Orange);
+                    MsgColor = new SolidColorBrush((Color)Colors.Orange);
                     MsgPrefix = StatusMsgPrefix.Warning;
                     MsgBody = StatusMsgBody.NotKeyboard;
                     break;
@@ -190,7 +191,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.offColorTiedToStandard = offColorTiedToStandard;
         }
 
-        public MonitoredKey(ToggleAbleKeys key, Windows.UI.Color onColor, Windows.UI.Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+        public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
         {
             this.key = key;
             this.onColor = (onColor.R, onColor.G, onColor.B);
@@ -208,21 +209,21 @@ namespace Dynamic_Lighting_Key_Indicator
             this.offColorTiedToStandard = true;
         }
 
-        public Windows.UI.Color? GetColorObjCurrent()
+        public Color? GetColorObjCurrent()
         {
-            return Windows.UI.Color.FromArgb(255, (byte)(IsOn() ? onColor.R : offColor.R),
+            return Color.FromArgb(255, (byte)(IsOn() ? onColor.R : offColor.R),
                                      (byte)(IsOn() ? onColor.G : offColor.G),
                                      (byte)(IsOn() ? onColor.B : offColor.B));
         }
 
-        public Windows.UI.Color? GetColorObjOff()
+        public Color? GetColorObjOff()
         {
-            return Windows.UI.Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
+            return Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
         }
 
-        public Windows.UI.Color? GetColorObjOn()
+        public Color? GetColorObjOn()
         {
-            return Windows.UI.Color.FromArgb(255, (byte)onColor.R, (byte)onColor.G, (byte)onColor.B);
+            return Color.FromArgb(255, (byte)onColor.R, (byte)onColor.G, (byte)onColor.B);
         }
 
         public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> keys)

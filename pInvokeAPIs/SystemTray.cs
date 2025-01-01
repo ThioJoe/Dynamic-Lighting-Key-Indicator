@@ -3,7 +3,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -126,7 +125,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 return null;
             }
 
-            System.Drawing.Icon icon = new Icon(iconStream);
+            System.Drawing.Icon icon = new System.Drawing.Icon(iconStream);
 
             return icon;
         }
@@ -153,7 +152,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Load icon from embedded resource
             IntPtr hIcon;
-            Icon? icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            System.Drawing.Icon? icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
 
             if (icon == null)
             {
