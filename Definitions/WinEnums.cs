@@ -44,7 +44,7 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
             RID_INPUT = 0x10000003
         }
 
-        public enum  WM_INPUT_wParam : uint
+        public enum WM_INPUT_wParam : uint
         {
             RIM_INPUT = 0,
             RIM_INPUTSINK = 1
@@ -53,7 +53,7 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUTDEVICELIST
         {
-            
+
         }
 
         // See: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputheader

@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Windows.ApplicationModel;
 using Windows.Devices.Lights;
-using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
 // BEWARE - THIS FILE IS A COMPLETE MESS. Properties and methods aren't really organized. 
@@ -405,9 +404,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.StartMinimizedToTray;
 
                 _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
-                    setting: setting, 
-                    configSavedOnDisk: mainWindow.SavedConfig, 
-                    currentConfig: mainWindow.CurrentConfig, 
+                    setting: setting,
+                    configSavedOnDisk: mainWindow.SavedConfig,
+                    currentConfig: mainWindow.CurrentConfig,
                     value: value
                 );
             }
@@ -655,7 +654,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (SetProperty(ref _scrollLockOnColor, value))
                 {
                     OnPropertyChanged(nameof(ScrollLockOnBrush));
-                    
+
                 }
             }
         }
@@ -856,11 +855,11 @@ namespace Dynamic_Lighting_Key_Indicator
         private bool _LastKnownCapsLockState = false;
         private bool _LastKnownNumLockState = false;
 
-        public bool LastKnownNumLockState 
-        { 
-            get => _LastKnownNumLockState; 
-            set 
-            { 
+        public bool LastKnownNumLockState
+        {
+            get => _LastKnownNumLockState;
+            set
+            {
                 SetProperty(ref _LastKnownNumLockState, value);
                 bool onIsActive = value ? true : false;
                 NumLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
@@ -869,11 +868,11 @@ namespace Dynamic_Lighting_Key_Indicator
                 OnPropertyChanged(nameof(NumLockOffBorderThickness));
             }
         }
-        public bool LastKnownCapsLockState 
-        { 
-            get => _LastKnownCapsLockState; 
-            set 
-            { 
+        public bool LastKnownCapsLockState
+        {
+            get => _LastKnownCapsLockState;
+            set
+            {
                 SetProperty(ref _LastKnownCapsLockState, value);
                 bool onIsActive = value ? true : false;
                 CapsLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;

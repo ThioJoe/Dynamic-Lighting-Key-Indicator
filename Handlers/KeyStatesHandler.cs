@@ -1,10 +1,7 @@
-﻿using Microsoft.UI.Xaml;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums.RAWKEYBOARD;
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -67,7 +64,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     pcbSize: ref dwSize,
                     cbSizeHeader: rawInputHeaderSize
                 );
-                
+
                 if (result == 0xFFFFFFFF) // Error indicated by (UINT)-1
                     return null;
 
@@ -111,7 +108,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr CallWindowProc(IntPtr lpPrevWndFunc, IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
-   
+
 
         [DllImport("user32.dll")]
         private static extern IntPtr DefRawInputProc(IntPtr paRawInput, Int32 nInput, UInt32 cbSizeHeader);

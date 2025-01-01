@@ -1,12 +1,10 @@
 using Microsoft.UI;
-using Microsoft.UI.Composition;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
@@ -20,8 +18,6 @@ using Windows.ApplicationModel.Activation;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
 using Windows.Graphics;
-using Windows.UI.Composition;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 #nullable enable
 #pragma warning disable IDE0079 // Remove unnecessary suppression
@@ -57,7 +53,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 mainWindow.OnAttachedDeviceSet();
             }
         }
-        
+
         private DeviceWatcher? m_deviceWatcher;
         private readonly Dictionary<int, string> deviceIndexDict = [];
         private readonly object _lock = new();
@@ -79,9 +75,9 @@ namespace Dynamic_Lighting_Key_Indicator
         // --------------------------------------------------- CONSTRUCTOR ---------------------------------------------------
         public MainWindow(string[] args)
         {
-            #if DEBUG
+#if DEBUG
                 DEBUGMODE = true;
-            #endif
+#endif
 
             mainWindow = this; // There is only one instance of the app and main window, so set to this static variable
 
@@ -96,7 +92,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.Activated += MainWindow_Activated;
             this.Title = MainWindowTitle;
             this.Closed += OnAppClose;
-            Application.Current.UnhandledException += OnUnhandledException;         
+            Application.Current.UnhandledException += OnUnhandledException;
 
             Microsoft.Windows.AppLifecycle.AppInstance thisInstance = Microsoft.Windows.AppLifecycle.AppInstance.GetCurrent();
             thisInstance.Activated += MainInstance_Activated;
@@ -120,20 +116,20 @@ namespace Dynamic_Lighting_Key_Indicator
             currentConfig = UserConfig.ReadConfigurationFile() ?? new UserConfig();
             configSavedOnDisk = (UserConfig)currentConfig.Clone();
 
-            ViewModel.SetAllColorSettingsFromUserConfig(config:currentConfig, window:this);
+            ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window: this);
             ViewModel.ApplyAppSettingsFromUserConfig(currentConfig);
             ViewModel.CheckAndUpdateSaveButton_EnabledStatus();
             ViewModel.DebugFileLoggingEnabled = currentConfig.DebugLoggingEnabled;
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
             // Set up keyboard hook
-            #pragma warning disable IDE0028
+#pragma warning disable IDE0028
             MonitoredKey.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
                 new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
             });
-            #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
+#pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
             ForceUpdateButtonBackgrounds(); // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
             ForceUpdateAllButtonGlyphs();   // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
@@ -309,7 +305,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        
+
 
         private void StopWatchingForLampArrays()
         {
@@ -470,9 +466,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (selectedDeviceIndex == -1 || deviceIndexDict.Count == 0 || selectedDeviceIndex > deviceIndexDict.Count)
             {
-                #pragma warning disable CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
+#pragma warning disable CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
                 ShowErrorMessage("Please select a device from the dropdown list.");
-                #pragma warning restore CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
+#pragma warning restore CS4014 // "Because this call is not awaited, execution of the current method continues before the call is completed"
                 Logging.WriteDebug($"No device selected from dropdown. Selected device index was: {selectedDeviceIndex}. Number of devices was {deviceIndexDict.Count}");
                 return null;
             }
@@ -695,7 +691,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Instead of using the GUI, use the passed in premade config
             else
             {
-                ViewModel.SetAllColorSettingsFromUserConfig(config: newConfig, window:this);
+                ViewModel.SetAllColorSettingsFromUserConfig(config: newConfig, window: this);
             }
 
             // TODO: Add binding to new settings to link on/off colors to standard color
@@ -730,13 +726,13 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool result = await currentConfig.WriteConfigurationFile_Async();
                 if (!result)
                 {
-                    #pragma warning disable CS4014
+#pragma warning disable CS4014
                     ShowErrorMessage("Failed to save the color settings to the configuration file.");
-                    #pragma warning restore CS4014
+#pragma warning restore CS4014
 
                     Logging.WriteDebug("Failed to save the color settings to the configuration file.");
                 }
-                ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window:this);
+                ViewModel.SetAllColorSettingsFromUserConfig(config: currentConfig, window: this);
             }
 
             // Update the Save button enabled status
@@ -1199,7 +1195,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 Debug.WriteLine("Button is null.");
                 return;
             }
-                
+
 
             if (button.Tag is not string colorPropertyName)
             {
@@ -1276,7 +1272,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 else
                 {
                     KeyColorUpdateInfo colorUpdateInfo = new KeyColorUpdateInfo(
-                        key: MainViewModel.GetKeyByPropertyName(colorPropertyName), 
+                        key: MainViewModel.GetKeyByPropertyName(colorPropertyName),
                         color: (args.NewColor.R, args.NewColor.G, args.NewColor.B),
                         forState: MainViewModel.GetStateByPropertyName(colorPropertyName)
                     );

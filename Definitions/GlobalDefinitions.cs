@@ -4,6 +4,7 @@ global using DWORD = System.UInt32;        // 4 Bytes, aka uint, uint32
 global using RGBTuple = (int R, int G, int B);
 global using VK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
 
+// Set default namespaces for certain types
 global using Color = Windows.UI.Color;
 global using DropShadow = Microsoft.UI.Composition.DropShadow;
 global using Thickness = Microsoft.UI.Xaml.Thickness;

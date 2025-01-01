@@ -1,6 +1,5 @@
 ﻿using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml;
 using System;
 
 namespace Dynamic_Lighting_Key_Indicator.Converters

@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.System;
-using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -72,16 +71,16 @@ namespace Dynamic_Lighting_Key_Indicator
             Logging.WriteDebug("Writing configuration file...");
             string configuration = System.Text.Json.JsonSerializer.Serialize(value: this, options: jsonSerializerOptions);
             try
-                {
-                    StorageFile configFile = await localFolder.CreateFileAsync(configFileName, CreationCollisionOption.ReplaceExisting);
-                    await FileIO.WriteTextAsync(configFile, configuration);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(Console.Error);
-                    Logging.WriteDebug("Failed to write configuration file: " + ex);
-                    return false;
-                }
+            {
+                StorageFile configFile = await localFolder.CreateFileAsync(configFileName, CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteTextAsync(configFile, configuration);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(Console.Error);
+                Logging.WriteDebug("Failed to write configuration file: " + ex);
+                return false;
+            }
             return true;
         }
 
@@ -89,10 +88,10 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             bool DiskSettingWasDifferent = false;
 
-            #pragma warning disable CS0219
+#pragma warning disable CS0219
             bool CurrentSettingWasDifferent = false; // Not currently used but could be useful in the future
-            #pragma warning restore CS0219
-            
+#pragma warning restore CS0219
+
             (string settingName, string valueString) = GetStandaloneSettingStringAndValue(setting, value);
             Logging.WriteDebug($"Updating configuration file for setting {settingName} to: {valueString}");
 

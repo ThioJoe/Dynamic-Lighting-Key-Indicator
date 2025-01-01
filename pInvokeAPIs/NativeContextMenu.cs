@@ -11,7 +11,7 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         // Win32 System Tray constants
         private const uint TPM_RETURNCMD = 0x0100;
-        
+
         private const uint TPM_RIGHTBUTTON = 0x0002;
         private const uint TPM_LEFTBUTTON = 0x0000;
         private const uint TPM_RIGHTALIGN = 0x0008;
@@ -115,7 +115,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         _menuItems.Count + 1,  // 1-based index because 0 is reserved for no selection
                         isDisabled
                     )
-                ); 
+                );
             }
 
             public void AddSeparator()

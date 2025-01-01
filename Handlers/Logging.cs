@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
@@ -48,7 +44,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void WriteDebug(string message, string beforeTimstamp = "", string suffix = "")
         {
             string time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            
+
             if (DebugFileLoggingEnabled == true)
             {
                 if (debugLogFileStream == null)
@@ -86,7 +82,7 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 // Set up a debug log file
                 DebugFileLoggingEnabled = true;
-                WriteDebug("------------------------------- Debug logging Enabled -------------------------------", beforeTimstamp:"\n");
+                WriteDebug("------------------------------- Debug logging Enabled -------------------------------", beforeTimstamp: "\n");
             }
         }
 
@@ -102,7 +98,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 File.Create(filePath);
             }
 
-            debugLogFileStream = new StreamWriter(path:filePath, append:true);
+            debugLogFileStream = new StreamWriter(path: filePath, append: true);
             debugLogFileStream.AutoFlush = true;
 
             return debugLogFileStream;

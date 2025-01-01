@@ -82,7 +82,8 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 string? containerId = keyboardDevice.Properties["System.Devices.ContainerId"].ToString();
 
-                if (containerId != null) {
+                if (containerId != null)
+                {
                     // If the container ID isn't already in the dictionary, add it with a new list
                     if (!keyboardDict.ContainsKey(containerId))
                     {

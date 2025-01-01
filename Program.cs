@@ -2,10 +2,10 @@
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Activation;
-using System.Diagnostics;
 
 // NOTE: If Visual Studio yells at you about this file already existing, it's because this one is custom to allow a single-instance app.
 //    See: https://learn.microsoft.com/en-us/windows/apps/windows-app-sdk/applifecycle/applifecycle-single-instance
@@ -27,7 +27,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Add global exception handler first thing
             AppDomain.CurrentDomain.UnhandledException += (sender, error) =>
             {
-                Logging.WriteCrashLog(exception:(Exception)error.ExceptionObject);
+                Logging.WriteCrashLog(exception: (Exception)error.ExceptionObject);
             };
 
             try
@@ -91,7 +91,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     Logging.WriteCrashLog(exception: ex);
                 }
-                catch(Exception exOuter)
+                catch (Exception exOuter)
                 {
                     Debug.WriteLine("Error:" + exOuter?.Message);
                 }

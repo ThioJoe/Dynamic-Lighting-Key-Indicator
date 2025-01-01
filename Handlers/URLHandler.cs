@@ -5,8 +5,6 @@ using Windows.ApplicationModel.Activation;
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    using static Dynamic_Lighting_Key_Indicator.KeyStatesHandler;
-
     internal static class URLHandler
     {
         private const string PROTOCOL_NAME = "key-lighting-indicator";  // Your protocol name (e.g., dlki://)
@@ -177,7 +175,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Update the default linking status if the value is 'default', and unlink if it was previously linked
                 if (value.Equals("default", StringComparison.OrdinalIgnoreCase))
                 {
-                   if (on)
+                    if (on)
                         key.onColorTiedToStandard = true;
                     else
                         key.offColorTiedToStandard = true;
@@ -203,7 +201,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         config.MonitoredKeysAndColors.Add(key);
                     }
                 }
-                
+
 
             }
             // --------------------------------------
