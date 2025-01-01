@@ -88,10 +88,6 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             bool DiskSettingWasDifferent = false;
 
-#pragma warning disable CS0219
-            bool CurrentSettingWasDifferent = false; // Not currently used but could be useful in the future
-#pragma warning restore CS0219
-
             (string settingName, string valueString) = GetStandaloneSettingStringAndValue(setting, value);
             Logging.WriteDebug($"Updating configuration file for setting {settingName} to: {valueString}");
 
@@ -102,8 +98,6 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Check if any change
                     if (configSavedOnDisk.DeviceId != (string)value)
                         DiskSettingWasDifferent = true;
-                    if (currentConfig.DeviceId != (string)value)
-                        CurrentSettingWasDifferent = true;
                     // Apply new value
                     configSavedOnDisk.DeviceId = (string)value;
                     currentConfig.DeviceId = (string)value;
@@ -113,8 +107,6 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Check if any change
                     if (configSavedOnDisk.StartMinimizedToTray != (bool)value)
                         DiskSettingWasDifferent = true;
-                    if (currentConfig.StartMinimizedToTray != (bool)value)
-                        CurrentSettingWasDifferent = true;
                     // Apply new value
                     configSavedOnDisk.StartMinimizedToTray = (bool)value;
                     currentConfig.StartMinimizedToTray = (bool)value;
@@ -124,8 +116,6 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Check if any change
                     if (configSavedOnDisk.DebugLoggingEnabled != (bool)value)
                         DiskSettingWasDifferent = true;
-                    if (currentConfig.DebugLoggingEnabled != (bool)value)
-                        CurrentSettingWasDifferent = true;
                     // Apply new value
                     configSavedOnDisk.DebugLoggingEnabled = (bool)value;
                     currentConfig.DebugLoggingEnabled = (bool)value;

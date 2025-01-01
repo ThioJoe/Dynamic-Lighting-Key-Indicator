@@ -161,10 +161,7 @@ namespace Dynamic_Lighting_Key_Indicator.Utils
         /// Gets the count of events being watched.
         /// </summary>
         /// <returns>The count of events being watched.</returns>
-        public int GetEventsWatchedCount()
-        {
-            return EventHandlersHolder.Count;
-        }
+        public int GetEventsWatchedCount() => EventHandlersHolder.Count;
 
         /// <summary>
         /// Lists the names of the events being watched.

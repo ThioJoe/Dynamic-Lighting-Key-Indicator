@@ -65,7 +65,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public const string UpdatesURL = @"https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator/releases";
 
         // Other random crap
-        public SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
+        public static SolidColorBrush DefaultFontColor => GlobalDefinitions.DefaultFontColor; // Can't be static or else xaml binding won't work for some dumb reason
         bool alreadyShowedDebugLogMessage = false;
 
         // Imported Windows API functions

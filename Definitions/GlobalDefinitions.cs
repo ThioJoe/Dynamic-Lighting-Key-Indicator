@@ -217,10 +217,7 @@ namespace Dynamic_Lighting_Key_Indicator
                                      (byte)(IsOn() ? onColor.B : offColor.B));
         }
 
-        public Color? GetColorObjOff()
-        {
-            return Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
-        }
+        public Color? GetColorObjOff() => Color.FromArgb(255, (byte)offColor.R, (byte)offColor.G, (byte)offColor.B);
 
         public Color? GetColorObjOn()
         {

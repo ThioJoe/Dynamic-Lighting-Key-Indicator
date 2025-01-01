@@ -50,7 +50,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if (debugLogFileStream == null)
                 {
                     Debug.WriteLine($"(Console) [{time}] {message}");
-                    InitializeFileLogging(GetOrCreateFileStream(_DebugLogFilePath));
+                    GetOrCreateFileStream(_DebugLogFilePath);
 
                     // If it's still null, something went wrong
                     if (debugLogFileStream == null)
@@ -76,21 +76,22 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private static void InitializeFileLogging(StreamWriter debugStream)
+        private static void InitializeFileLogging()
         {
             if (!DebugFileLoggingEnabled)
             {
+                GetOrCreateFileStream(_DebugLogFilePath);
                 // Set up a debug log file
                 DebugFileLoggingEnabled = true;
                 WriteDebug("------------------------------- Debug logging Enabled -------------------------------", beforeTimstamp: "\n");
             }
         }
 
-        private static StreamWriter GetOrCreateFileStream(string filePath)
+        private static void GetOrCreateFileStream(string filePath)
         {
             if (debugLogFileStream != null)
             {
-                return debugLogFileStream;
+                return;
             }
 
             if (!File.Exists(filePath))
@@ -101,7 +102,7 @@ namespace Dynamic_Lighting_Key_Indicator
             debugLogFileStream = new StreamWriter(path: filePath, append: true);
             debugLogFileStream.AutoFlush = true;
 
-            return debugLogFileStream;
+            return;
         }
 
         private static void CloseFileLogging()
@@ -121,8 +122,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void EnableDebugLog()
         {
-            StreamWriter debugLogStream = GetOrCreateFileStream(_DebugLogFilePath);
-            InitializeFileLogging(debugLogStream);
+            
+            InitializeFileLogging();
         }
 
         public static void DisableDebugLog()
