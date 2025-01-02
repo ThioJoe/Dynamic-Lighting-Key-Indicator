@@ -234,31 +234,11 @@ namespace Dynamic_Lighting_Key_Indicator
             StartMinimizedToTray = defaultMinimizedToTray;
         }
 
-        // Scale brightness of all key settings based on a brightness level
-        public void UpdateBrightnessForAllKeys(int brightnessLevel)
+        public void UpdateGlobalBrightness(int brightnessLevel)
         {
-            UserConfig config = this; // Applies to the object on which the method is called
-
-            if (brightnessLevel < 0)
-                brightnessLevel = 0;
-            if (brightnessLevel > 100)
-                brightnessLevel = 100;
-
+            UserConfig config = this;
             config.Brightness = brightnessLevel;
-
-            List<MonitoredKey> keysList = config.MonitoredKeysAndColors;
-            foreach (var key in keysList)
-            {
-                RGBTuple onColor = ColorSetter.ScaleColorBrightness(key.onColor, brightnessLevel);
-                RGBTuple offColor = ColorSetter.ScaleColorBrightness(key.offColor, brightnessLevel);
-
-                key.onColor = onColor;
-                key.offColor = offColor;
-            }
-
-            // Update the standard key color
-            RGBTuple standardColor = ColorSetter.ScaleColorBrightness(config.StandardKeyColor, brightnessLevel);
-            config.StandardKeyColor = standardColor;
+            ColorSetter.SetGlobalBrightness(brightnessLevel);
         }
 
         public object Clone()

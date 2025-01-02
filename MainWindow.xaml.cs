@@ -598,7 +598,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             Logging.WriteDebug("Setting colors on device...");
             ColorSetter.DefineCurrentDevice(lampArray);
-            ColorSetter.SetAllColors_ToKeyboard(lampArray);
+            ColorSetter.SetGlobalBrightness(currentConfig.Brightness);
+            ColorSetter.SetProperColorsEveryKey_ToKeyboard(lampArray);
         }
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
@@ -709,8 +710,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
             {
-                //ColorSetter.SetAllColors_ToKeyboard(ColorSetter.CurrentDevice);
-                ColorSetter.ProperlySetProperColorsAllKeys_ToKeyboard(ColorSetter.CurrentDevice);
+                ColorSetter.SetProperColorsEveryKey_ToKeyboard(ColorSetter.CurrentDevice);
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
@@ -744,13 +744,12 @@ namespace Dynamic_Lighting_Key_Indicator
             ColorSetter.SetSpecificKeysColor_ToKeyboard(colorUpdateInfo);
         }
 
-        // This is called when the standard / default key color is changed via GUI. Updates both standard keys and applicable monitored keys
-        //internal void ApplyNewDefaultColor(RGBTuple color, Dictionary<VK, bool> assumedStatesDict)
+        // This is called when the standard / default key color is changed via GUI.
+        // Updates both standard keys and specified additional keys, specifically which ones are set to currently display the default color, to avoid flickering
         internal void ApplyNewDefaultColor(RGBTuple color, List<VK> additionalKeys)
         {
             ViewModel.UpdateAllColorSettingsFromGUI();
 
-            //ColorSetter.SetDefaultAndApplicableKeysColor_ToKeyboard(color, lampArray:ColorSetter.CurrentDevice, noStateCheck:false, assumedStatesDict:assumedStatesDict);
             ColorSetter.SetColorToDefaultAndAdditionalIndices(colorTuple: color, additionalKeys: additionalKeys, lampArray: ColorSetter.CurrentDevice);
 
         }

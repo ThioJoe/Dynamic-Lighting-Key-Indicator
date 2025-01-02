@@ -52,15 +52,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return lampArray;
         }
 
-        public static void SetAllColors_ToKeyboard(LampArray? lampArray = null) // Defaults to the current device
-        {
-            // If it's null, it will show an error then we can return
-            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
-                return;
-
-            ProperlySetProperColorsAllKeys_ToKeyboard(lampArrayToUse);
-        }
-
         // For when the monitored key is toggled, this applies the set color to the key
         public static void SetSingleMonitorKeyColor_ToKeyboard(MonitoredKey key, LampArray? lampArray = null)
         {
@@ -79,7 +70,7 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArrayToUse.SetColorsForKey(color, vkCode);
         }
 
-        public static void ProperlySetProperColorsAllKeys_ToKeyboard(LampArray? lampArray = null)
+        public static void SetProperColorsEveryKey_ToKeyboard(LampArray? lampArray = null)
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
@@ -164,7 +155,10 @@ namespace Dynamic_Lighting_Key_Indicator
             MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
             NonMonitoredKeyIndices = new List<int>();
 
-            Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
+            // Put this within debug preprocessor directive in case I forget to comment it out
+            //#if DEBUG
+            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
+            //#endif
 
             // Build the arrays of colors and keys
             for (int i = 0; i < lampArray.LampCount; i++)
@@ -196,53 +190,16 @@ namespace Dynamic_Lighting_Key_Indicator
             return Color.FromArgb(255, (byte)color.R, (byte)color.G, (byte)color.B);
         }
 
-        public static Color ScaleColorBrightness(Color color, int brightness)
+        public static void SetGlobalBrightness(int brightnessPct, LampArray? lampArray = null)
         {
-            RGBTuple colorTuple = (color.R, color.G, color.B);
-            RGBTuple newColorTuple = ScaleColorBrightness(colorTuple, brightness);
-            return RGBTuple_To_ColorObj(newColorTuple);
-        }
+            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+                return;
 
-        // Set the absolute scale of a color based on a brightness level. 100 is full brightness, 0 is off
-        // Will use relative scaling of the largest or smallest value in the color
-        public static RGBTuple ScaleColorBrightness(RGBTuple color, int brightness)
-        {
-            // Clamp brightness to the 0-100 range
-            brightness = Math.Max(0, Math.Min(100, brightness));
+            // Convert the percent to a double from 0.0 to 1.0
+            double brightness = brightnessPct / 100.0;
 
-            int R = color.R;
-            int G = color.G;
-            int B = color.B;
-
-            // Find the maximum RGB component
-            int maxComponent = Math.Max(R, Math.Max(G, B));
-
-            if (maxComponent == 0)
-            {
-                return (0, 0, 0);
-            }
-
-            // Calculate the relative proportions of each component
-            double rProportion = R / (double)maxComponent;
-            double gProportion = G / (double)maxComponent;
-            double bProportion = B / (double)maxComponent;
-
-            // Calculate the desired maximum component value based on brightness
-            double desiredMaxComponent = (brightness / 100.0) * 255.0;
-
-            // Compute new RGB values by scaling the proportions
-            int newR = (int)Math.Round(rProportion * desiredMaxComponent);
-            int newG = (int)Math.Round(gProportion * desiredMaxComponent);
-            int newB = (int)Math.Round(bProportion * desiredMaxComponent);
-
-            // Clamp the values to the 0-255 range
-            newR = Math.Min(255, Math.Max(0, newR));
-            newG = Math.Min(255, Math.Max(0, newG));
-            newB = Math.Min(255, Math.Max(0, newB));
-
-            // Update the color tuple
-            color = (newR, newG, newB);
-            return color;
+            // Set the brightness of all keys
+            lampArrayToUse.BrightnessLevel = brightness;
         }
 
         // Use this info to set the colors of all the other keys not being monitored, so we don't cause the monitored keys to flicker

@@ -262,7 +262,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // Update the global brightness
             if (setGlobalBrightness >= 0)
             {
-                config.UpdateBrightnessForAllKeys(setGlobalBrightness);
+                config.UpdateGlobalBrightness(setGlobalBrightness);
             }
 
             // Apply

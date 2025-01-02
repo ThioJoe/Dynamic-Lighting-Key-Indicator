@@ -641,7 +641,8 @@ namespace Dynamic_Lighting_Key_Indicator
             set
             {
                 SetProperty(ref _brightness, value);
-                ScaleAllColorBrightness(value);
+                //ColorSetter.SetGlobalBrightness(value);
+                CurrentConfig.UpdateGlobalBrightness(value);
             }
         }
 
@@ -1039,17 +1040,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 ScrollLockOffColor = DefaultColor;
 
             ColorSetter.DefineKeyboardMainColor(DefaultColor);
-        }
-
-        public void ScaleAllColorBrightness(int brightness)
-        {
-            NumLockOnColor = ColorSetter.ScaleColorBrightness(NumLockOnColor, brightness);
-            NumLockOffColor = ColorSetter.ScaleColorBrightness(NumLockOffColor, brightness);
-            CapsLockOnColor = ColorSetter.ScaleColorBrightness(CapsLockOnColor, brightness);
-            CapsLockOffColor = ColorSetter.ScaleColorBrightness(CapsLockOffColor, brightness);
-            ScrollLockOnColor = ColorSetter.ScaleColorBrightness(ScrollLockOnColor, brightness);
-            ScrollLockOffColor = ColorSetter.ScaleColorBrightness(ScrollLockOffColor, brightness);
-            DefaultColor = ColorSetter.ScaleColorBrightness(DefaultColor, brightness);
         }
 
         public static SolidColorBrush GetBrushFromColor(Color color)
