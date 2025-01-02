@@ -59,8 +59,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void SetInitialDefaultColor_ToKeyboard(LampArray lampArray)
         {
-            lampArray.SetColor(KeyboardMainColor);
-            ColorSetter.SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys);
+            ProperlySetProperColorsAllKeys_ToKeyboard(lampArray);
         }
 
         public static void SetAllColors_ToKeyboard(LampArray? lampArray = null) // Defaults to the current device
@@ -69,8 +68,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
 
-            SetInitialDefaultColor_ToKeyboard(lampArrayToUse);
-            SetAllMonitoredKeyColors_ToKeyboard(KeyStatesHandler.monitoredKeys);
+            ProperlySetProperColorsAllKeys_ToKeyboard(lampArrayToUse);
         }
 
         // For when the monitored key is toggled, this applies the set color to the key
@@ -136,8 +134,16 @@ namespace Dynamic_Lighting_Key_Indicator
             // Add non-monitored keys and applicable monitored keys to the list of indices
             foreach (var key in KeyStatesHandler.monitoredKeys)
             {
-                keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
-                colors.Add(key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor));
+                if ( MonitoredKeyIndicesDict.TryGetValue(key.key, out int index) )
+                {
+                    keyIndices.Add(index);
+                    colors.Add(key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor));
+                }
+                else
+                {
+                    // Handle the case where the key is not found
+                    Logging.WriteDebug($"Key '{key.key}' not found in MonitoredKeyIndicesDict.");
+                }
             }
             foreach (int index in NonMonitoredKeyIndices)
             {
@@ -240,6 +246,11 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 VirtualKey vkCode = (VirtualKey)key.key;
                 int[] indices = lampArray.GetIndicesForKey(vkCode);
+
+                // If the key is not found, skip it
+                if (indices.Length == 0)
+                    continue;
+
                 foreach (int index in indices)
                 {
                     MonitoredKeyIndicesDict.Add(key.key, index);
