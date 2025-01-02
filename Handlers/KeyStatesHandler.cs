@@ -167,6 +167,7 @@ namespace Dynamic_Lighting_Key_Indicator
                         if (monitoredKeysDict.TryGetValue((VK)rawInput.keyboard.VKey, out MonitoredKey? mk))
                         {
                             Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
+                            //Task.Run(() => ColorSetter.SetProperColorsEveryKey_ToKeyboard());
                             Task.Run(() => MainViewModel.StaticUpdateLastKnownKeyState(mk));
                         }
                     }

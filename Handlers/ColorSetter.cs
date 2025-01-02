@@ -72,8 +72,12 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void SetProperColorsEveryKey_ToKeyboard(LampArray? lampArray = null)
         {
+            Logging.WriteDebug("Updating key colors...");
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
+            {
+                Logging.WriteDebug("LampArray could not be determined. Not setting key colors.");
                 return;
+            }
 
             // Make arrays of each monitored key's color, the default color for all others, put into combined arrays
             List<Color> colors = [];
@@ -85,7 +89,11 @@ namespace Dynamic_Lighting_Key_Indicator
                 if ( MonitoredKeyIndicesDict.TryGetValue(key.key, out int index) )
                 {
                     keyIndices.Add(index);
-                    colors.Add(key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor));
+                    Color clr = key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor);
+                    colors.Add(clr);
+
+                    if (Logging.DebugFileLoggingEnabled)
+                        Logging.WriteDebug($"  > Key {key.key.ToString()} set to color {clr.ToString()} ( A: {clr.A}, R: {clr.R}, G: {clr.G}, B: {clr.B} )");
                 }
                 else
                 {

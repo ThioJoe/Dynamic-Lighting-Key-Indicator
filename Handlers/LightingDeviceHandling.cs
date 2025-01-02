@@ -69,6 +69,7 @@ namespace Dynamic_Lighting_Key_Indicator
         // for the specified LampArray.
         private void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
+            Logging.WriteDebug("AvailabilityChanged event fired.");
             UpdateStatusMessage();
         }
 

@@ -275,6 +275,11 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 SetProperty(ref _deviceStatusMessage, value);
                 OnPropertyChanged(nameof(InstructionHeader));
+                OnPropertyChanged(nameof(AttachedDeviceName));
+                OnPropertyChanged(nameof(DeviceIsAvailable));
+                OnPropertyChanged(nameof(DeviceIsConnected));
+                OnPropertyChanged(nameof(DeviceIsEnabled));
+                Logging.WriteDebug("Device Status Changed To: " + value.MsgBody.ToString());
             }
         }
 
