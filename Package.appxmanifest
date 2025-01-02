@@ -12,7 +12,7 @@
   <Identity
     Name="d0c925b6-90d6-4ee7-a5c8-d9b08b62723e"
     Publisher="CN=&quot;Thio Software, LLC&quot;, O=&quot;Thio Software, LLC&quot;, L=Sheridan, S=Wyoming, C=US"
-    Version="1.1.0.0" />
+    Version="1.1.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="d0c925b6-90d6-4ee7-a5c8-d9b08b62723e" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
