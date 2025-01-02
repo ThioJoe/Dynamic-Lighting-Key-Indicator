@@ -8,6 +8,7 @@ global using VK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
 global using Color = Windows.UI.Color;
 global using DropShadow = Microsoft.UI.Composition.DropShadow;
 global using Thickness = Microsoft.UI.Xaml.Thickness;
+global using Colors = Microsoft.UI.Colors;
 // -------------------------------
 global using static Dynamic_Lighting_Key_Indicator.Definitions.WinEnums;
 global using Dynamic_Lighting_Key_Indicator.Definitions;
@@ -17,7 +18,6 @@ global using static Dynamic_Lighting_Key_Indicator.GlobalDefinitions;
 //-------------------------------------------------------------------------------------
 
 // ---- Local Standard Usings ----
-using Microsoft.UI;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -25,6 +25,8 @@ using System.Text.Json.Serialization;
 using System;
 using Windows.UI.Text;
 using System.Collections.Generic;
+using Windows.System;
+using System.Linq;
 // -------------------------------
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -238,4 +240,42 @@ namespace Dynamic_Lighting_Key_Indicator
 
     } // End of MonitoredKey class
 
+    // Get list of all VirtualKey values, including custom ones that aren't in the standard enum, but are common
+    public static class ExtendedVirtualKeySet
+    {
+        private static readonly HashSet<int> _allValues;
+
+        static ExtendedVirtualKeySet()
+        {
+            _allValues = [];
+
+            // Add all standard VirtualKey values
+            foreach (VirtualKey vk in Enum.GetValues<VirtualKey>())
+            {
+                _allValues.Add((int)vk);
+            }
+
+            // Add custom OEM keys
+            _allValues.Add(0xDB); // VK_OEM_4 - LeftBracket
+            _allValues.Add(0xDD); // VK_OEM_6 - RightBracket
+            _allValues.Add(0xDC); // VK_OEM_5 - Backslash
+            _allValues.Add(0xBF); // VK_OEM_2 - ForwardSlash
+            _allValues.Add(0xDE); // VK_OEM_7 - Quote
+            _allValues.Add(0xE2); // VK_OEM_102 - Sometimes <> keys, sometimes \|
+            _allValues.Add(0xBE); // VK_OEM_PERIOD  (On US keyboards, this is the .> key)
+            _allValues.Add(0xBA); // VK_OEM_1 - Semicolon/Colon key
+            _allValues.Add(0xBD); // VK_OEM_MINUS
+            _allValues.Add(0xBB); // VK_OEM_PLUS
+            _allValues.Add(0xC0); // VK_OEM_3 - Tilde/Grave/Backtick key
+            _allValues.Add(0xBC); // VK_OEM_COMMA
+
+        }
+
+        public static IEnumerable<VirtualKey> GetAllKeys()
+        {
+            return _allValues.Select(v => (VirtualKey)v);
+        }
+    }
+
 } // End of Namespace
+

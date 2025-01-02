@@ -52,16 +52,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return lampArray;
         }
 
-        public static Color DetermineDefaultColor(Color? color)
-        {
-            return color ?? KeyboardMainColor;
-        }
-
-        public static void SetInitialDefaultColor_ToKeyboard(LampArray lampArray)
-        {
-            ProperlySetProperColorsAllKeys_ToKeyboard(lampArray);
-        }
-
         public static void SetAllColors_ToKeyboard(LampArray? lampArray = null) // Defaults to the current device
         {
             // If it's null, it will show an error then we can return
@@ -87,39 +77,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 color = RGBTuple_To_ColorObj(key.offColor);
 
             lampArrayToUse.SetColorsForKey(color, vkCode);
-        }
-
-        // For when the monitored keys are toggled, this applies the set colors to all the monitored keys
-        public static void SetAllMonitoredKeyColors_ToKeyboard(List<MonitoredKey> monitoredKeys, LampArray? lampArray = null)
-        {
-            // If it's null, it will show an error then we can return
-            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
-                return;
-
-            Color[] colors = new Color[monitoredKeys.Count];
-            VirtualKey[] keys = new VirtualKey[monitoredKeys.Count];
-
-            // Build arrays of colors and keys
-            foreach (var key in monitoredKeys)
-            {
-                VirtualKey vkCode = (VirtualKey)key.key;
-                Color color;
-
-                if (key.IsOn())
-                {
-                    color = Color.FromArgb(255, (byte)key.onColor.R, (byte)key.onColor.G, (byte)key.onColor.B);
-                }
-                else
-                {
-                    color = Color.FromArgb(255, (byte)key.offColor.R, (byte)key.offColor.G, (byte)key.offColor.B);
-                }
-
-                int index = monitoredKeys.IndexOf(key);
-                colors[index] = color;
-                keys[index] = vkCode;
-            }
-
-            lampArrayToUse.SetColorsForKeys(colors, keys);
         }
 
         public static void ProperlySetProperColorsAllKeys_ToKeyboard(LampArray? lampArray = null)
@@ -197,42 +154,17 @@ namespace Dynamic_Lighting_Key_Indicator
             lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
         }
 
-        // For when the user is changing the color of the default color in the UI, which may include linked colors of monitored keys
-        public static void SetDefaultAndApplicableKeysColor_ToKeyboard(RGBTuple colorTuple, LampArray? lampArray = null, bool noStateCheck = false, Dictionary<VK, bool>? assumedStatesDict = null)
+        public static void SetKeysListToColor(LampArray lampArray, List<int> keys, Color color)
         {
-            if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
-                return;
-            Color colorToUse = DetermineDefaultColor(RGBTuple_To_ColorObj(colorTuple));
-
-            // Check which keys have on or off colors linked to the standard color, and also whether the color is on or off, to decide which colors need to be updated on the keyboard
-            List<int> keyIndices = [];
-
-            // Add non-monitored keys and applicable monitored keys to the list of indices
-            foreach (var key in KeyStatesHandler.monitoredKeys)
-            {
-                bool keyState;
-                if (assumedStatesDict != null)
-                    keyState = assumedStatesDict[key.key];
-                else
-                    keyState = key.IsOn(); // TODO: This probably causes a lot of calls, maybe only check it once when the flyout opens
-
-                if ((keyState && key.onColorTiedToStandard) || (!keyState && key.offColorTiedToStandard) || noStateCheck)
-                {
-                    keyIndices.Add(MonitoredKeyIndicesDict[key.key]);
-                }
-            }
-            keyIndices.AddRange(NonMonitoredKeyIndices);
-
-            int[] keyIndicesArray = keyIndices.ToArray();
-            Color[] colorsArray = Enumerable.Repeat(colorToUse, keyIndices.Count).ToArray(); // Same color for all so just fill it to the same size as the keyIndices
-
-            lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
+            lampArray.SetSingleColorForIndices(color, keys.ToArray());
         }
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
         {
             MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
             NonMonitoredKeyIndices = new List<int>();
+
+            Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
 
             // Build the arrays of colors and keys
             for (int i = 0; i < lampArray.LampCount; i++)
@@ -313,49 +245,6 @@ namespace Dynamic_Lighting_Key_Indicator
             return color;
         }
 
-        // ------------------------------------------- Unused But Maybe Useful Later ------------------------------------------------------------
-
-        #region Unused
-        public static void SetSpecificKeysToColor(LampArray lampArray, VirtualKey[] keys, Color color)
-        {
-            Color[] colors = Enumerable.Repeat(color, keys.Length).ToArray();
-            lampArray.SetColorsForKeys(colors, keys);
-            lampArray.BrightnessLevel = 1.0f;
-        }
-
-        public static void SetKeyboardColorExceptMonitoredKeys(List<MonitoredKey> monitoredKeys, LampArray? lampArray = null)
-        {
-            if (lampArray == null)
-            {
-                if (CurrentDevice == null)
-                {
-                    throw new ArgumentNullException(nameof(lampArray), "LampArray must be defined.");
-                }
-                else
-                {
-                    lampArray = CurrentDevice;
-                }
-            }
-
-            List<int>? monitoredKeyIndices = MonitoredIndices;
-            monitoredKeyIndices ??= UpdateMonitoredLampArrayIndices(lampArray); // If the monitored indices are null, update them
-
-            Color[] colors = new Color[lampArray.LampCount - monitoredKeys.Count];
-            int[] keys = new int[lampArray.LampCount - monitoredKeys.Count];
-
-            // Build the arrays of colors and keys
-            for (int i = 0; i < lampArray.LampCount; i++)
-            {
-                if (!monitoredKeyIndices.Contains(i))
-                {
-                    colors[i] = KeyboardMainColor;
-                    keys[i] = i;
-                }
-            }
-
-            lampArray.SetColorsForIndices(colors, keys);
-        }
-
         // Use this info to set the colors of all the other keys not being monitored, so we don't cause the monitored keys to flicker
         public static List<int> UpdateMonitoredLampArrayIndices(LampArray lampArray)
         {
@@ -370,6 +259,5 @@ namespace Dynamic_Lighting_Key_Indicator
             return monitoredIndices;
 
         }
-        #endregion
     }
 }

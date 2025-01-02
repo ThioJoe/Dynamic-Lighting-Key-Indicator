@@ -6,7 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Dynamic_Lighting_Key_Indicator.Utils
+namespace Dynamic_Lighting_Key_Indicator.Extras
 {
     // Used to print to console any time any event is triggered on a target object. Useful for testing purposes.
     public class AllEventsWatcher
