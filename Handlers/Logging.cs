@@ -96,7 +96,15 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (!File.Exists(filePath))
             {
-                File.Create(filePath);
+                try
+                {
+                    using (File.Create(filePath)) { } // Dispose file handle immediately after creating to prevent file in use errors
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Error trying to create debug log file: " + ex.Message);
+                    return;
+                }
             }
 
             debugLogFileStream = new StreamWriter(path: filePath, append: true);
