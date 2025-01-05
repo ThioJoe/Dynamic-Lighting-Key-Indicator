@@ -24,7 +24,7 @@
                 <Setter Property="Padding" Value="0"/>
                 <Setter Property="CornerRadius" Value="4"/>
             </Style>
-            
+
             <Style x:Key="SwapButtonStyle" TargetType="Button">
                 <Setter Property="Width" Value="30"/>
                 <Setter Property="Height" Value="30"/>
@@ -41,7 +41,7 @@
                 <Setter Property="Glyph" Value="&#xF1CB;"/>
                 <Setter Property="FontSize" Value="14" />
             </Style>
-            
+
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -61,32 +61,32 @@
 
         <!-- Shadow host panel: declared first, so it's at a lower Z-index -->
         <Grid x:Name="ShadowHostGrid" />
-        
+
         <!-- Debug mode test button 1 -->
-        <Button x:Name="testButton" 
-            Content="Test" 
-            Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}" 
-            HorizontalAlignment="Right" 
-            VerticalAlignment="Top" 
+        <Button x:Name="testButton"
+            Content="Test"
+            Visibility="{x:Bind ViewModel.DebugMode_VisibilityBool, Mode=OneWay}"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
             Click="TestButton_Click"
         />
         <!-- Title -->
         <!-- <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" FontFamily="OverpassEmbedded" FontSize="35" HorizontalAlignment="Center" Margin="0,0,0,0"/> -->
-        <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR" 
-                   FontFamily="{StaticResource OverpassBold}" 
+        <TextBlock Grid.Row="0" Text="DYNAMIC LIGHTING KEY INDICATOR"
+                   FontFamily="{StaticResource OverpassBold}"
                    ignore:FontFamily="Overpass"
                    ignore:FontWeight="Bold"
                    FontSize="35" HorizontalAlignment="Center" Margin="0,0,0,10"/>
 
         <!--
-        <TextBlock x:Name="watcherStatusText" 
+        <TextBlock x:Name="watcherStatusText"
                    Grid.Row="0"
                    Text="{x:Bind ViewModel.DeviceWatcherStatusMessage, Mode=OneWay}"
                    HorizontalAlignment="Center"
                    Margin="0,0,0,0"
                    />
         -->
-        
+
         <!-- Row With Start/Stop monitoring buttons -->
         <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,15,0,0" HorizontalAlignment="Center">
 
@@ -106,7 +106,7 @@
                 </StackPanel>
             </Button>
 
-            <!-- Vertical Divider 
+            <!-- Vertical Divider
             <Rectangle Width="1" Height="30" Fill="Gray" Margin="20,0,20,0"/>
             -->
 
@@ -124,7 +124,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,20,0,0" HorizontalAlignment="Center">
 
             <!-- Dropdown -->
-            <ComboBox x:Name="dropdownDevices" 
+            <ComboBox x:Name="dropdownDevices"
                   Margin="0,0,0,0"
                   Width="300"
                   HorizontalAlignment="Center"
@@ -138,7 +138,7 @@
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
                     ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
-                    IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">  
+                    IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
                     <TextBlock Text="Apply To Device"/>
@@ -148,8 +148,8 @@
         </StackPanel>
 
         <!-- Mixed Use status message: When attached, says number of attached devices, otherwise watcher status such as 'Waiting' with instructional message to start -->
-        <TextBlock x:Name="statusText" 
-                   Grid.Row="3" 
+        <TextBlock x:Name="statusText"
+                   Grid.Row="3"
                    Margin="0,10,0,0"
                    HorizontalAlignment="Center"
                    Foreground="{x:Bind ViewModel.DeviceStatusMessage.MsgColor, Mode=OneWay}">
@@ -190,34 +190,34 @@
 
             <!-- Scroll Lock -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonScrollLockOn" 
-                    Grid.Row="1" 
-                    Grid.Column="1" 
+            <Button x:Name="buttonScrollLockOn"
+                    Grid.Row="1"
+                    Grid.Column="1"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="ScrollLockOnColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.ScrollLockOnBorderThickness, Mode=OneWay}"
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapScrollLock" 
-                    Grid.Row="1" 
-                    Grid.Column="3" 
+            <Button x:Name="buttonSwapScrollLock"
+                    Grid.Row="1"
+                    Grid.Column="3"
                     Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
+                    Click="SwapOnOffColor_Click"
                     Tag="ScrollLock"
                     HorizontalAlignment="Center"
                     >
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonScrollLockOff" 
-                    Grid.Row="1" 
-                    Grid.Column="4" 
+            <Button x:Name="buttonScrollLockOff"
+                    Grid.Row="1"
+                    Grid.Column="4"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="ScrollLockOffColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.ScrollLockOffBorderThickness, Mode=OneWay}"
@@ -227,33 +227,33 @@
 
             <!-- Caps Lock -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Caps Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonCapsLockOn" 
-                    Grid.Row="2" 
-                    Grid.Column="1" 
+            <Button x:Name="buttonCapsLockOn"
+                    Grid.Row="2"
+                    Grid.Column="1"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.CapsLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.CapsLockOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="CapsLockOnColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.CapsLockOnBorderThickness, Mode=OneWay}"
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapCapsLock" 
-                    Grid.Row="2" 
-                    Grid.Column="3" 
+            <Button x:Name="buttonSwapCapsLock"
+                    Grid.Row="2"
+                    Grid.Column="3"
                     Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
+                    Click="SwapOnOffColor_Click"
                     Tag="CapsLock"
                     >
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonCapsLockOff" 
-                    Grid.Row="2" 
-                    Grid.Column="4" 
+            <Button x:Name="buttonCapsLockOff"
+                    Grid.Row="2"
+                    Grid.Column="4"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="CapsLockOffColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.CapsLockOffBorderThickness, Mode=OneWay}"
@@ -263,32 +263,32 @@
 
             <!-- Num Lock -->
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Num Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonNumLockOn" 
-                    Grid.Row="3" 
-                    Grid.Column="1" 
+            <Button x:Name="buttonNumLockOn"
+                    Grid.Row="3"
+                    Grid.Column="1"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.NumLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.NumLockOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="NumLockOnColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.NumLockOnBorderThickness, Mode=OneWay}"
                     >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapNumLock" 
-                    Grid.Row="3" 
-                    Grid.Column="3" 
+            <Button x:Name="buttonSwapNumLock"
+                    Grid.Row="3"
+                    Grid.Column="3"
                     Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
+                    Click="SwapOnOffColor_Click"
                     Tag="NumLock">
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonNumLockOff" 
-                    Grid.Row="3" 
-                    Grid.Column="4" 
+            <Button x:Name="buttonNumLockOff"
+                    Grid.Row="3"
+                    Grid.Column="4"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="NumLockOffColor"
                     BorderBrush="{ThemeResource ButtonBorder}"
                     BorderThickness="{x:Bind ViewModel.NumLockOffBorderThickness, Mode=OneWay}"
@@ -296,25 +296,170 @@
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOffGlyph, Mode=OneWay}" />
             </Button>
 
-            <!-- Default -->
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonDefaultColor" 
-                    Grid.Row="4" 
-                    Grid.Column="1" 
+            <!-- Ins Key -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Ins Key:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonInsKeyOn"
+                    Grid.Row="4"
+                    Grid.Column="1"
                     Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
+                    Background="{x:Bind ViewModel.InsKeyOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="InsKeyOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.InsKeyOnBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding InsKeyOnGlyph, Mode=OneWay}" />
+            </Button>
+            <Button x:Name="buttonSwapInsKey"
+                    Grid.Row="4"
+                    Grid.Column="3"
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click"
+                    Tag="InsKey"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonInsKeyOff"
+                    Grid.Row="4"
+                    Grid.Column="4"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.InsKeyOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="InsKeyOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.InsKeyOffBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding InsKeyOffGlyph, Mode=OneWay}" />
+            </Button>
+
+            <!-- Pause Key -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Pause Key:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonPauseKeyOn"
+                    Grid.Row="5"
+                    Grid.Column="1"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.PauseKeyOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="PauseKeyOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.PauseKeyOnBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding PauseKeyOnGlyph, Mode=OneWay}" />
+            </Button>
+            <Button x:Name="buttonSwapPauseKey"
+                    Grid.Row="5"
+                    Grid.Column="3"
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click"
+                    Tag="PauseKey"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonPauseKeyOff"
+                    Grid.Row="5"
+                    Grid.Column="4"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.PauseKeyOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="PauseKeyOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.PauseKeyOffBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding PauseKeyOffGlyph, Mode=OneWay}" />
+            </Button>
+
+            <!-- Volume Mute -->
+            <TextBlock Grid.Row="6" Grid.Column="0" Text="Volume Mute:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonVMuteOn"
+                    Grid.Row="6"
+                    Grid.Column="1"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.VMuteOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="VMuteOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.VMuteOnBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding VMuteOnGlyph, Mode=OneWay}" />
+            </Button>
+            <Button x:Name="buttonSwapVMute"
+                    Grid.Row="6"
+                    Grid.Column="3"
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click"
+                    Tag="VMute"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonVMuteOff"
+                    Grid.Row="6"
+                    Grid.Column="4"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.VMuteOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="VMuteOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.VMuteOffBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding VMuteOffGlyph, Mode=OneWay}" />
+            </Button>
+
+            <!-- Media Play Pause -->
+            <TextBlock Grid.Row="7" Grid.Column="0" Text="Media Play Pause:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonMPlayPauseOn"
+                    Grid.Row="7"
+                    Grid.Column="1"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.MPlayPauseOnBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="MPlayPauseOnColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.MPlayPauseOnBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding MPlayPauseOnGlyph, Mode=OneWay}" />
+            </Button>
+            <Button x:Name="buttonSwapMPlayPause"
+                    Grid.Row="7"
+                    Grid.Column="3"
+                    Style="{StaticResource SwapButtonStyle}"
+                    Click="SwapOnOffColor_Click"
+                    Tag="MPlayPause"
+                    >
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+            </Button>
+            <Button x:Name="buttonMPlayPauseOff"
+                    Grid.Row="7"
+                    Grid.Column="4"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.MPlayPauseOffBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
+                    Tag="MPlayPauseOffColor"
+                    BorderBrush="{ThemeResource ButtonBorder}"
+                    BorderThickness="{x:Bind ViewModel.MPlayPauseOffBorderThickness, Mode=OneWay}"
+                    >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding MPlayPauseOffGlyph, Mode=OneWay}" />
+            </Button>
+
+
+            <!-- Default -->
+            <TextBlock Grid.Row="8" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonDefaultColor"
+                    Grid.Row="8"
+                    Grid.Column="1"
+                    Style="{StaticResource ColorButtonStyle}"
+                    Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}"
+                    Click="ColorButton_Click"
                     Tag="DefaultColor"
                     />
-            <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
+            <TextBlock Grid.Row="8" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
         </Grid>
-        
+
         <!-- Brightness Slider -->
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
+        <StackPanel Grid.Row="9" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
             <TextBlock x:Name="labelGlobalBrightness"  Text="Global Brightness:" VerticalAlignment="Center" Margin="0,0,0,0"/>
-            <Slider x:Name="sliderBrightness" 
-                Width="200" 
-                Minimum="0" 
+            <Slider x:Name="sliderBrightness"
+                Width="200"
+                Minimum="0"
                 Maximum="100"
                 Margin="10,5,0,0"
                 Value="{x:Bind ViewModel.Brightness, Mode=TwoWay}"
@@ -323,8 +468,8 @@
         </StackPanel>
 
         <!-- Config Buttons -->
-        <StackPanel Orientation="Horizontal" Grid.Row="7" HorizontalAlignment="Center" Margin="0,20,0,0">
-            
+        <StackPanel Orientation="Horizontal" Grid.Row="10" HorizontalAlignment="Center" Margin="0,20,0,0">
+
             <!-- Save Button -->
             <Button x:Name="buttonSaveSettings" Click="ButtonSaveSettings_Click" Margin="0,0,0,0" IsEnabled="{x:Bind ViewModel.IsSaveButtonEnabled, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal">
@@ -348,9 +493,9 @@
                     <TextBlock Text="Restore Default Colors"/>
                 </StackPanel>
             </Button>
-            
+
             <!-- Open Config Folder (Debug Mode) -->
-            <Button x:Name="buttonOpenConfigFolder" 
+            <Button x:Name="buttonOpenConfigFolder"
                     Click="OpenConfigFolder_Click"
                     Margin="10,0,10,0"
                     Visibility="{x:Bind ViewModel.AdvancedInfo_VisibilityBool, Mode=OneWay}"
@@ -364,7 +509,7 @@
         </StackPanel>
 
         <!-- Startup Setting Toggle and Message -->
-        <Grid Grid.Row="8" Margin="0,20,0,0" HorizontalAlignment="Center">
+        <Grid Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -378,8 +523,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- Start with Windows Label and Toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="0" 
-               Text="Start with Windows" 
+            <TextBlock Grid.Row="0" Grid.Column="0"
+               Text="Start with Windows"
                HorizontalAlignment="Center"
                Margin="0,0,0,0"/>
             <ToggleSwitch x:Name="toggleStartupWithWindows"
@@ -387,39 +532,39 @@
                   IsOn="{x:Bind ViewModel.IsStartupEnabled, Mode=TwoWay}"
                   IsEnabled="{x:Bind ViewModel.StartupSettingCanBeChanged, Mode=OneWay}"
                   HorizontalAlignment="Center"
-                  MinWidth="0" 
+                  MinWidth="0"
                   Margin="0,0,0,0"/>
 
             <!-- Start Minimized to Tray Label and Toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="1" 
-               Text="Start Minimized to Tray" 
+            <TextBlock Grid.Row="0" Grid.Column="1"
+               Text="Start Minimized to Tray"
                HorizontalAlignment="Center"
                Margin="30,0,0,0"/>
             <ToggleSwitch x:Name="toggleStartMinimizedToTray"
                   Grid.Row="1" Grid.Column="1"
                   IsOn="{x:Bind ViewModel.StartMinimizedToTray, Mode=TwoWay}"
                   HorizontalAlignment="Center"
-                  MinWidth="0" 
+                  MinWidth="0"
                   Margin="30,0,0,0"/>
 
             <!-- Advanced Info Mode Toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="2" 
-               Text="Advanced Info" 
+            <TextBlock Grid.Row="0" Grid.Column="2"
+               Text="Advanced Info"
                HorizontalAlignment="Center"
                Margin="30,0,0,0"
             />
-            <ToggleSwitch x:Name="AdvancedInfoToggle" 
+            <ToggleSwitch x:Name="AdvancedInfoToggle"
                 Grid.Row="1" Grid.Column="2"
                 IsOn="{x:Bind ViewModel.ShowAdvancedInfo, Mode=TwoWay}"
                 Toggled="AutoSizeWindow_OnAdvancedToggle"
                 HorizontalAlignment="Center"
-                MinWidth="0" 
+                MinWidth="0"
                 Margin="30,0,0,0"
             />
 
             <!-- Debug logging toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="3" 
-               Text="Debug Logging" 
+            <TextBlock Grid.Row="0" Grid.Column="3"
+               Text="Debug Logging"
                HorizontalAlignment="Center"
                Margin="30,0,0,0"
                ToolTipService.ToolTip="Creates debug log on the desktop."
@@ -428,7 +573,7 @@
                   Grid.Row="1" Grid.Column="3"
                   IsOn="{x:Bind ViewModel.DebugFileLoggingEnabled, Mode=TwoWay}"
                   HorizontalAlignment="Center"
-                  MinWidth="0" 
+                  MinWidth="0"
                   Margin="30,0,0,0"
                   ToolTipService.ToolTip="Creates debug log on the desktop."
                   Toggled="ToggleDebugLogging_Toggled"
@@ -437,15 +582,15 @@
         </Grid>
 
         <!-- Divider Line and Informational TextBlock -->
-        <Line Grid.Row="9" 
-              X2="1000" 
-              Stroke="Black" 
-              StrokeThickness="1" 
+        <Line Grid.Row="12"
+              X2="1000"
+              Stroke="Black"
+              StrokeThickness="1"
               HorizontalAlignment="Center"
               Margin="0,10,0,0"
             />
-        
-        <Expander Grid.Row="10"
+
+        <Expander Grid.Row="13"
           Header="{x:Bind ViewModel.InstructionHeader, Mode=OneWay}"
           IsExpanded="False"
                   Width="700"
@@ -477,7 +622,7 @@
             </TextBlock>
         </Expander>
         <!-- Debug Information Row -->
-        <StackPanel x:Name="AdvancedInfoStack" Grid.Row="11" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.AdvancedInfo_VisibilityBool, Mode=OneWay}">
+        <StackPanel x:Name="AdvancedInfoStack" Grid.Row="14" Margin="0,20,0,0" HorizontalAlignment="Center" Visibility="{x:Bind ViewModel.AdvancedInfo_VisibilityBool, Mode=OneWay}">
             <TextBlock Margin="0,5,0,0" >
                 <Run Text="Name: "/>
                 <Run Text="{x:Bind ViewModel.AttachedDeviceName, Mode=OneWay}"/>

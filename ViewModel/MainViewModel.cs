@@ -11,7 +11,7 @@ using Windows.ApplicationModel;
 using Windows.Devices.Lights;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
-// BEWARE - THIS FILE IS A COMPLETE MESS. Properties and methods aren't really organized. 
+// BEWARE - THIS FILE IS A COMPLETE MESS. Properties and methods aren't really organized.
 // But it has a bunch of important stuff to connect the GUI to the backend.
 
 namespace Dynamic_Lighting_Key_Indicator
@@ -32,15 +32,17 @@ namespace Dynamic_Lighting_Key_Indicator
             _capsLockOffGlyph = UnlinkedGlyph;
             _numLockOffGlyph = UnlinkedGlyph;
             _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
+            _insKeyOffGlyph = UnlinkedGlyph;
+            _pauseKeyOffGlyph = UnlinkedGlyph;
+            _vMuteOffGlyph = UnlinkedGlyph;
+            _mPlayPauseOffGlyph = UnlinkedGlyph;
             _scrollLockOnGlyph = UnlinkedGlyph;
             _capsLockOnGlyph = UnlinkedGlyph;
             _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _scrollLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
+            _insKeyOnGlyph = UnlinkedGlyph;
+            _pauseKeyOnGlyph = UnlinkedGlyph;
+            _vMuteOnGlyph = UnlinkedGlyph;
+            _mPlayPauseOnGlyph = UnlinkedGlyph;
             _startupSettingCanBeChanged = true;
             _startupSettingReason = "";
             _isStartupEnabled = false;
@@ -587,6 +589,110 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private bool _syncInsKeyOnColor;
+        public bool SyncInsKeyOnColor
+        {
+            get => _syncInsKeyOnColor;
+            set
+            {
+                if (SetProperty(ref _syncInsKeyOnColor, value))
+                {
+                    OnPropertyChanged(nameof(InsKeyOnGlyph));
+                }
+            }
+        }
+
+        private bool _syncInsKeyOffColor;
+        public bool SyncInsKeyOffColor
+        {
+            get => _syncInsKeyOffColor;
+            set
+            {
+                if (SetProperty(ref _syncInsKeyOffColor, value))
+                {
+                    OnPropertyChanged(nameof(InsKeyOffGlyph));
+                }
+            }
+        }
+
+        private bool _syncPauseKeyOnColor;
+        public bool SyncPauseKeyOnColor
+        {
+            get => _syncPauseKeyOnColor;
+            set
+            {
+                if (SetProperty(ref _syncPauseKeyOnColor, value))
+                {
+                    OnPropertyChanged(nameof(PauseKeyOnGlyph));
+                }
+            }
+        }
+
+        private bool _syncPauseKeyOffColor;
+        public bool SyncPauseKeyOffColor
+        {
+            get => _syncPauseKeyOffColor;
+            set
+            {
+                if (SetProperty(ref _syncPauseKeyOffColor, value))
+                {
+                    OnPropertyChanged(nameof(PauseKeyOffGlyph));
+                }
+            }
+        }
+
+        private bool _syncVMuteOnColor;
+        public bool SyncVMuteOnColor
+        {
+            get => _syncVMuteOnColor;
+            set
+            {
+                if (SetProperty(ref _syncVMuteOnColor, value))
+                {
+                    OnPropertyChanged(nameof(VMuteOnGlyph));
+                }
+            }
+        }
+
+        private bool _syncVMuteOffColor;
+        public bool SyncVMuteOffColor
+        {
+            get => _syncVMuteOffColor;
+            set
+            {
+                if (SetProperty(ref _syncVMuteOffColor, value))
+                {
+                    OnPropertyChanged(nameof(VMuteOffGlyph));
+                }
+            }
+        }
+
+        private bool _syncMPlayPauseOnColor;
+        public bool SyncMPlayPauseOnColor
+        {
+            get => _syncMPlayPauseOnColor;
+            set
+            {
+                if (SetProperty(ref _syncMPlayPauseOnColor, value))
+                {
+                    OnPropertyChanged(nameof(MPlayPauseOnGlyph));
+                }
+            }
+        }
+
+        private bool _syncMPlayPauseOffColor;
+        public bool SyncMPlayPauseOffColor
+        {
+            get => _syncMPlayPauseOffColor;
+            set
+            {
+                if (SetProperty(ref _syncMPlayPauseOffColor, value))
+                {
+                    OnPropertyChanged(nameof(MPlayPauseOffGlyph));
+                }
+            }
+        }
+
         private string _scrollLockOnGlyph;
         public string ScrollLockOnGlyph
         {
@@ -629,6 +735,62 @@ namespace Dynamic_Lighting_Key_Indicator
             private set => SetProperty(ref _numLockOffGlyph, value);
         }
 
+        private string _insKeyOnGlyph;
+        public string InsKeyOnGlyph
+        {
+            get => SyncInsKeyOnColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _insKeyOnGlyph, value);
+        }
+
+        private string _insKeyOffGlyph;
+        public string InsKeykOffGlyph
+        {
+            get => SyncInsKeykOffColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _insKeyOffGlyph, value);
+        }
+
+        private string _pauseKeyOnGlyph;
+        public string PauseKeyOnGlyph
+        {
+            get => SyncPauseKeyOnColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _pauseKeyOnGlyph, value);
+        }
+
+        private string _pauseKeyOffGlyph;
+        public string PauseKeyOffGlyph
+        {
+            get => SyncPauseKeyOffColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _pauseKeyOffGlyph, value);
+        }
+
+        private string _vMuteOnGlyph;
+        public string VMuteOnGlyph
+        {
+            get => SyncVMuteOnColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _vMuteOnGlyph, value);
+        }
+
+        private string _vMuteOffGlyph;
+        public string VMuteOffGlyph
+        {
+            get => SyncVMuteOffColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _vMuteOffGlyph, value);
+        }
+
+        private string _mPlayPauseOnGlyph;
+        public string MPLayPauseOnGlyph
+        {
+            get => SyncMPLayPauseOnColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _mPlayPauseOnGlyph, value);
+        }
+
+        private string _mPlayPauseOffGlyph;
+        public string MPLayPauseOffGlyph
+        {
+            get => SyncMPLayPauseOffColor ? LinkedGlyph : UnlinkedGlyph;
+            private set => SetProperty(ref _mPlayPauseOffGlyph, value);
+        }
+
         // Color backgrounds for buttons
         public SolidColorBrush ScrollLockOnBrush => GetBrushFromColor(ScrollLockOnColor);
         public SolidColorBrush ScrollLockOffBrush => GetBrushFromColor(ScrollLockOffColor);
@@ -636,6 +798,14 @@ namespace Dynamic_Lighting_Key_Indicator
         public SolidColorBrush CapsLockOffBrush => GetBrushFromColor(CapsLockOffColor);
         public SolidColorBrush NumLockOnBrush => GetBrushFromColor(NumLockOnColor);
         public SolidColorBrush NumLockOffBrush => GetBrushFromColor(NumLockOffColor);
+        public SolidColorBrush InsKeynBrush => GetBrushFromColor(InsKeynColor);
+        public SolidColorBrush InsKeyffBrush => GetBrushFromColor(InsKeyffColor);
+        public SolidColorBrush PauseKeyOnBrush => GetBrushFromColor(PauseKeyOnColor);
+        public SolidColorBrush PauseKeyOffBrush => GetBrushFromColor(PauseKeyOffColor);
+        public SolidColorBrush VMuteOnBrush => GetBrushFromColor(VMuteOnColor);
+        public SolidColorBrush VMuteOffBrush => GetBrushFromColor(VMuteOffColor);
+        public SolidColorBrush MPlayPauseOnBrush => GetBrushFromColor(MPlayPauseOnColor);
+        public SolidColorBrush MPlayPauseOffBrush => GetBrushFromColor(MPlayPauseOffColor);
         public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
 
 
@@ -735,6 +905,118 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        private Color _insKeyOnColor;
+        public Color InsKeyOnColor
+        {
+            get => _insKeyOnColor;
+            set
+            {
+                if (SetProperty(ref _insKeyOnColor, value))
+                {
+                    OnPropertyChanged(nameof(InsKeyOnBrush));
+
+                }
+            }
+        }
+
+        private Color _insKeyOffColor;
+        public Color InsKeyOffColor
+        {
+            get => _insKeyOffColor;
+            set
+            {
+                if (SetProperty(ref _insKeyOffColor, value))
+                {
+                    OnPropertyChanged(nameof(InsKeyOffBrush));
+
+                }
+            }
+        }
+
+        private Color _pauseKeyOnColor;
+        public Color PauseKeyOnColor
+        {
+            get => _pauseKeyOnColor;
+            set
+            {
+                if (SetProperty(ref _pauseKeyOnColor, value))
+                {
+                    OnPropertyChanged(nameof(PauseKeyOnBrush));
+
+                }
+            }
+        }
+
+        private Color _pauseKeyOffColor;
+        public Color PauseKeyOffColor
+        {
+            get => _pauseKeyOffColor;
+            set
+            {
+                if (SetProperty(ref _pauseKeyOffColor, value))
+                {
+                    OnPropertyChanged(nameof(PauseKeyOffBrush));
+
+                }
+            }
+        }
+
+        private Color _vMuteOnColor;
+        public Color VMuteOnColor
+        {
+            get => _vMuteOnColor;
+            set
+            {
+                if (SetProperty(ref _vMuteOnColor, value))
+                {
+                    OnPropertyChanged(nameof(VMuteOnBrush));
+
+                }
+            }
+        }
+
+        private Color _vMuteOffColor;
+        public Color VMuteOffColor
+        {
+            get => _vMuteOffColor;
+            set
+            {
+                if (SetProperty(ref _vMuteOffColor, value))
+                {
+                    OnPropertyChanged(nameof(VMuteOffBrush));
+
+                }
+            }
+        }
+
+        private Color _mPlayPauseOnColor;
+        public Color MPlayPauseOnColor
+        {
+            get => _mPlayPauseOnColor;
+            set
+            {
+                if (SetProperty(ref _mPlayPauseOnColor, value))
+                {
+                    OnPropertyChanged(nameof(MPlayPauseOnBrush));
+
+                }
+            }
+        }
+
+        private Color _mPlayPauseOffColor;
+        public Color MPlayPauseOffColor
+        {
+            get => _mPlayPauseOffColor;
+            set
+            {
+                if (SetProperty(ref _mPlayPauseOffColor, value))
+                {
+                    OnPropertyChanged(nameof(MPlayPauseOffBrush));
+
+                }
+            }
+        }
+
         private Color _defaultColor;
         public Color DefaultColor
         {
@@ -778,6 +1060,38 @@ namespace Dynamic_Lighting_Key_Indicator
                     SyncScrollLockOffColor = syncSetting;
                     OnPropertyChanged(nameof(ScrollLockOffGlyph));
                     break;
+                case ColorPropName.InsKeyOn:
+                    SyncInsKeyOnColor = syncSetting;
+                    OnPropertyChanged(nameof(InsKeyOnGlyph));
+                    break;
+                case ColorPropName.InsKeyOff:
+                    SyncInsKeyOffColor = syncSetting;
+                    OnPropertyChanged(nameof(InsKeyOffGlyph));
+                    break;
+                case ColorPropName.PauseKeyOn:
+                    SyncPauseKeyOnColor = syncSetting;
+                    OnPropertyChanged(nameof(PauseKeyOnGlyph));
+                    break;
+                case ColorPropName.PauseKeyOff:
+                    SyncPauseKeyOffColor = syncSetting;
+                    OnPropertyChanged(nameof(PauseKeyOffGlyph));
+                    break;
+                case ColorPropName.VMuteOn:
+                    SyncVMuteOnColor = syncSetting;
+                    OnPropertyChanged(nameof(VMuteOnGlyph));
+                    break;
+                case ColorPropName.VMuteOff:
+                    SyncVMuteOffColor = syncSetting;
+                    OnPropertyChanged(nameof(VMuteOffGlyph));
+                    break;
+                case ColorPropName.MPlayPauseOn:
+                    SyncMPlayPauseOnColor = syncSetting;
+                    OnPropertyChanged(nameof(MPlayPauseOnGlyph));
+                    break;
+                case ColorPropName.MPlayPauseOff:
+                    SyncMPlayPauseOffColor = syncSetting;
+                    OnPropertyChanged(nameof(MPlayPauseOffGlyph));
+                    break;
                 default:
                     break;
             }
@@ -793,6 +1107,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorPropName.CapsLockOff => SyncCapsLockOffColor,
                 ColorPropName.ScrollLockOn => SyncScrollLockOnColor,
                 ColorPropName.ScrollLockOff => SyncScrollLockOffColor,
+                ColorPropName.InsKeyOn => SyncInsKeyOnColor,
+                ColorPropName.InsKeyOff => SyncInsKeyOffColor,
+                ColorPropName.PauseKeyOn => SyncPauseKeyOnColor,
+                ColorPropName.PauseKeyOff => SyncPauseKeyOffColor,
+                ColorPropName.VMuteOn => SyncVMuteOnColor,
+                ColorPropName.VMuteOff => SyncVMuteOffColor,
+                ColorPropName.MPlayPauseOn => SyncMPlayPauseOnColor,
+                ColorPropName.MPlayPauseOff => SyncMPlayPauseOffColor,
                 _ => false,
             };
         }
@@ -807,6 +1129,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 ButtonName.CapsLockOff => SyncCapsLockOffColor,
                 ButtonName.ScrollLockOn => SyncScrollLockOnColor,
                 ButtonName.ScrollLockOff => SyncScrollLockOffColor,
+                ButtonName.InsKeyOn => SyncInsKeyOnColor,
+                ButtonName.InsKeyOff => SyncInsKeyOffColor,
+                ButtonName.PauseKeyOn => SyncPauseKeyOnColor,
+                ButtonName.PauseKeyOff => SyncPauseKeyOffColor,
+                ButtonName.VMuteOn => SyncVMuteOnColor,
+                ButtonName.VMuteOff => SyncVMuteOffColor,
+                ButtonName.MPlayPauseOn => SyncMPlayPauseOnColor,
+                ButtonName.MPlayPauseOff => SyncMPlayPauseOffColor,
                 _ => false,
             };
         }
@@ -825,6 +1155,14 @@ namespace Dynamic_Lighting_Key_Indicator
         private Thickness _capsLockOffBorderThickness;
         private Thickness _numLockOnBorderThickness;
         private Thickness _numLockOffBorderThickness;
+        private Thickness _insKeyOnBorderThickness;
+        private Thickness _insKeyOffBorderThickness;
+        private Thickness _pauseKeyOnBorderThickness;
+        private Thickness _pauseKeyOffBorderThickness;
+        private Thickness _vMuteOnBorderThickness;
+        private Thickness _vMuteOffBorderThickness;
+        private Thickness _mPlayPauseOnBorderThickness;
+        private Thickness _mPlayPauseOffBorderThickness;
 
         public Thickness ScrollLockOnBorderThickness
         {
@@ -856,10 +1194,54 @@ namespace Dynamic_Lighting_Key_Indicator
             get => _numLockOffBorderThickness;
             set => SetProperty(ref _numLockOffBorderThickness, value);
         }
+        public Thickness InsKeyOnBorderThickness
+        {
+            get => _insKeyOnBorderThickness;
+            set => SetProperty(ref _insKeyOnBorderThickness, value);
+        }
+        public Thickness InsKeyOffBorderThickness
+        {
+            get => _insKeyOffBorderThickness;
+            set => SetProperty(ref _insKeyOffBorderThickness, value);
+        }
+        public Thickness PauseKeyOnBorderThickness
+        {
+            get => _pauseKeyOnBorderThickness;
+            set => SetProperty(ref _pauseKeyOnBorderThickness, value);
+        }
+        public Thickness PauseKeyOffBorderThickness
+        {
+            get => _pauseKeyOffBorderThickness;
+            set => SetProperty(ref _pauseKeyOffBorderThickness, value);
+        }
+        public Thickness VMuteOnBorderThickness
+        {
+            get => _vMuteOnBorderThickness;
+            set => SetProperty(ref _vMuteOnBorderThickness, value);
+        }
+        public Thickness VMuteOffBorderThickness
+        {
+            get => _vMuteOffBorderThickness;
+            set => SetProperty(ref _vMuteOffBorderThickness, value);
+        }
+        public Thickness MPlayPauseOnBorderThickness
+        {
+            get => _mPlayPauseOnBorderThickness;
+            set => SetProperty(ref _mPlayPauseOnBorderThickness, value);
+        }
+        public Thickness MPlayPauseOffBorderThickness
+        {
+            get => _mPlayPauseOffBorderThickness;
+            set => SetProperty(ref _mPlayPauseOffBorderThickness, value);
+        }
 
         private bool _LastKnownScrollLockState = false;
         private bool _LastKnownCapsLockState = false;
         private bool _LastKnownNumLockState = false;
+        private bool _LastKnownInsKeyState = false;
+        private bool _LastKnownPauseKeyState = false;
+        private bool _LastKnownVMuteState = false;
+        private bool _LastKnownMPlayPauseState = false;
 
         public bool LastKnownNumLockState
         {
@@ -901,6 +1283,58 @@ namespace Dynamic_Lighting_Key_Indicator
 
             }
         }
+        public bool LastKnownInsKeyState
+        {
+            get => _LastKnownInsKeyState;
+            set
+            {
+                SetProperty(ref _LastKnownInsKeyState, value);
+                bool onIsActive = value;
+                InsKeyOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                InsKeyOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(InsKeyOnBorderThickness));
+                OnPropertyChanged(nameof(InsKeyOffBorderThickness));
+            }
+        }
+        public bool LastKnownPauseKeyState
+        {
+            get => _LastKnownPauseKeyState;
+            set
+            {
+                SetProperty(ref _LastKnownPauseKeyState, value);
+                bool onIsActive = value;
+                PauseKeyOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                PauseKeyOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(PauseKeyOnBorderThickness));
+                OnPropertyChanged(nameof(PauseKeyOffBorderThickness));
+            }
+        }
+        public bool LastKnownVMuteState
+        {
+            get => _LastKnownVMuteState;
+            set
+            {
+                SetProperty(ref _LastKnownVMuteState, value);
+                bool onIsActive = value;
+                VMuteOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                VMuteOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(VMuteOnBorderThickness));
+                OnPropertyChanged(nameof(VMuteOffBorderThickness));
+            }
+        }
+        public bool LastKnownMPlayPauseState
+        {
+            get => _LastKnownMPlayPauseState;
+            set
+            {
+                SetProperty(ref _LastKnownMPlayPauseState, value);
+                bool onIsActive = value;
+                MPlayPauseOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
+                MPlayPauseOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
+                OnPropertyChanged(nameof(MPlayPauseOnBorderThickness));
+                OnPropertyChanged(nameof(MPlayPauseOffBorderThickness));
+            }
+        }
 
         public void UpdateLastKnownKeyState(VK key, bool state)
         {
@@ -915,14 +1349,30 @@ namespace Dynamic_Lighting_Key_Indicator
                 case VK.ScrollLock:
                     LastKnownScrollLockState = state;
                     break;
+                case VK.InsKey:
+                    LastKnownInsKeyState = state;
+                    break;
+                case VK.PauseKey:
+                    LastKnownPauseKeyState = state;
+                    break;
+                case VK.VMute:
+                    LastKnownVMuteState = state;
+                    break;
+                case VK.MPlayPause:
+                    LastKnownMPlayPauseState = state;
+                    break;
             }
         }
 
-        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock)
+        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock, bool insKey, bool pauseKey, bool vMute, bool mPlayPause)
         {
             LastKnownNumLockState = numLock;
             LastKnownCapsLockState = capsLock;
             LastKnownScrollLockState = scrollLock;
+            LastKnownInsKeyState = insKey;
+            LastKnownPauseKeyState = pauseKey;
+            LastKnownVMuteState = vMute;
+            LastKnownMPlayPauseState = mPlayPause;
         }
 
         public static void StaticUpdateLastKnownKeyState(MonitoredKey key)
@@ -1018,6 +1468,30 @@ namespace Dynamic_Lighting_Key_Indicator
                         SyncScrollLockOnColor = onColorTiedToStandard;
                         SyncScrollLockOffColor = offColorTiedToStandard;
                         break;
+                    case VK.InsKey:
+                        InsKeyOnColor = onColor;
+                        InsKeyOffColor = offColor;
+                        SyncInsKeyOnColor = onColorTiedToStandard;
+                        SyncInsKeyOffColor = offColorTiedToStandard;
+                        break;
+                    case VK.PauseKey:
+                        PauseKeyOnColor = onColor;
+                        PauseKeyOffColor = offColor;
+                        SyncPauseKeyOnColor = onColorTiedToStandard;
+                        SyncPauseKeyOffColor = offColorTiedToStandard;
+                        break;
+                    case VK.VMute:
+                        VMuteOnColor = onColor;
+                        VMuteOffColor = offColor;
+                        SyncVMuteOnColor = onColorTiedToStandard;
+                        SyncVMuteOffColor = offColorTiedToStandard;
+                        break;
+                    case VK.MPlayPause:
+                        MPlayPauseOnColor = onColor;
+                        MPlayPauseOffColor = offColor;
+                        SyncMPlayPauseOnColor = onColorTiedToStandard;
+                        SyncMPlayPauseOffColor = offColorTiedToStandard;
+                        break;
                 }
             }
 
@@ -1043,6 +1517,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 ScrollLockOnColor = DefaultColor;
             if (SyncScrollLockOffColor)
                 ScrollLockOffColor = DefaultColor;
+            if (SyncInsKeyOnColor)
+                InsKeyOnColor = DefaultColor;
+            if (SyncInsKeyOffColor)
+                InsKeyOffColor = DefaultColor;
+            if (SyncPauseKeyOnColor)
+                PauseKeyOnColor = DefaultColor;
+            if (SyncPauseKeyOffColor)
+                PauseKeyOffColor = DefaultColor;
+            if (SyncVMuteOnColor)
+                VMuteOnColor = DefaultColor;
+            if (SyncVMuteOffColor)
+                VMuteOffColor = DefaultColor;
+            if (SyncMPlayPauseOnColor)
+                MPlayPauseOnColor = DefaultColor;
+            if (SyncMPlayPauseOffColor)
+                MPlayPauseOffColor = DefaultColor;
 
             ColorSetter.DefineKeyboardMainColor(DefaultColor);
         }
@@ -1084,9 +1574,13 @@ namespace Dynamic_Lighting_Key_Indicator
             MonitoredKey? CapsLockKey = GetMonitoredKeyObj(VK.CapsLock);
             MonitoredKey? NumLockKey = GetMonitoredKeyObj(VK.NumLock);
             MonitoredKey? ScrollLockKey = GetMonitoredKeyObj(VK.ScrollLock);
+            MonitoredKey? InsKeyKey = GetMonitoredKeyObj(VK.InsKey);
+            MonitoredKey? PauseKeyKey = GetMonitoredKeyObj(VK.PauseKey);
+            MonitoredKey? VMuteKey = GetMonitoredKeyObj(VK.VMute);
+            MonitoredKey? MPlayPauseKey = GetMonitoredKeyObj(VK.MPlayPause);
 
             // If any of the keys are null, return false
-            if (CapsLockKey == null || NumLockKey == null || ScrollLockKey == null)
+            if (CapsLockKey == null || NumLockKey == null || ScrollLockKey == null || InsKeyKey == null || PauseKeyKey == null || VMuteKey == null || MPlayPauseKey == null)
                 return false;
 
             // Brightness
@@ -1105,6 +1599,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 return false;
             if (ColorsAreDifferent(NumLockOffColor, NumLockKey.offColor))
                 return false;
+            if (ColorsAreDifferent(InsKeyOnColor, InsKeyKey.onColor))
+                return false;
+            if (ColorsAreDifferent(InsKeyOffColor, InsKeyKey.offColor))
+                return false;
+            if (ColorsAreDifferent(PauseKeyOnColor, PauseKeyKey.onColor))
+                return false;
+            if (ColorsAreDifferent(PauseKeyOffColor, PauseKeyKey.offColor))
+                return false;
+            if (ColorsAreDifferent(VMuteOnColor, VMuteKey.onColor))
+                return false;
+            if (ColorsAreDifferent(VMuteOffColor, VMuteKey.offColor))
+                return false;
+            if (ColorsAreDifferent(MPlayPauseOnColor, MPlayPauseKey.onColor))
+                return false;
+            if (ColorsAreDifferent(MPlayPauseOffColor, MPlayPauseKey.offColor))
+                return false;
             if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
                 return false;
 
@@ -1121,6 +1631,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 return false;
             if (SyncNumLockOffColor != NumLockKey.offColorTiedToStandard)
                 return false;
+            if (SyncInsKeyOnColor != InsKeyKey.onColorTiedToStandard)
+                return false;
+            if (SyncInsKeyOffColor != InsKeyKey.offColorTiedToStandard)
+                return false;
+            if (SyncPauseKeyOnColor != PauseKeyKey.onColorTiedToStandard)
+                return false;
+            if (SyncPauseKeyOffColor != PauseKeyKey.offColorTiedToStandard)
+                return false;
+            if (SyncVMuteOnColor != VMuteKey.onColorTiedToStandard)
+                return false;
+            if (SyncVMuteOffColor != VMuteKey.offColorTiedToStandard)
+                return false;
+            if (SyncMPlayPauseOnColor != MPlayPauseKey.onColorTiedToStandard)
+                return false;
+            if (SyncMPlayPauseOffColor != MPlayPauseKey.offColorTiedToStandard)
+                return false;
 
             // Everything matches at this point
             return true;
@@ -1136,6 +1662,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 nameof(CapsLockOffColor) => VK.CapsLock,
                 nameof(ScrollLockOnColor) => VK.ScrollLock,
                 nameof(ScrollLockOffColor) => VK.ScrollLock,
+                nameof(InsKeyOnColor) => VK.InsKey,
+                nameof(InsKeyOffColor) => VK.InsKey,
+                nameof(PauseKeyOnColor) => VK.PauseKey,
+                nameof(PauseKeyOffColor) => VK.PauseKey,
+                nameof(VMuteOnColor) => VK.VMute,
+                nameof(VMuteOffColor) => VK.VMute,
+                nameof(MPlayPauseOnColor) => VK.MPlayPause,
+                nameof(MPlayPauseOffColor) => VK.MPlayPause,
                 _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
             };
         }
@@ -1150,6 +1684,14 @@ namespace Dynamic_Lighting_Key_Indicator
                 nameof(CapsLockOffColor) => StateColorApply.Off,
                 nameof(ScrollLockOnColor) => StateColorApply.On,
                 nameof(ScrollLockOffColor) => StateColorApply.Off,
+                nameof(InsKeyOnColor) => StateColorApply.On,
+                nameof(InsKeyOffColor) => StateColorApply.Off,
+                nameof(PauseKeyOnColor) => StateColorApply.On,
+                nameof(PauseKeyOffColor) => StateColorApply.Off,
+                nameof(VMuteOnColor) => StateColorApply.On,
+                nameof(VMuteOffColor) => StateColorApply.Off,
+                nameof(MPlayPauseOnColor) => StateColorApply.On,
+                nameof(MPlayPauseOffColor) => StateColorApply.Off,
                 _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
             };
         }
@@ -1163,6 +1705,14 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string CapsLockOff = "CapsLockOffColor";
             public const string ScrollLockOn = "ScrollLockOnColor";
             public const string ScrollLockOff = "ScrollLockOffColor";
+            public const string InsKeyOn = "InsKeyOnColor";
+            public const string InsKeyOff = "InsKeyOffColor";
+            public const string PauseKeyOn = "PauseKeyOnColor";
+            public const string PauseKeyOff = "PauseKeyOffColor";
+            public const string VMuteOn = "VMuteOnColor";
+            public const string VMuteOff = "VMuteOffColor";
+            public const string MPlayPauseOn = "MPlayPauseOnColor";
+            public const string MPlayPauseOff = "MPlayPauseOffColor";
             public const string DefaultColor = "DefaultColor";
         }
 
@@ -1174,6 +1724,14 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string CapsLockOff = "buttonCapsLockOff";
             public const string ScrollLockOn = "buttonScrollLockOn";
             public const string ScrollLockOff = "buttonScrollLockOff";
+            public const string InsKeyOn = "buttonInsKeyOn";
+            public const string InsKeyOff = "buttonInsKeyOff";
+            public const string PauseKeyOn = "buttonPauseKeyOn";
+            public const string PauseKeyOff = "buttonPauseKeyOff";
+            public const string VMuteOn = "buttonVMuteOn";
+            public const string VMuteOff = "buttonVMuteOff";
+            public const string MPlayPauseOn = "buttonMPlayPauseOn";
+            public const string MPlayPauseOff = "buttonMPlayPauseOff";
         }
 
     } // ----------------------- End of MainViewModel -----------------------

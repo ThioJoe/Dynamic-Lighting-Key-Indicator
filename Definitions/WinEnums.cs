@@ -153,6 +153,10 @@ namespace Dynamic_Lighting_Key_Indicator.Definitions
             WM_KEYUP = 0x0101,
             VK_NUMLOCK = 0x90,
             VK_CAPSLOCK = 0x14,
+            VK_INS_KEY = 0x2D,
+            VK_PAUSE_KEY = 0x13,
+            VK_V_MUTE = 0xAD,
+            VK_M_PLAY_PAUSE = 0xB3,
             VM_SYSKEYDOWN = 0x104,
             VM_SYSKEYUP = 0x105,
         }

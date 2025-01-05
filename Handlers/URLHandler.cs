@@ -80,6 +80,14 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string NumLockOffColor = "numlockcolor_off";
             public const string CapsLockOnColor = "capslockcolor_on";
             public const string CapsLockOffColor = "capslockcolor_off";
+            public const string InsKeyOnColor = "inskeycolor_on";
+            public const string InsKeyOffColor = "inskeycolor_off";
+            public const string PauseKeyOnColor = "pausekeycolor_on";
+            public const string PauseKeyOffColor = "pausekeycolor_off";
+            public const string VMuteOnColor = "vmutecolor_on";
+            public const string VMuteOffColor = "vmutecolor_off";
+            public const string MPlayPauseOnColor = "mplaypausecolor_on";
+            public const string MPlayPauseOffColor = "mplaypausecolor_off";
             public const string StandardKeyColor = "standardkeycolor";
         }
 
@@ -254,6 +262,30 @@ namespace Dynamic_Lighting_Key_Indicator
                         break;
                     case ParameterNames.CapsLockOffColor:
                         SetKeyColor(key_vk: VK.CapsLock, on: false, value: value);
+                        break;
+                    case ParameterNames.InsKeyOnColor:
+                        SetKeyColor(key_vk: VK.InsKey, on: true, value: value);
+                        break;
+                    case ParameterNames.InsKeyOffColor:
+                        SetKeyColor(key_vk: VK.InsKey, on: false, value: value);
+                        break;
+                    case ParameterNames.PauseKeyOnColor:
+                        SetKeyColor(key_vk: VK.PauseKey, on: true, value: value);
+                        break;
+                    case ParameterNames.PauseKeyOffColor:
+                        SetKeyColor(key_vk: VK.PauseKey, on: false, value: value);
+                        break;
+                    case ParameterNames.VMuteOnColor:
+                        SetKeyColor(key_vk: VK.VMute, on: true, value: value);
+                        break;
+                    case ParameterNames.VMuteOffColor:
+                        SetKeyColor(key_vk: VK.VMute, on: false, value: value);
+                        break;
+                    case ParameterNames.MPlayPauseOnColor:
+                        SetKeyColor(key_vk: VK.MPlayPause, on: true, value: value);
+                        break;
+                    case ParameterNames.MPlayPauseOffColor:
+                        SetKeyColor(key_vk: VK.MPlayPause, on: false, value: value);
                         break;
                 }
 

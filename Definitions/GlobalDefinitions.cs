@@ -61,7 +61,11 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         NumLock = 0x90,
         CapsLock = 0x14,
-        ScrollLock = 0x91
+        ScrollLock = 0x91,
+        InsKey = 0x2D,
+        PauseKey = 0x13,
+        VMute = 0xAD,
+        MPlayPause = 0xB3
     }
     public enum StateColorApply
     {
@@ -79,7 +83,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public FontWeight PrefixWeight { get; set; } = FontWeights.Bold;
 
         // Default system font so it will automatically use white/black for dark/light theme
-        
+
 
         public DeviceStatusInfo(DeviceStatusInfo.Msg message, int? deviceCount = null, string? suffix = null)
         {
@@ -278,4 +282,3 @@ namespace Dynamic_Lighting_Key_Indicator
     }
 
 } // End of Namespace
-

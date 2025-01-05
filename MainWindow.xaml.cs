@@ -129,7 +129,11 @@ namespace Dynamic_Lighting_Key_Indicator
             MonitoredKey.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
                 new(VK.NumLock,    onColor: currentConfig.GetVKOnColor(VK.NumLock),    offColor: currentConfig.GetVKOffColor(VK.NumLock)),
                 new(VK.CapsLock,   onColor: currentConfig.GetVKOnColor(VK.CapsLock),   offColor: currentConfig.GetVKOffColor(VK.CapsLock)),
-                new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock))
+                new(VK.ScrollLock, onColor: currentConfig.GetVKOnColor(VK.ScrollLock), offColor: currentConfig.GetVKOffColor(VK.ScrollLock)),
+                new(VK.InsKey,   onColor: currentConfig.GetVKOnColor(VK.InsKey),   offColor: currentConfig.GetVKOffColor(VK.InsKey)),
+                new(VK.PauseKey,   onColor: currentConfig.GetVKOnColor(VK.PauseKey),   offColor: currentConfig.GetVKOffColor(VK.PauseKey)),
+                new(VK.VMute,   onColor: currentConfig.GetVKOnColor(VK.VMute),   offColor: currentConfig.GetVKOffColor(VK.VMute)),
+                new(VK.MPlayPause,   onColor: currentConfig.GetVKOnColor(VK.MPlayPause),   offColor: currentConfig.GetVKOffColor(VK.MPlayPause))
             });
             #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
@@ -614,6 +618,14 @@ namespace Dynamic_Lighting_Key_Indicator
             buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.CapsLockOffColor);
             buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.ScrollLockOnColor);
             buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.ScrollLockOffColor);
+            buttonInsKeyOn.Background = new SolidColorBrush(ViewModel.InsKeyOnColor);
+            buttonInsKeyOff.Background = new SolidColorBrush(ViewModel.InsKeyOffColor);
+            buttonPauseKeyOn.Background = new SolidColorBrush(ViewModel.PauseKeyOnColor);
+            buttonPauseKeyOff.Background = new SolidColorBrush(ViewModel.PauseKeyOffColor);
+            buttonVMuteOn.Background = new SolidColorBrush(ViewModel.VMuteOnColor);
+            buttonVMuteOff.Background = new SolidColorBrush(ViewModel.VMuteOffColor);
+            buttonMPlayPauseOn.Background = new SolidColorBrush(ViewModel.MPlayPauseOnColor);
+            buttonMPlayPauseOff.Background = new SolidColorBrush(ViewModel.MPlayPauseOffColor);
             buttonDefaultColor.Background = new SolidColorBrush(ViewModel.DefaultColor);
         }
 
@@ -637,7 +649,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal void ForceUpdateAllButtonGlyphs()
         {
             // Update the sync glpyhs
-            foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
+            foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff, buttonInskeyOn, buttonInskeyOff, buttonPauseKeyOn, buttonPauseKeyOff, buttonVMuteOn, buttonVMuteOff, buttonMPlayPauseOn, buttonMPlayPauseOff })
             {
                 if (button == null)
                     return;
@@ -700,7 +712,11 @@ namespace Dynamic_Lighting_Key_Indicator
             List<MonitoredKey> monitoredKeysList = [
                 new(VK.NumLock,    onColor: ViewModel.NumLockOnColor,    offColor: ViewModel.NumLockOffColor,      onColorTiedToStandard: ViewModel.SyncNumLockOnColor,    offColorTiedToStandard: ViewModel.SyncNumLockOffColor),
                 new(VK.CapsLock,   onColor: ViewModel.CapsLockOnColor,   offColor: ViewModel.CapsLockOffColor,     onColorTiedToStandard: ViewModel.SyncCapsLockOnColor,   offColorTiedToStandard: ViewModel.SyncCapsLockOffColor),
-                new(VK.ScrollLock, onColor: ViewModel.ScrollLockOnColor, offColor: ViewModel.ScrollLockOffColor,   onColorTiedToStandard: ViewModel.SyncScrollLockOnColor, offColorTiedToStandard: ViewModel.SyncScrollLockOffColor)
+                new(VK.ScrollLock, onColor: ViewModel.ScrollLockOnColor, offColor: ViewModel.ScrollLockOffColor,   onColorTiedToStandard: ViewModel.SyncScrollLockOnColor, offColorTiedToStandard: ViewModel.SyncScrollLockOffColor),
+                new(VK.InsKey,   onColor: ViewModel.InsKeyOnColor,   offColor: ViewModel.InsKeyOffColor,     onColorTiedToStandard: ViewModel.SyncInsKeyOnColor,   offColorTiedToStandard: ViewModel.SyncInsKeyOffColor),
+                new(VK.PauseKey,   onColor: ViewModel.PauseKeyOnColor,   offColor: ViewModel.PauseKeyOffColor,     onColorTiedToStandard: ViewModel.SyncPauseKeyOnColor,   offColorTiedToStandard: ViewModel.SyncPauseKeyOffColor),
+                new(VK.VMute,   onColor: ViewModel.VMuteOnColor,   offColor: ViewModel.VMuteOffColor,     onColorTiedToStandard: ViewModel.SyncVMuteOnColor,   offColorTiedToStandard: ViewModel.SyncVMuteOffColor),
+                new(VK.MPlayPause,   onColor: ViewModel.MPlayPauseOnColor,   offColor: ViewModel.MPlayPauseOffColor,     onColorTiedToStandard: ViewModel.SyncMPlayPauseOnColor,   offColorTiedToStandard: ViewModel.SyncMPlayPauseOffColor)
             ];
 
             RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
@@ -761,8 +777,12 @@ namespace Dynamic_Lighting_Key_Indicator
             bool numLockState = KeyStatesHandler.FetchKeyState((int)VK.NumLock);
             bool capsLockState = KeyStatesHandler.FetchKeyState((int)VK.CapsLock);
             bool scrollLockState = KeyStatesHandler.FetchKeyState((int)VK.ScrollLock);
+            bool insKeyState = KeyStatesHandler.FetchKeyState((int)VK.InsKey);
+            bool pauseKeyState = KeyStatesHandler.FetchKeyState((int)VK.PauseKey);
+            bool vMuteState = KeyStatesHandler.FetchKeyState((int)VK.VMute);
+            bool mPlayPauseState = KeyStatesHandler.FetchKeyState((int)VK.MPlayPause);
 
-            ViewModel.UpdateAllKeyStates(numLockState, capsLockState, scrollLockState);
+            ViewModel.UpdateAllKeyStates(numLockState, capsLockState, scrollLockState, insKeyState, pauseKeyState, vMuteState, mPlayPauseState);
         }
 
         public static void OpenUpdatesWebsite()
@@ -955,6 +975,58 @@ namespace Dynamic_Lighting_Key_Indicator
 
                     break;
 
+                case "InsKey":
+                    Color insKeyOnColor = ViewModel.InsKeyOnColor;
+                    Color insKeyOffColor = ViewModel.InsKeyOffColor;
+                    ViewModel.InsKeyOnColor = insKeyOffColor;
+                    ViewModel.InsKeyOffColor = insKeyOnColor;
+
+                    bool syncInsKeyOnColor = ViewModel.SyncInsKeyOnColor;
+                    bool syncInsKeyOffColor = ViewModel.SyncInsKeyOffColor;
+                    ViewModel.SyncInsKeyOnColor = syncInsKeyOffColor;
+                    ViewModel.SyncInsKeyOffColor = syncInsKeyOnColor;
+
+                    break;
+
+                    case "PauseKey":
+                        Color pauseKeyOnColor = ViewModel.PauseKeyOnColor;
+                        Color pauseKeyOffColor = ViewModel.PauseKeyOffColor;
+                        ViewModel.PauseKeyOnColor = pauseKeyOffColor;
+                        ViewModel.PauseKeyOffColor = pauseKeyOnColor;
+
+                        bool syncPauseKeyOnColor = ViewModel.SyncPauseKeyOnColor;
+                        bool syncPauseKeyOffColor = ViewModel.SyncPauseKeyOffColor;
+                        ViewModel.SyncPauseKeyOnColor = syncPauseKeyOffColor;
+                        ViewModel.SyncPauseKeyOffColor = syncPauseKeyOnColor;
+
+                        break;
+
+                    case "VMute":
+                        Color vMuteOnColor = ViewModel.VMuteOnColor;
+                        Color vMuteOffColor = ViewModel.VMuteOffColor;
+                        ViewModel.VMuteOnColor = vMuteOffColor;
+                        ViewModel.VMuteOffColor = vMuteOnColor;
+
+                        bool syncVMuteOnColor = ViewModel.SyncVMuteOnColor;
+                        bool syncVMuteOffColor = ViewModel.SyncVMuteOffColor;
+                        ViewModel.SyncVMuteOnColor = syncVMuteOffColor;
+                        ViewModel.SyncVMuteOffColor = syncVMuteOnColor;
+
+                        break;
+
+                    case "MPlayPause":
+                        Color mPlayPauseOnColor = ViewModel.MPlayPauseOnColor;
+                        Color mPlayPauseOffColor = ViewModel.MPlayPauseOffColor;
+                        ViewModel.MPlayPauseOnColor = mPlayPauseOffColor;
+                        ViewModel.MPlayPauseOffColor = mPlayPauseOnColor;
+
+                        bool syncMPlayPauseOnColor = ViewModel.SyncMPlayPauseOnColor;
+                        bool syncMPlayPauseOffColor = ViewModel.SyncMPlayPauseOffColor;
+                        ViewModel.SyncMPlayPauseOnColor = syncMPlayPauseOffColor;
+                        ViewModel.SyncMPlayPauseOffColor = syncMPlayPauseOnColor;
+
+                        break;
+
                 default:
                     break;
             }
@@ -1141,7 +1213,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 int assumedTextLineHeight = 24;
                 int assumedInfoStackHeight = assumedTextLineHeight * advancedInfoStack.Children.Count;
 
-                // 
+                //
                 Double infoStackHeight;
                 if (advancedInfoStack.DesiredSize.Height != 0)
                     infoStackHeight = advancedInfoStack.DesiredSize.Height;
@@ -1235,7 +1307,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
                 if (colorPropertyName == "DefaultColor")
                 {
-                    List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff];
+                    List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff, buttonInsKeyOn, buttonInsKeyOff, buttonPauseKeyOn, buttonPauseKeyOff, buttonVMuteOn, buttonVMuteOff, buttonMPlayPauseOn, buttonMPlayPauseOff];
 
                     foreach (Button button in buttonsList) // Iterate through the list of tuples for each button
                     {
