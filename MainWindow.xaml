@@ -125,20 +125,21 @@
 
             <!-- Dropdown -->
             <ComboBox x:Name="dropdownDevices" 
-                  Margin="0,0,0,0"
-                  Width="300"
-                  HorizontalAlignment="Center"
-                  PlaceholderText="Select a device"
-                  SelectedIndex="{x:Bind ViewModel.SelectedDeviceIndex, Mode=TwoWay}"
-                  IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}"
-                  ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
+                      Margin="0,0,0,0"
+                      Width="300"
+                      HorizontalAlignment="Center"
+                      PlaceholderText="Select a device"
+                      ItemsSource="{x:Bind ViewModel.AvailableDevices, Mode=OneWay}"
+                      DisplayMemberPath="Name"
+                      IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}"
+                      ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
             />
 
             <!-- Apply Button -->
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"
                     HorizontalAlignment="Center"
                     ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
-                    IsEnabled="{x:Bind ViewModel.EnableApplyButton, Mode=OneWay}">  
+                    IsEnabled="{x:Bind ViewModel.ShouldApplyButtonBeEnabled, Mode=OneWay}">  
                 <StackPanel Orientation="Horizontal">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE8FB;" Margin="0,0,8,0"/>
                     <TextBlock Text="Apply To Device"/>

@@ -62,68 +62,81 @@ namespace Dynamic_Lighting_Key_Indicator
 
             return info;
         }
-
+        
         // -------------------------------------- CUSTOM EVENT HANDLERS --------------------------------------
 
-        // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting
-        // for the specified LampArray.
+
+        // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting for the specified LampArray.
         private void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
+            // args is always null, sender is the LampArray object that changed availability
             Logging.WriteDebug("AvailabilityChanged event fired.");
+
             UpdateStatusMessage();
         }
 
-        private void Watcher_Removed(DeviceWatcher sender, DeviceInformationUpdate args)
+        // The 'Removed' event for the Watcher class.
+        private void OnDeviceRemoved(DeviceWatcher sender, DeviceInformationUpdate args)
         {
-            if (AttachedDevice == null)
-                return;
+            Logging.WriteDebug("Device removal detected: " + args.Id);
 
-            lock (AttachedDevice)
+            if ( AttachedDevice != null )
             {
-                AttachedDevice = null;
+                lock ( AttachedDevice )
+                {
+                    AttachedDevice = null;
+                }
             }
 
             // Update UI on the UI thread
             DispatcherQueue.TryEnqueue(() =>
             {
-                UpdatAvailableLampArrayDisplayList();
+                // Remove the device from the list of available devices if it's there
+                DeviceInformation? deviceToRemove = availableDevices.FirstOrDefault(existingDevice => existingDevice.Id == args.Id);
+                if ( deviceToRemove != null )
+                {
+                    _ = availableDevices.Remove(deviceToRemove);
+                }
             });
         }
 
-        private void Watcher_Added(DeviceWatcher sender, DeviceInformation args)
+        // The 'Added' event for the Watcher class.
+        private void OnDeviceAdded(DeviceWatcher sender, DeviceInformation args)
         {
             string addedArrayID = args.Id;
             string addedArrayName = args.Name;
 
-            if (addedArrayID == null)
+            Logging.WriteDebug("Device added: " + addedArrayID + " - " + addedArrayName);
+
+            if ( addedArrayID == null )
             {
                 return;
             }
 
-            availableDevices.Add(args);
-
-            // Don't update the UI until enumeration is done to avoid interupting the creation of availableDevices
-            if (m_deviceWatcher == null || m_deviceWatcher.Status != DeviceWatcherStatus.EnumerationCompleted)
-            {
-                return;
-            }
-
-            // Update UI on the UI thread. Only update the available devices since we might not attach to it.
             DispatcherQueue.TryEnqueue(() =>
             {
-                UpdatAvailableLampArrayDisplayList();
+                // Add the device to the list of available devices if it's not already there
+                if ( !availableDevices.Any(existingDevice => existingDevice.Id == addedArrayID) )
+                    availableDevices.Add(args);
+
+                // After this check will only occur if enumeration was already finished and now a new device was added later
+                if ( m_deviceWatcher == null || m_deviceWatcher.Status != DeviceWatcherStatus.EnumerationCompleted )
+                {
+                    return;
+                }
+
+                // If we aren't attached to a device, check if we should attach to this one if it's saved
+                if ( AttachedDevice == null && configSavedOnDisk.DeviceId == addedArrayID )
+                {
+                    Logging.WriteDebug("Added device matches the saved device ID. Attempting to attach.");
+                    AttachToSavedDevice();
+                }
             });
         }
 
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
             Logging.WriteDebug("Device enumeration completed.");
-            // Update UI on the UI thread. Only update the available devices since we might not attach to it.
-            DispatcherQueue.TryEnqueue(() =>
-            {
-                UpdatAvailableLampArrayDisplayList();
-            });
-
             DispatcherQueue.TryEnqueue(() => AttachToSavedDevice());
         }
 

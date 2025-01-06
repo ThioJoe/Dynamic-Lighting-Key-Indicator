@@ -4,10 +4,12 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Windows.ApplicationModel;
+using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
 
@@ -53,6 +55,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
+
+            AvailableDevices.CollectionChanged += AvailableDevices_CollectionChanged;
         }
 
         public static void SetMainViewModelInstance(MainViewModel vieModelInstance)
@@ -317,10 +321,24 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 SetProperty(ref _hasAttachedDevices, value);
                 // Notify that EnableApplyButton has also changed when device attachment status changes
-                OnPropertyChanged(nameof(EnableApplyButton));
+                CheckIfApplyButtonShouldBeEnabled();
             }
         }
-        public bool EnableApplyButton
+
+        public void CheckIfApplyButtonShouldBeEnabled()
+        {
+            bool prevStatus = _shouldApplyButtonBeEnabled_Previous;
+            bool newStatus = ShouldApplyButtonBeEnabled;
+
+            if (prevStatus != newStatus)
+            {
+                OnPropertyChanged(nameof(ShouldApplyButtonBeEnabled));
+            }
+        }
+
+        private bool _shouldApplyButtonBeEnabled_Previous = false;
+
+        public bool ShouldApplyButtonBeEnabled
         {
             get
             {
@@ -329,7 +347,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     return false;
 
                 // If the dropdown isn't currently selecting a device, return false
-                if (SelectedDeviceIndex == -1)
+                if (mainWindow.DropdownDevices.SelectedIndex == -1)
                     return false;
 
                 // If there aren't even any attached devices, return true, since we can attach to any device
@@ -339,14 +357,18 @@ namespace Dynamic_Lighting_Key_Indicator
                 bool? attachMatch = mainWindow.AttachedDeviceMatchesDropdownSelection();
 
                 // If there are attached devices, only enable the apply button if the selected device is different from the attached device
+                bool returnValue;
                 if (attachMatch == null)
                 {
-                    return false;
+                    returnValue = false;
                 }
                 else
                 {
-                    return (bool)!attachMatch;
+                    returnValue = (bool)!attachMatch;
                 }
+
+                _shouldApplyButtonBeEnabled_Previous = returnValue;
+                return returnValue;
             }
         }
 
@@ -369,7 +391,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Notify that IsWatcherStopped has also changed
                     OnPropertyChanged(nameof(IsWatcherStopped));
                     OnPropertyChanged(nameof(WatcherRunningVisibilityBool));
-                    OnPropertyChanged(nameof(EnableApplyButton));
+                    CheckIfApplyButtonShouldBeEnabled();
                     OnPropertyChanged(nameof(WatcherButtonEnable_GlyphOpacity));
                     OnPropertyChanged(nameof(WatcherButtonDisable_GlyphOpacity));
                 }
@@ -387,16 +409,15 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private int _selectedDeviceIndex;
-        public int SelectedDeviceIndex
+        public int SelectedDeviceIndex => mainWindow.DropdownDevices.SelectedIndex;
+
+        public ObservableCollection<DeviceInformation> AvailableDevices => mainWindow.availableDevices;
+        // Event handler
+        private void AvailableDevices_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            get => _selectedDeviceIndex;
-            set
-            {
-                _selectedDeviceIndex = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(EnableApplyButton));
-            }
+            OnPropertyChanged(nameof(AvailableDevices));
+            OnPropertyChanged(nameof(HasAttachedDevices));
+            CheckIfApplyButtonShouldBeEnabled();
         }
 
         private bool _startMinimizedToTray;
