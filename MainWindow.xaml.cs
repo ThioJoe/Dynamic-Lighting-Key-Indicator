@@ -315,7 +315,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 DispatcherQueue.TryEnqueue(() =>
                 {
                     ViewModel.AttachedDevicesMessage = message;
-                    ViewModel.HasAttachedDevices = (AttachedDevice != null);
                 });
             }
             UpdateStatusMessage();
@@ -391,6 +390,8 @@ namespace Dynamic_Lighting_Key_Indicator
                     dropdownDevices.SelectedIndex = deviceIndex;
                 });
             }
+
+            ViewModel.CheckIfApplyButtonShouldBeEnabled();
         }
 
         public async Task ShowErrorMessage(string message)

@@ -313,27 +313,9 @@ namespace Dynamic_Lighting_Key_Indicator
         public double WatcherButtonEnable_GlyphOpacity => IsWatcherRunning ? 0.3 : 1.0;
         public double WatcherButtonDisable_GlyphOpacity => IsWatcherRunning ? 1.0 : 0.3;
 
-        private bool _hasAttachedDevices;
-        public bool HasAttachedDevices
-        {
-            get => _hasAttachedDevices;
-            set
-            {
-                SetProperty(ref _hasAttachedDevices, value);
-                // Notify that EnableApplyButton has also changed when device attachment status changes
-                CheckIfApplyButtonShouldBeEnabled();
-            }
-        }
-
         public void CheckIfApplyButtonShouldBeEnabled()
         {
-            bool prevStatus = _shouldApplyButtonBeEnabled_Previous;
-            bool newStatus = ShouldApplyButtonBeEnabled;
-
-            if (prevStatus != newStatus)
-            {
-                OnPropertyChanged(nameof(ShouldApplyButtonBeEnabled));
-            }
+            OnPropertyChanged(nameof(ShouldApplyButtonBeEnabled));
         }
 
         private bool _shouldApplyButtonBeEnabled_Previous = false;
@@ -351,7 +333,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     return false;
 
                 // If there aren't even any attached devices, return true, since we can attach to any device
-                if (!HasAttachedDevices)
+                if (AttachedDevice == null)
                     return true;
 
                 bool? attachMatch = mainWindow.AttachedDeviceMatchesDropdownSelection();
@@ -367,7 +349,6 @@ namespace Dynamic_Lighting_Key_Indicator
                     returnValue = (bool)!attachMatch;
                 }
 
-                _shouldApplyButtonBeEnabled_Previous = returnValue;
                 return returnValue;
             }
         }
@@ -416,7 +397,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private void AvailableDevices_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged(nameof(AvailableDevices));
-            OnPropertyChanged(nameof(HasAttachedDevices));
             CheckIfApplyButtonShouldBeEnabled();
         }
 

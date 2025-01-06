@@ -46,11 +46,14 @@ namespace Dynamic_Lighting_Key_Indicator
             // Set up the AvailabilityChanged event callback
             info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
 
-            // Add to the list (thread-safe)
+            // Add to the list
             AttachedDevice = info;
+            ColorSetter.DefineCurrentDevice(info.lampArray);
 
             // Set user config device ID
             currentConfig.DeviceId = device.Id;
+
+            ViewModel.CheckIfApplyButtonShouldBeEnabled();
 
             // Initialize the keyboard hook and callback to monitor key states
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -99,8 +102,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private void StartWatchingForLampArrays()
         {
             Logging.WriteDebug("Starting to watch for lamp arrays.");
-
-            ViewModel.HasAttachedDevices = false;
 
             //string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
             string lampArraySelector = LampArray.GetDeviceSelector();
@@ -154,7 +155,6 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             ColorSetter.DefineCurrentDevice(null);
-            ViewModel.HasAttachedDevices = false;
             currentConfig.DeviceId = "";
         }
 
