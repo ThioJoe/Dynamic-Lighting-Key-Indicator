@@ -62,7 +62,102 @@ namespace Dynamic_Lighting_Key_Indicator
 
             return info;
         }
-        
+
+        private async void TryAttachToSavedDevice()
+        {
+            Logging.WriteDebug("Attempting to attach to saved device, if any.");
+            // If current device ID is null or empty it probably means the user stopped watching so it reset, so don't try to attach or else it will throw an exception
+            if (configSavedOnDisk.DeviceId == null || configSavedOnDisk.DeviceId == "")
+            {
+                Logging.WriteDebug("Device ID from config file is null or empty, not attempting to attach.");
+                return;
+            }
+
+            Logging.WriteDebug("Found device ID in config file: " + configSavedOnDisk.DeviceId);
+            DeviceInformation? device = availableDevices.FirstOrDefault(d => d.Id == configSavedOnDisk.DeviceId);
+
+            if (device != null)
+            {
+                Logging.WriteDebug("   > Found matching device to the one in the config.");
+                LampArrayInfo? lampArrayInfo = await AttachToDevice_Async(device);
+
+                if (lampArrayInfo != null)
+                {
+                    ApplyLightingToDevice_AndSaveIdToConfig(lampArrayInfo);
+                    UpdateSelectedDeviceDropdownToCurrentDevice();
+                }
+                else
+                {
+                    Logging.WriteDebug("Failed to attach to the device from the config file.");
+                }
+            }
+            else
+            {
+                Logging.WriteDebug("Device ID from config file not found in available devices.");
+            }
+        }
+        private void StartWatchingForLampArrays()
+        {
+            Logging.WriteDebug("Starting to watch for lamp arrays.");
+
+            ViewModel.HasAttachedDevices = false;
+
+            //string combinedSelector = await GetKeyboardLampArrayDeviceSelectorAsync();
+            string lampArraySelector = LampArray.GetDeviceSelector();
+
+            m_deviceWatcher = DeviceInformation.CreateWatcher(lampArraySelector);
+
+            m_deviceWatcher.Added += OnDeviceAdded;
+            m_deviceWatcher.Removed += OnDeviceRemoved;
+            m_deviceWatcher.EnumerationCompleted += OnEnumerationCompleted;
+
+            // Add event handler OnDeviceWatcherStopped to the Stopped event
+            m_deviceWatcher.Stopped += OnDeviceWatcherStopped;
+
+            m_deviceWatcher.Start();
+
+            if (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted)
+            {
+                ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Started.";
+                ViewModel.IsWatcherRunning = true;
+                Logging.WriteDebug("DeviceWatcher started.");
+            }
+            else
+            {
+                ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Not started, something may have gone wrong.";
+                Logging.WriteDebug("DeviceWatcher not started. Something may have gone wrong.");
+            }
+        }
+        private void StopWatchingForLampArrays()
+        {
+            Logging.WriteDebug("Stopping to watch for lamp arrays.");
+
+            if (KeyStatesHandler.rawInputWatcherActive == true)
+            {
+                KeyStatesHandler.CleanupInputWatcher();
+            }
+
+            if (m_deviceWatcher != null && (m_deviceWatcher.Status == DeviceWatcherStatus.Started || m_deviceWatcher.Status == DeviceWatcherStatus.EnumerationCompleted))
+            {
+                m_deviceWatcher.Stop();
+                ViewModel.IsWatcherRunning = false;
+                Logging.WriteDebug("Stopped device watcher.");
+            }
+            else if (m_deviceWatcher == null)
+            {
+                ViewModel.IsWatcherRunning = false;
+                Logging.WriteDebug("Device watcher was already null.");
+            }
+            else
+            {
+                Logging.WriteDebug("Device watcher was not running. The status was: " + m_deviceWatcher.Status);
+            }
+
+            ColorSetter.DefineCurrentDevice(null);
+            ViewModel.HasAttachedDevices = false;
+            currentConfig.DeviceId = "";
+        }
+
         // -------------------------------------- CUSTOM EVENT HANDLERS --------------------------------------
 
 
@@ -129,7 +224,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if ( AttachedDevice == null && configSavedOnDisk.DeviceId == addedArrayID )
                 {
                     Logging.WriteDebug("Added device matches the saved device ID. Attempting to attach.");
-                    AttachToSavedDevice();
+                    TryAttachToSavedDevice();
                 }
             });
         }
@@ -137,7 +232,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
             Logging.WriteDebug("Device enumeration completed.");
-            DispatcherQueue.TryEnqueue(() => AttachToSavedDevice());
+            DispatcherQueue.TryEnqueue(() => TryAttachToSavedDevice());
         }
 
         private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)
