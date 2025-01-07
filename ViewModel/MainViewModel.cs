@@ -12,6 +12,7 @@ using Windows.ApplicationModel;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Lights;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // BEWARE - THIS FILE IS A COMPLETE MESS. Properties and methods aren't really organized. 
 // But it has a bunch of important stuff to connect the GUI to the backend.
@@ -58,6 +59,11 @@ namespace Dynamic_Lighting_Key_Indicator
 
             AvailableDevices.CollectionChanged += AvailableDevices_CollectionChanged;
         }
+        internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig)
+        {
+            StartMinimizedToTray = userConfig.StartMinimizedToTray;
+            NumlockColorsEntireKeypad = userConfig.NumlockColorsEntireKeypad;
+        }
 
         public static void SetMainViewModelInstance(MainViewModel vieModelInstance)
         {
@@ -82,15 +88,6 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             get
             {
-                //return _DebugFileLoggingEnabled;
-                //bool mode = Logging.DebugFileLoggingEnabled;
-                //// If the mode is different from the property, update the property
-                //if (mode != _DebugFileLoggingEnabled)
-                //{
-                //    _DebugFileLoggingEnabled = mode;
-                //    OnPropertyChanged(nameof(DebugFileLoggingEnabled));
-                //}
-                //return mode;
                 return Logging.DebugFileLoggingEnabled;
             }
             set
@@ -116,6 +113,30 @@ namespace Dynamic_Lighting_Key_Indicator
                     currentConfig: MainWindow.CurrentConfig,
                     value: value
                 );
+            }
+        }
+
+        private bool _numlockColorsEntireKeypad;
+        public bool NumlockColorsEntireKeypad
+        {
+            get => _numlockColorsEntireKeypad;
+            set
+            {
+                SetProperty(ref _numlockColorsEntireKeypad, value);
+                ColorSetter.NumLockColorsEntireKeypad = value;
+
+                UserConfig.StandaloneSettings setting = UserConfig.StandaloneSettings.NumlockColorsEntireKeypad;
+                _ = UserConfig.UpdateConfigFile_SpecificSetting_Async(
+                    setting: setting,
+                    configSavedOnDisk: MainWindow.SavedConfig,
+                    currentConfig: MainWindow.CurrentConfig,
+                    value: value
+                );
+
+                if (mainWindow?.AttachedDevice?.lampArray != null)
+                { 
+                    ColorSetter.BuildMonitoredKeyIndicesDict(mainWindow.AttachedDevice.lampArray); 
+                }
             }
         }
 
@@ -940,11 +961,6 @@ namespace Dynamic_Lighting_Key_Indicator
         public string GetSyncGlyph_ByButtonObject(Button button)
         {
             return GetSyncSetting_ByButtonObject(button) ? LinkedGlyph : UnlinkedGlyph;
-        }
-
-        internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig)
-        {
-            StartMinimizedToTray = userConfig.StartMinimizedToTray;
         }
 
         public Color GetColorFromString(string color)

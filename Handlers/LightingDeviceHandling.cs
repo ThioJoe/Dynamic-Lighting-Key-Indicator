@@ -46,7 +46,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Set up the AvailabilityChanged event callback
             info.lampArray.AvailabilityChanged += LampArray_AvailabilityChanged;
 
-            // Add to the list
             AttachedDevice = info;
             ColorSetter.DefineCurrentDevice(info.lampArray);
 
@@ -58,7 +57,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // Initialize the keyboard hook and callback to monitor key states
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             KeyStatesHandler.InitializeRawInput(hwnd);
-
 
             if (info != null)
                 ColorSetter.BuildMonitoredKeyIndicesDict(info.lampArray);

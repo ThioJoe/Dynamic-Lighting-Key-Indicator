@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Windows.Devices.Lights;
@@ -17,8 +18,29 @@ namespace Dynamic_Lighting_Key_Indicator
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
         public static Dictionary<ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
-        public static List<int> NonMonitoredKeyIndices { get; set; } = []; // Maybe make this an array later
+        public static List<int> StandardKeyIndices { get; set; } = []; // Maybe make this an array later
+        public static bool NumLockColorsEntireKeypad { get; set; } = false;
 
+        private static IReadOnlyList<int> _numPadIndicesToChange = [];
+        private static int[] NumPadIndicesToChangeArray = [];
+        private static IReadOnlyList<int> NumPadIndicesToChange_IncludingNumLock { get; set; } = [];
+        private static int[] NumPadIndicesToChangeArray_IncludingNumLock = [];
+
+        public static IReadOnlyList<int> NumPadIndicesToChange
+        {
+            get => _numPadIndicesToChange;
+            private set
+            {
+                _numPadIndicesToChange = value;
+                NumPadIndicesToChangeArray = value.ToArray();
+
+                List<int> _includingNumLock = new List<int>(value);
+                _includingNumLock.Add(MonitoredKeyIndicesDict[VK.NumLock]);
+
+                NumPadIndicesToChangeArray_IncludingNumLock = _includingNumLock.ToArray();
+            }
+        }
+        
 
         // ------------- Define Main Color with wither RGBTuple or Windows.UI.Color -------------
         public static void DefineKeyboardMainColor(RGBTuple color)
@@ -67,10 +89,17 @@ namespace Dynamic_Lighting_Key_Indicator
             else
                 color = RGBTuple_To_ColorObj(key.offColor);
 
-            lampArrayToUse.SetColorsForKey(color, vkCode);
+            if (key.key != VK.NumLock)
+                lampArrayToUse.SetColorsForKey(color, vkCode);
+            else if (NumLockColorsEntireKeypad)
+                //SetEntireNumpadColor_ToKeyboard(lampArrayToUse, color);
+                lampArrayToUse.SetSingleColorForIndices(color, NumPadIndicesToChangeArray_IncludingNumLock);
+            else 
+                lampArrayToUse.SetColorsForKey(color, vkCode);
+
         }
 
-        public static void SetProperColorsEveryKey_ToKeyboard(LampArray? lampArray = null)
+        public static void SetProperColorsAllMonitoredKeys_ToKeyboard(LampArray? lampArray = null)
         {
             Logging.WriteDebug("Updating key colors...");
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
@@ -92,6 +121,15 @@ namespace Dynamic_Lighting_Key_Indicator
                     Color clr = key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor);
                     colors.Add(clr);
 
+                    if (key.key == VK.NumLock && NumLockColorsEntireKeypad)
+                    {
+                        foreach (int numpadIndex in NumPadIndicesToChange)
+                        {
+                            keyIndices.Add(numpadIndex);
+                            colors.Add(clr);
+                        }
+                    }
+
                     if (Logging.DebugFileLoggingEnabled)
                         Logging.WriteDebug($"  > Key {key.key.ToString()} set to color {clr.ToString()} ( A: {clr.A}, R: {clr.R}, G: {clr.G}, B: {clr.B} )");
                 }
@@ -101,7 +139,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     Logging.WriteDebug($"Key '{key.key}' not found in MonitoredKeyIndicesDict.");
                 }
             }
-            foreach (int index in NonMonitoredKeyIndices)
+            foreach (int index in StandardKeyIndices)
             {
                 keyIndices.Add(index);
                 colors.Add(KeyboardMainColor);
@@ -114,28 +152,39 @@ namespace Dynamic_Lighting_Key_Indicator
 
         }
 
-        // For when user is changing the color of a specific key in the UI
+        // For when user is changing the color of a specific key in the UI. Includes option to check the state or not
         public static void SetSpecificKeysColor_ToKeyboard(KeyColorUpdateInfo colorUpdateInfo, LampArray? lampArray = null, bool noStateCheck = false)
         {
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
 
             ToggleAbleKeys key = colorUpdateInfo.key;
-            RGBTuple color = colorUpdateInfo.color;
+            //RGBTuple color = colorUpdateInfo.color;
+            Color color = RGBTuple_To_ColorObj(colorUpdateInfo.color);
             StateColorApply forState = colorUpdateInfo.forState;
 
             if (noStateCheck == true || forState == StateColorApply.Both)
             {
-                lampArrayToUse.SetColorsForKey(RGBTuple_To_ColorObj(color), (VirtualKey)key);
+                if (key == VK.NumLock && NumLockColorsEntireKeypad)
+                    lampArrayToUse.SetSingleColorForIndices(color, NumPadIndicesToChangeArray_IncludingNumLock);
+                else
+                    lampArrayToUse.SetColorsForKey(color, (VirtualKey)key);
             }
             else
             {
                 bool currentKeyState = KeyStatesHandler.FetchKeyState((int)key);
                 // Do nothing if the key's state doesn't match the state to which the color applies
                 if ((forState == StateColorApply.On && currentKeyState == true) || (forState == StateColorApply.Off && currentKeyState == false))
-                    lampArrayToUse.SetColorsForKey(RGBTuple_To_ColorObj(color), (VirtualKey)key);
+                {
+                    if (key == VK.NumLock && NumLockColorsEntireKeypad)
+                        lampArrayToUse.SetSingleColorForIndices(color, NumPadIndicesToChangeArray_IncludingNumLock);
+                    else
+                        lampArrayToUse.SetColorsForKey(color, (VirtualKey)key);
+                }
                 else
+                {
                     return;
+                }
             }
         }
 
@@ -147,32 +196,25 @@ namespace Dynamic_Lighting_Key_Indicator
             Color colorToUse = Color.FromArgb(255, (byte)colorTuple.R, (byte)colorTuple.G, (byte)colorTuple.B);
 
             List<int> keyIndices = [];
-            keyIndices.AddRange(NonMonitoredKeyIndices);
+            keyIndices.AddRange(StandardKeyIndices);
             keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[key]));
 
-            lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
-        }
+            if (additionalKeys.Contains(VK.NumLock))
+                keyIndices.AddRange(NumPadIndicesToChange);
 
-        public static void SetKeysListToColor(LampArray lampArray, List<int> keys, Color color)
-        {
-            lampArray.SetSingleColorForIndices(color, keys.ToArray());
+            lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
         }
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
         {
             MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
-            NonMonitoredKeyIndices = new List<int>();
-
-            // Put this within debug preprocessor directive in case I forget to comment it out
-            //#if DEBUG
-            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
-            //#endif
+            StandardKeyIndices = new List<int>();
 
             // Build the arrays of colors and keys
             for (int i = 0; i < lampArray.LampCount; i++)
             {
                 // Add all indices to the non-monitored list, then we'll remove the monitored ones
-                NonMonitoredKeyIndices.Add(i);
+                StandardKeyIndices.Add(i);
             }
 
             // Get the indices of the monitored keys using lampArray's built in methods, and remove them from the non-monitored list
@@ -188,8 +230,25 @@ namespace Dynamic_Lighting_Key_Indicator
                 foreach (int index in indices)
                 {
                     MonitoredKeyIndicesDict.Add(key.key, index);
-                    NonMonitoredKeyIndices.Remove(index);
+                    StandardKeyIndices.Remove(index);
                 }
+            }
+
+            if (NumLockColorsEntireKeypad) {
+                List<int> newNumpadIndices = new List<int>();
+
+                foreach (VirtualKey vkCode in NumPadKeysList)
+                {
+                    int[] indices = lampArray.GetIndicesForKey(vkCode);
+
+                    foreach (int index in indices)
+                    {
+                        newNumpadIndices.Add(index);
+                        StandardKeyIndices.Remove(index);
+                    }
+                }
+
+                NumPadIndicesToChange = newNumpadIndices; // Set it all at once instead of adding one by one
             }
         }
 
@@ -224,5 +283,21 @@ namespace Dynamic_Lighting_Key_Indicator
             return monitoredIndices;
 
         }
+
+        // List of VK Codes for keys affected by Num Lock on the keypad
+        public static readonly VirtualKey[] NumPadKeysList =
+        [
+            VirtualKey.NumberPad0,
+            VirtualKey.NumberPad1,
+            VirtualKey.NumberPad2,
+            VirtualKey.NumberPad3,
+            VirtualKey.NumberPad4,
+            VirtualKey.NumberPad5,
+            VirtualKey.NumberPad6,
+            VirtualKey.NumberPad7,
+            VirtualKey.NumberPad8,
+            VirtualKey.NumberPad9,
+            VirtualKey.Decimal, // Numpad Period / Dot
+        ];
     }
 }

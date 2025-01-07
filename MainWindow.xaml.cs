@@ -466,7 +466,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Logging.WriteDebug("Setting colors on device...");
             ColorSetter.DefineCurrentDevice(lampArray);
             ColorSetter.SetGlobalBrightness(currentConfig.Brightness);
-            ColorSetter.SetProperColorsEveryKey_ToKeyboard(lampArray);
+            ColorSetter.SetProperColorsAllMonitoredKeys_ToKeyboard(lampArray);
         }
 
         // Forces the color buttons to update their backgrounds to reflect the current color settings. Normally they update by event, but this is needed for the initial load
@@ -577,7 +577,7 @@ namespace Dynamic_Lighting_Key_Indicator
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
             {
-                ColorSetter.SetProperColorsEveryKey_ToKeyboard(ColorSetter.CurrentDevice);
+                ColorSetter.SetProperColorsAllMonitoredKeys_ToKeyboard(ColorSetter.CurrentDevice);
                 currentConfig.DeviceId = ColorSetter.CurrentDevice.DeviceId;
             }
 
@@ -929,30 +929,44 @@ namespace Dynamic_Lighting_Key_Indicator
             VirtualKey[] keys = [VirtualKey.NumberKeyLock];
 
             LampArray lampArray = AttachedDevice.lampArray;
-            if (testState)
-            {
-                //AttachedDevice?.lampArray?.SetColor(Colors.Green);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Green);
-                //lampArray.SetColorsForKey(Colors.Green, Windows.System.VirtualKey.NumberKeyLock);
-                //lampArray.SetColorForIndex(50, Colors.Green);
-                //lampArray.SetColorsForKeys(colors1, keys);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Green); // Works
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White); // No Work
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Green);
-                Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White);
-            }
-            else
-            {
-                //AttachedDevice?.lampArray?.SetColor(Colors.Yellow);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Yellow);
-                //lampArray.SetColorsForKey(Colors.Yellow, Windows.System.VirtualKey.NumberKeyLock);
-                //lampArray.SetColorForIndex(50, Colors.Yellow);
-                //lampArray.SetColorsForKeys(colors2, keys);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Yellow); // Works
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Yellow, Colors.White); // No Work
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Yellow);
-                Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Red, Colors.White);
-            }
+
+            //int[] decimalKeyIndex = lampArray.GetIndicesForKey(VirtualKey.Decimal);
+
+            Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
+
+            var index = lampArray.GetIndicesForKey(VirtualKey.Delete);
+
+            lampArray.SetColorsForKey(Colors.Green, VirtualKey.RightMenu);
+
+            //if (testState)
+            //    lampArray.SetColorsForKey(Colors.Green, VirtualKey.Decimal);
+            //else
+            //    lampArray.SetColorsForKey(Colors.Yellow, VirtualKey.Decimal);
+
+            //if (testState)
+            //{
+            //    //AttachedDevice?.lampArray?.SetColor(Colors.Green);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Green);
+            //    //lampArray.SetColorsForKey(Colors.Green, Windows.System.VirtualKey.NumberKeyLock);
+            //    //lampArray.SetColorForIndex(50, Colors.Green);
+            //    //lampArray.SetColorsForKeys(colors1, keys);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Green); // Works
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White); // No Work
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Green);
+            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White);
+            //}
+            //else
+            //{
+            //    //AttachedDevice?.lampArray?.SetColor(Colors.Yellow);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Yellow);
+            //    //lampArray.SetColorsForKey(Colors.Yellow, Windows.System.VirtualKey.NumberKeyLock);
+            //    //lampArray.SetColorForIndex(50, Colors.Yellow);
+            //    //lampArray.SetColorsForKeys(colors2, keys);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Yellow); // Works
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Yellow, Colors.White); // No Work
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Yellow);
+            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Red, Colors.White);
+            //}
 
             testState = !testState;
 

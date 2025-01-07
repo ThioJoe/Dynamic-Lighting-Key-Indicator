@@ -27,6 +27,7 @@ using Windows.UI.Text;
 using System.Collections.Generic;
 using Windows.System;
 using System.Linq;
+using Windows.Devices.Lights;
 // -------------------------------
 
 namespace Dynamic_Lighting_Key_Indicator

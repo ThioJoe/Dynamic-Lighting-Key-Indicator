@@ -24,6 +24,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool StartMinimizedToTray { get; set; } = false;
         [JsonInclude]
         public bool DebugLoggingEnabled { get; set; } = false;
+        [JsonInclude]
+        public bool NumlockColorsEntireKeypad { get; set; } = false;
 
         public readonly static int DefaultBrightness = 100;
         public readonly static RGBTuple DefaultStandardKeyColor = (R: 0, G: 0, B: 255);
@@ -119,6 +121,14 @@ namespace Dynamic_Lighting_Key_Indicator
                     // Apply new value
                     configSavedOnDisk.DebugLoggingEnabled = (bool)value;
                     currentConfig.DebugLoggingEnabled = (bool)value;
+                    break;
+                case StandaloneSettings.NumlockColorsEntireKeypad:
+                    // Check if any change
+                    if (configSavedOnDisk.NumlockColorsEntireKeypad != (bool)value)
+                        DiskSettingWasDifferent = true;
+                    // Apply new value
+                    configSavedOnDisk.NumlockColorsEntireKeypad = (bool)value;
+                    currentConfig.NumlockColorsEntireKeypad = (bool)value;
                     break;
 
                 default:
@@ -264,7 +274,8 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             DeviceId,
             StartMinimizedToTray,
-            DebugLoggingEnabled
+            DebugLoggingEnabled,
+            NumlockColorsEntireKeypad
         }
 
         private static (string, string) GetStandaloneSettingStringAndValue(StandaloneSettings setting, object value)
@@ -276,6 +287,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     StandaloneSettings.DeviceId => "DeviceId",
                     StandaloneSettings.StartMinimizedToTray => "StartMinimizedToTray",
                     StandaloneSettings.DebugLoggingEnabled => "DebugLoggingEnabled",
+                    StandaloneSettings.NumlockColorsEntireKeypad => "NumlockColorsEntireKeypad",
                     _ => "Unknown"
                 };
 

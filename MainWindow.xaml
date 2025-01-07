@@ -376,6 +376,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <!-- Start with Windows Label and Toggle -->
@@ -402,15 +403,29 @@
                   HorizontalAlignment="Center"
                   MinWidth="0" 
                   Margin="30,0,0,0"/>
+            
+            <!-- Toggle to set entire keypad color for num lock -->
+            <TextBlock Grid.Row="0" Grid.Column="2" 
+               Text="Color Entire Keypad" 
+               HorizontalAlignment="Center"
+               Margin="30,0,0,0"
+            />
+            <ToggleSwitch x:Name="toggleNumLockEntireKeypad"
+                  Grid.Row="1" Grid.Column="2"
+                  IsOn="{x:Bind ViewModel.NumlockColorsEntireKeypad, Mode=TwoWay}"
+                  HorizontalAlignment="Center"
+                  MinWidth="0" 
+                  Margin="30,0,0,0"
+            />
 
             <!-- Advanced Info Mode Toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="2" 
+            <TextBlock Grid.Row="0" Grid.Column="3" 
                Text="Advanced Info" 
                HorizontalAlignment="Center"
                Margin="30,0,0,0"
             />
             <ToggleSwitch x:Name="AdvancedInfoToggle" 
-                Grid.Row="1" Grid.Column="2"
+                Grid.Row="1" Grid.Column="3"
                 IsOn="{x:Bind ViewModel.ShowAdvancedInfo, Mode=TwoWay}"
                 Toggled="AutoSizeWindow_OnAdvancedToggle"
                 HorizontalAlignment="Center"
@@ -419,14 +434,14 @@
             />
 
             <!-- Debug logging toggle -->
-            <TextBlock Grid.Row="0" Grid.Column="3" 
+            <TextBlock Grid.Row="0" Grid.Column="4" 
                Text="Debug Logging" 
                HorizontalAlignment="Center"
                Margin="30,0,0,0"
                ToolTipService.ToolTip="Creates debug log on the desktop."
             />
             <ToggleSwitch x:Name="toggleDebugLogging"
-                  Grid.Row="1" Grid.Column="3"
+                  Grid.Row="1" Grid.Column="4"
                   IsOn="{x:Bind ViewModel.DebugFileLoggingEnabled, Mode=TwoWay}"
                   HorizontalAlignment="Center"
                   MinWidth="0" 
