@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -143,6 +144,19 @@ internal class Tests
             }
         }
 
+        List<(int, VirtualKey)> indexToVKTupleList = [];
+        foreach (var (vk, vkInt) in VKCodesTupleList)
+        {
+            int[] indices = lampArray.GetIndicesForKey(vk);
+            foreach (int index in indices)
+            {
+                indexToVKTupleList.Add((index, vk));
+            }
+        }
+
+        // Sort the list of tuples by index
+        indexToVKTupleList.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+
         List<LampInfo> allLampInfo = [];
         for (int i = 0; i < lampArray.LampCount; i++)
         {
@@ -240,8 +254,41 @@ internal class Tests
         lampArray.SetColorsForKeys(colors, VKList.ToArray());
     }
 
-    public static void TestBlah(LampArray lampArray)
+    public static void SetOneIndexOneColorOthersAnotherColor(LampArray lampArray, int keyIndex, Color chosenKeyColor, Color otherColor)
     {
-        //lampArray.
+        List<int> allIndices = [];
+        for (int i = 0; i < lampArray.LampCount; i++)
+        {
+            allIndices.Add(i);
+        }
+        Color[] colors = new Color[lampArray.LampCount];
+        for (int i = 0; i < lampArray.LampCount; i++)
+        {
+            if (i == keyIndex)
+                colors[i] = chosenKeyColor;
+            else
+                colors[i] = otherColor;
+        }
+        lampArray.SetColorsForIndices(colors, allIndices.ToArray());
+    }
+
+    public static void LoopThroughAllKeyIndexes(LampArray lampArray, Color color1, Color color2)
+    {
+        for (int i = 0; i < lampArray.LampCount; i++)
+        {
+            Debug.WriteLine("Setting index: " + i);
+            SetOneIndexOneColorOthersAnotherColor(lampArray, i, color1, color2);
+            System.Threading.Thread.Sleep(500);
+        }
+    }
+
+    public static void LoopThroughRangeOfIndexes(LampArray lampArray, int startIndex, int endIndex, Color color1, Color color2)
+    {
+        for (int i = startIndex; i <= endIndex; i++)
+        {
+            Debug.WriteLine("Setting index: " + i);
+            SetOneIndexOneColorOthersAnotherColor(lampArray, i, color1, color2);
+            System.Threading.Thread.Sleep(1000);
+        }
     }
 }

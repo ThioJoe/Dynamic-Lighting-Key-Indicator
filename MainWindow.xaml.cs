@@ -929,6 +929,9 @@ namespace Dynamic_Lighting_Key_Indicator
             VirtualKey[] keys = [VirtualKey.NumberKeyLock];
 
             LampArray lampArray = AttachedDevice.lampArray;
+
+            Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
+
             if (testState)
             {
                 //AttachedDevice?.lampArray?.SetColor(Colors.Green);
