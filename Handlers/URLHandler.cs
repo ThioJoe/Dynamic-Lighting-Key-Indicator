@@ -7,35 +7,17 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     internal static class URLHandler
     {
-        private const string PROTOCOL_NAME = "key-lighting-indicator";  // Your protocol name (e.g., dlki://)
+        private const string PROTOCOL_NAME = "key-lighting-indicator";  // Protocol name (e.g., key-lighting-indicator://)
         private static MainWindow? _mainWindow;
         private static UserConfig? _currentConfig;
 
         public static void Initialize()
         {
-            // Register for protocol activation (existing code)
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => Cleanup();
-            RegisterForProtocolActivation();
-        }
-
-        private static void RegisterForProtocolActivation()
-        {
-            try
+            // Handles the main instance activation. In the event that it is a protocol activation it will apply the settings.
+            AppActivationArguments? args = AppInstance.GetCurrent().GetActivatedEventArgs();
+            if (args != null)
             {
-                Logging.WriteDebug("Registering protocol activation.");
-
-                // Get the current activation arguments
-                var args = AppInstance.GetCurrent().GetActivatedEventArgs();
-                if (args != null)
-                {
-                    // Handle the protocol activation
-                    HandleActivation(args);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle any initialization errors
-                Logging.WriteDebug($"Error in protocol registration: {ex.Message}");
+                HandleActivation(args);
             }
         }
 
@@ -129,9 +111,6 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-
-
-        // Example command handlers
         private static void HandleSetCommand(System.Collections.Specialized.NameValueCollection queryParams)
         {
             if (_mainWindow == null)
@@ -306,12 +285,6 @@ namespace Dynamic_Lighting_Key_Indicator
             // If fail to parse, return null
             return null;
         }
-
-        private static void Cleanup()
-        {
-            // Perform any necessary cleanup
-        }
-
     }
 
 

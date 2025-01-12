@@ -34,24 +34,39 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 WinRT.ComWrappersSupport.InitializeComWrappers();
 
-                var currentInstance = AppInstance.GetCurrent();
-                var activatedEventArgs = currentInstance.GetActivatedEventArgs();
-                var mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
+                AppInstance currentInstance = AppInstance.GetCurrent();
+                AppActivationArguments? activatedEventArgs = currentInstance.GetActivatedEventArgs();
+                AppInstance mainInstance = AppInstance.FindOrRegisterForKey("Dynamic_Lighting_Key_Indicator");
 
                 // If this isn't the main instance and it's a protocol activation, redirect it to the main instance.
                 // It will be captured by the MainInstance_Activated handler we created in MainWindow.xaml.cs attached to the main instance.
-                if (!mainInstance.IsCurrent && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
+                if (!mainInstance.IsCurrent)
                 {
-                    try
+                    // Ensure the protocol activation data is present
+                    if (
+                        activatedEventArgs != null
+                        && activatedEventArgs?.Kind == ExtendedActivationKind.Protocol
+                        && activatedEventArgs.Data is IProtocolActivatedEventArgs protocolArgs 
+                        && protocolArgs.Uri != null
+                    )
                     {
-                        // Redirect activation (for window focus)
-                        Task.Run(() => mainInstance.RedirectActivationToAsync(activatedEventArgs)).Wait();
-                        return 0;
+                        try
+                        {
+                            // Redirect activation (for window focus)
+                            Windows.Foundation.IAsyncAction redirectTask = mainInstance.RedirectActivationToAsync(activatedEventArgs);
+                            redirectTask.AsTask().Wait(TimeSpan.FromSeconds(7)); // Timeout after 7 seconds (Arbitrarily chosen)
+                            return 0;
+                        }
+                        catch (Exception ex)
+                        {
+                            Logging.WriteCrashLog(exception: ex);
+                            throw; // Re-throw to be caught by outer handler
+                        }
                     }
-                    catch (Exception ex)
+                    else // If it's not a protocol activation, or they aren't valid, just exit because we only want to allow one instance.
                     {
-                        Logging.WriteCrashLog(exception: ex);
-                        throw; // Re-throw to be caught by outer handler
+                        Logging.WriteDebug("Non-protocol or invalid protocol activation detected. Exiting.");
+                        return 0;
                     }
                 }
 
@@ -60,20 +75,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     try
                     {
-                        var context = new DispatcherQueueSynchronizationContext(
-                            DispatcherQueue.GetForCurrentThread());
+                        DispatcherQueueSynchronizationContext context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
                         SynchronizationContext.SetSynchronizationContext(context);
-                        var app = new App();
-
-                        // Handle direct protocol activation if present
-                        if (activatedEventArgs?.Kind == ExtendedActivationKind.Protocol)
-                        {
-                            var protocolArgs = activatedEventArgs.Data as IProtocolActivatedEventArgs;
-                            if (protocolArgs?.Uri != null)
-                            {
-                                URLHandler.ProcessUri(protocolArgs.Uri);
-                            }
-                        }
+                        App app = new App();
                     }
                     catch (Exception ex)
                     {

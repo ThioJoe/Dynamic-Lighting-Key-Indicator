@@ -671,29 +671,31 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // This will handle the redirected activation from the protocol (URL) activation of further instances
-        private void MainInstance_Activated(object? sender, AppActivationArguments args)
+        private void MainInstance_Activated(object? sender, AppActivationArguments? args)
         {
             // Capture the relevant data immediately
-            var isProtocol = args.Kind == ExtendedActivationKind.Protocol;
+            bool isProtocol = args?.Kind == ExtendedActivationKind.Protocol;
             Uri? protocolUri = null;
 
             if (isProtocol)
             {
-                var protocolArgs = args.Data as IProtocolActivatedEventArgs;
+                IProtocolActivatedEventArgs? protocolArgs = args?.Data as IProtocolActivatedEventArgs;
+
                 if (protocolArgs?.Uri != null)
                 {
                     protocolUri = protocolArgs.Uri;
+
+                    // Now use the dispatcher with our captured data
+                    DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
+                    {
+                        // Final null check just in case of a race condition or something changing it
+                        if (protocolUri != null)
+                        {
+                            URLHandler.ProcessUri(protocolUri);
+                        }
+                    });
                 }
             }
-
-            // Now use the dispatcher with our captured data
-            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Normal, () =>
-            {
-                if (isProtocol && protocolUri != null)
-                {
-                    URLHandler.ProcessUri(protocolUri);
-                }
-            });
         }
 
         public void OnAppClose(object sender, WindowEventArgs args)
