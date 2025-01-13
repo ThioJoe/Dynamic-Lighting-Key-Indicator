@@ -41,7 +41,9 @@
                 <Setter Property="Glyph" Value="&#xF1CB;"/>
                 <Setter Property="FontSize" Value="14" />
             </Style>
-            
+
+            <converters:DllPathToImageConverter x:Key="DllPathToImageConverter" />
+
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -124,16 +126,25 @@
         <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,20,0,0" HorizontalAlignment="Center">
 
             <!-- Dropdown -->
-            <ComboBox x:Name="dropdownDevices" 
-                      Margin="0,0,0,0"
-                      Width="300"
-                      HorizontalAlignment="Center"
-                      PlaceholderText="Select a device"
-                      ItemsSource="{x:Bind ViewModel.AvailableDevices, Mode=OneWay}"
-                      DisplayMemberPath="Name"
-                      IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}"
-                      ignore:Visibility="{x:Bind ViewModel.WatcherRunningVisibilityBool, Mode=OneWay}"
-            />
+            <ComboBox x:Name="dropdownDevices"
+              Width="300"
+              HorizontalAlignment="Center"
+              PlaceholderText="Select a device"
+              ItemsSource="{x:Bind ViewModel.AvailableDevices, Mode=OneWay}"
+              IsEnabled="{x:Bind ViewModel.IsWatcherRunning, Mode=OneWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Image
+                               Width="16" 
+                               Height="16" 
+                               Margin="0,0,8,0"
+                               Source="{Binding Properties, Converter={StaticResource DllPathToImageConverter}}" />
+                            <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
 
             <!-- Apply Button -->
             <Button x:Name="buttonApply" Click="ButtonApply_Click" Margin="10,0,0,0"

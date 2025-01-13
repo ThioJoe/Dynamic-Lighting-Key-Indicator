@@ -5,13 +5,14 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Hosting;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -646,7 +647,58 @@ namespace Dynamic_Lighting_Key_Indicator
                 Logging.WriteDebug("Failed to open the updates website: " + e.Message);
             }
         }
+        public static BitmapImage LoadSystemDllIcon(string rawResourcePathAndID)
+        {
+            // The resource path will look like: C:\Windows\System32\DDORes.dll,-3001
 
+            BitmapImage bitmapImage = new BitmapImage();
+
+            // Split on the last comma to separate the path from the ID
+            string[] pathParts = rawResourcePathAndID.Split(',');
+            string resourcePath = "";
+
+            // Get the last part, parse and ensure it's a valid number within expected range (0-65535, though may be negative)
+            string idString = pathParts.Last();
+            int id;
+
+            bool parseSuccess = int.TryParse(idString, out id);
+            if (parseSuccess)
+            {
+                // Join the path parts back together, excluding the last part
+                resourcePath = string.Join("", pathParts.Take(pathParts.Length - 1));
+            }
+            else
+            {
+                return bitmapImage; // Return an empty image
+            }
+
+            System.Drawing.Icon? icon;
+            try
+            {
+                icon = System.Drawing.Icon.ExtractIcon(filePath: resourcePath, id: id, smallIcon: false);
+                if (icon == null)
+                {
+                    return bitmapImage; // Return an empty image
+                }
+
+                // Convert Icon to BitmapImage
+                using (var bitmap = icon.ToBitmap())
+                using (var memory = new MemoryStream())
+                {
+                    bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                    memory.Position = 0;
+                    bitmapImage.SetSource(memory.AsRandomAccessStream());
+
+                    return bitmapImage;
+                }
+            }
+            catch (Exception e)
+            {
+                Logging.WriteDebug($"Failed to load icon: {rawResourcePathAndID}. Error: {e.Message}");
+                return bitmapImage; // Return an empty image
+            }
+
+        }
 
         // --------------------------------------------------- CLASSES AND ENUMS ---------------------------------------------------
         internal class LampArrayInfo(string id, string displayName, LampArray? lampArray)
