@@ -376,22 +376,17 @@ namespace Dynamic_Lighting_Key_Indicator
             // Get the index of the device that matches the current device ID
             int deviceIndex = availableDevices.ToList().FindIndex(device => device.Id == currentConfig.DeviceId);
 
-            if (deviceIndex == -1 || deviceIndex > availableDevices.Count)
+            if (deviceIndex > availableDevices.Count)
             {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    dropdownDevices.SelectedIndex = -1;
-                });
-            }
-            else
-            {
-                DispatcherQueue.TryEnqueue(() =>
-                {
-                    dropdownDevices.SelectedIndex = deviceIndex;
-                });
+                Logging.WriteDebug("Device index was greater than the number of available devices. Setting to -1 (no selection).");
+                deviceIndex = -1;
             }
 
-            ViewModel.CheckIfApplyButtonShouldBeEnabled();
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                dropdownDevices.SelectedIndex = deviceIndex;
+                ViewModel.CheckIfApplyButtonShouldBeEnabled(); // Putting this within the dispatcher to ensure it runs after the dropdown selection is set
+            });
         }
 
         public async Task ShowErrorMessage(string message)
