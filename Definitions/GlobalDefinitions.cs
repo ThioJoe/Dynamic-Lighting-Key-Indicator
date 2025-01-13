@@ -135,6 +135,12 @@ namespace Dynamic_Lighting_Key_Indicator
                     MsgBody = StatusMsgBody.NotKeyboard;
                     break;
 
+                case Msg.AttachedNotConnected:
+                    MsgColor = new SolidColorBrush((Color)Colors.Orange);
+                    MsgPrefix = StatusMsgPrefix.Warning;
+                    MsgBody = StatusMsgBody.AttachedNotConnected;
+                    break;
+
                 default:
                     MsgColor = DefaultFontColor;
                     MsgPrefix = StatusMsgPrefix.None;
@@ -145,19 +151,20 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public enum Msg
         {
-            NoneFound, Waiting, Available, NotAvailable, Good, Empty, ErrorInitializing, NotKeyboard
+            NoneFound, Waiting, Available, NotAvailable, Good, Empty, ErrorInitializing, NotKeyboard, AttachedNotConnected
         }
 
         public struct StatusMsgBody
         {
             internal const string NoneFound = "No elegible lighting devices found";
-            internal const string Waiting = "Waiting - Click Enable to list available devices.";
+            internal const string Waiting = "Waiting - Click Enable to list available devices, then select one.";
             internal const string Available = $"Available Devices: "; // Append device names to this string
             internal const string NotAvailable = "Device attached but not controllable. See instructions below for how to enable background control.";
             internal const string Good = "Good";
             internal const string Empty = "";
             internal const string ErrorInitializing = "Error initializing LampArray: ";
             internal const string NotKeyboard = "Device is attached, but it doesn't seem to be a keyboard. This might not work.";
+            internal const string AttachedNotConnected = "Saved device seems to have been disconnected. Try reconnecting.";
         }
 
         public struct StatusMsgPrefix

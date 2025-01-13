@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
@@ -12,9 +13,16 @@ namespace Dynamic_Lighting_Key_Indicator
 {
     public sealed partial class MainWindow : Window
     {
+        private bool deviceWasConnected = false; // To track whether we should go through re-attach process when availability changes
+
+        private readonly Lock _devicelock = new();
+
         private async Task<LampArrayInfo?> AttachToDevice_Async(DeviceInformation device)
         {
             Logging.WriteDebug("Attempting to attach to device: " + device.Id);
+
+            // Clear anything that depends on the previous device
+            ColorSetter.DefineCurrentDevice(null);
 
             LampArray? lampArray = null;
             try
@@ -41,6 +49,18 @@ namespace Dynamic_Lighting_Key_Indicator
                 return null;
             }
 
+            // Usually the device is not available to attach if not connected. But there is a delay between disconnecting and when Windows realizes it's disconnected.
+            // Therefore it's possible to attach to a device that is not connected.
+            if (lampArray.IsConnected == true)
+            {
+                deviceWasConnected = true;
+            }
+            // It should probably not even get to this point if it's not connected, but just in case of odd timing, ensure it matches the actual state
+            else if (lampArray.IsConnected == false)
+            {
+                deviceWasConnected = false;
+            }
+
             Logging.WriteDebug("   > Successfully attached to device");
 
             // Set up the AvailabilityChanged event callback
@@ -59,14 +79,10 @@ namespace Dynamic_Lighting_Key_Indicator
             IntPtr hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             KeyStatesHandler.InitializeRawInput(hwnd);
 
-
-            if (info != null)
-                ColorSetter.BuildMonitoredKeyIndicesDict(info.lampArray);
-
             return info;
         }
 
-        private async void TryAttachToSavedDevice()
+        private async void TryAttachToSavedDevice_Async()
         {
             Logging.WriteDebug("Attempting to attach to saved device, if any.");
             // If current device ID is null or empty it probably means the user stopped watching so it reset, so don't try to attach or else it will throw an exception
@@ -161,11 +177,24 @@ namespace Dynamic_Lighting_Key_Indicator
         // -------------------------------------- CUSTOM EVENT HANDLERS --------------------------------------
 
 
-        // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting for the specified LampArray.
+        // The AvailabilityChanged event will fire when this calling process gains or loses control of RGB lighting for the attached
+        // Only applies to the attached device. Will fire in addition to OnDeviceRemoved and OnDeviceAdded
         private void LampArray_AvailabilityChanged(LampArray sender, object args)
         {
             // args is always null, sender is the LampArray object that changed availability
             Logging.WriteDebug("AvailabilityChanged event fired.");
+
+            if (sender.IsConnected == false)
+            {
+                Logging.WriteDebug("Device is no longer connected.");
+                deviceWasConnected = false;
+            }
+            // If the device was not connected and now it is, we need to re-do the attaching process otherwise it doesn't behave properly
+            else if (deviceWasConnected == false && sender.IsConnected == true)
+            {
+                TryAttachToSavedDevice_Async();
+                // Attaching will update deviceWasConnected so we don't need to change that here
+            }
 
             UpdateStatusMessage();
         }
@@ -175,12 +204,13 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             Logging.WriteDebug("Device removal detected: " + args.Id);
 
-            if ( AttachedDevice != null )
+            if (AttachedDevice != null && args.Id == AttachedDevice.id)
             {
-                lock ( AttachedDevice )
+                lock (_devicelock)
                 {
                     AttachedDevice = null;
                 }
+                ColorSetter.DefineCurrentDevice(null);
             }
 
             // Update UI on the UI thread
@@ -224,7 +254,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 if ( AttachedDevice == null && configSavedOnDisk.DeviceId == addedArrayID )
                 {
                     Logging.WriteDebug("Added device matches the saved device ID. Attempting to attach.");
-                    TryAttachToSavedDevice();
+                    TryAttachToSavedDevice_Async();
                 }
             });
         }
@@ -232,13 +262,20 @@ namespace Dynamic_Lighting_Key_Indicator
         private void OnEnumerationCompleted(DeviceWatcher sender, object args)
         {
             Logging.WriteDebug("Device enumeration completed.");
-            DispatcherQueue.TryEnqueue(() => TryAttachToSavedDevice());
+            DispatcherQueue.TryEnqueue(() => TryAttachToSavedDevice_Async());
         }
 
         private void OnDeviceWatcherStopped(DeviceWatcher sender, object args)
         {
             Console.WriteLine("DeviceWatcher stopped.");
             ViewModel.DeviceWatcherStatusMessage = "DeviceWatcher Status: Stopped.";
+
+            lock (_devicelock)
+            {
+                AttachedDevice = null;
+            }
+            ColorSetter.DefineCurrentDevice(null);
+            deviceWasConnected = false;
 
             if (KeyStatesHandler.rawInputWatcherActive == true)
             {

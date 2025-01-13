@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Windows.Devices.Lights;
 using Windows.System;
 using static Dynamic_Lighting_Key_Indicator.MainWindow;
@@ -19,6 +20,8 @@ namespace Dynamic_Lighting_Key_Indicator
         public static Dictionary<ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
         public static List<int> NonMonitoredKeyIndices { get; set; } = []; // Maybe make this an array later
 
+        private static readonly System.Threading.Lock _lock = new();
+
 
         // ------------- Define Main Color with wither RGBTuple or Windows.UI.Color -------------
         public static void DefineKeyboardMainColor(RGBTuple color)
@@ -34,6 +37,16 @@ namespace Dynamic_Lighting_Key_Indicator
         public static void DefineCurrentDevice(LampArray? device)
         {
             _currentDevice = device;
+
+            if (device == null) // Reset the dictionaries if device is null
+            {
+                MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
+                NonMonitoredKeyIndices = new List<int>();
+            }
+            else
+            {
+                BuildMonitoredKeyIndicesDict(device);
+            }
         }
 
         public static LampArray? DetermineLampArray(LampArray? lampArray)
@@ -83,35 +96,37 @@ namespace Dynamic_Lighting_Key_Indicator
             List<Color> colors = [];
             List<int> keyIndices = [];
 
-            // Add non-monitored keys and applicable monitored keys to the list of indices
-            foreach (var key in KeyStatesHandler.monitoredKeys)
+            lock (_lock)
             {
-                if ( MonitoredKeyIndicesDict.TryGetValue(key.key, out int index) )
+                // Add non-monitored keys and applicable monitored keys to the list of indices
+                foreach (var key in KeyStatesHandler.monitoredKeys)
+                {
+                    if ( MonitoredKeyIndicesDict.TryGetValue(key.key, out int index) )
+                    {
+                        keyIndices.Add(index);
+                        Color clr = key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor);
+                        colors.Add(clr);
+
+                        if (Logging.DebugFileLoggingEnabled)
+                            Logging.WriteDebug($"  > Key {key.key.ToString()} set to color {clr.ToString()} ( A: {clr.A}, R: {clr.R}, G: {clr.G}, B: {clr.B} )");
+                    }
+                    else
+                    {
+                        // Handle the case where the key is not found
+                        Logging.WriteDebug($"Key '{key.key}' not found in MonitoredKeyIndicesDict.");
+                    }
+                }
+                foreach (int index in NonMonitoredKeyIndices)
                 {
                     keyIndices.Add(index);
-                    Color clr = key.IsOn() ? RGBTuple_To_ColorObj(key.onColor) : RGBTuple_To_ColorObj(key.offColor);
-                    colors.Add(clr);
-
-                    if (Logging.DebugFileLoggingEnabled)
-                        Logging.WriteDebug($"  > Key {key.key.ToString()} set to color {clr.ToString()} ( A: {clr.A}, R: {clr.R}, G: {clr.G}, B: {clr.B} )");
+                    colors.Add(KeyboardMainColor);
                 }
-                else
-                {
-                    // Handle the case where the key is not found
-                    Logging.WriteDebug($"Key '{key.key}' not found in MonitoredKeyIndicesDict.");
-                }
-            }
-            foreach (int index in NonMonitoredKeyIndices)
-            {
-                keyIndices.Add(index);
-                colors.Add(KeyboardMainColor);
             }
 
             int[] keyIndicesArray = keyIndices.ToArray();
             Color[] colorsArray = colors.ToArray();
 
             lampArrayToUse.SetColorsForIndices(colorsArray, keyIndicesArray);
-
         }
 
         // For when user is changing the color of a specific key in the UI

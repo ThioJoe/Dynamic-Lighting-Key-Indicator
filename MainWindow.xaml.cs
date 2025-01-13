@@ -273,6 +273,11 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     statusInfo = new(DeviceStatusInfo.Msg.Available, deviceCount: deviceCount);
                 }
+                // If the attached device is set but not connected
+                else if (AttachedDevice?.lampArray?.IsConnected == false)
+                {
+                    statusInfo = new(DeviceStatusInfo.Msg.AttachedNotConnected);
+                }
                 // If the device is attached but is not available, show warning
                 else if (AttachedDevice?.lampArray?.IsAvailable == false)
                 {
