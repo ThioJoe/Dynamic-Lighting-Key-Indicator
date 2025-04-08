@@ -27,7 +27,12 @@ using Windows.UI.Text;
 using System.Collections.Generic;
 using Windows.System;
 using System.Linq;
+using System.Runtime.InteropServices;
 // -------------------------------
+
+// Set the default DllImport search paths to System32 to mitigate DLL hijacking attacks, though shouldn't be a
+//      problem for system DLLs since well-known DLLs should already prioritize being loaded from System32. But rather be explicit
+[assembly: DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 
 namespace Dynamic_Lighting_Key_Indicator
 {
