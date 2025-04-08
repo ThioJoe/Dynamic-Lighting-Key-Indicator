@@ -60,8 +60,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
             foreach (ToggleAbleKeys key in Enum.GetValues(typeof(ToggleAbleKeys)))
             {
-                // Pass a delegate to allow KeyIndicatorState to raise PropertyChanged on the ViewModel's thread
-                KeyStates.Add(key, new KeyIndicatorState(propName => OnPropertyChanged(propName)));
+                // Pass the MainViewModel's DispatcherQueue
+                KeyStates.Add(key, new KeyIndicatorState(this._dispatcherQueue));
             }
 
             AvailableDevices.CollectionChanged += AvailableDevices_CollectionChanged;

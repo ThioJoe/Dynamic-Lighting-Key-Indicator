@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,19 @@ namespace Dynamic_Lighting_Key_Indicator
         public static readonly Thickness InactiveThickness = new Thickness(0);
 
         private readonly Action<string?> _notifyParentPropertyChanged; // Delegate to notify parent ViewModel
+
+        private readonly DispatcherQueue _dispatcherQueue; // Add this field
+
+        // Modify the constructor
+        public KeyIndicatorState(DispatcherQueue dispatcherQueue) // Accept DispatcherQueue
+        {
+            _dispatcherQueue = dispatcherQueue ?? throw new ArgumentNullException(nameof(dispatcherQueue));
+            // Set initial defaults
+            _onBorderThickness = InactiveThickness;
+            _offBorderThickness = InactiveThickness;
+            _onColor = Colors.Transparent; // Or some default
+            _offColor = Colors.Transparent; // Or some default
+        }
 
         public KeyIndicatorState(Action<string?> notifyParentPropertyChanged)
         {
@@ -122,16 +136,23 @@ namespace Dynamic_Lighting_Key_Indicator
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            // Use the parent's dispatcher queue if needed for thread safety,
-            // assuming this class might be updated from background threads.
-            // If updates always happen on the UI thread, direct invoke is fine.
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            // Check if we are already on the UI thread
+            if (_dispatcherQueue.HasThreadAccess)
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            }
+            else
+            {
+                // If not, enqueue the invocation onto the UI thread's queue
+                _ = _dispatcherQueue.TryEnqueue(() =>
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                });
+            }
 
-            // Also notify the parent ViewModel that a property *within* this object changed,
-            // which might be necessary if the parent binds to the entire KeyIndicatorState object
-            // or uses converters that depend on multiple internal properties.
-            // This might not always be needed, depending on exact binding setup.
-            // Example: _notifyParentPropertyChanged($"KeyStates[{_associatedKey}].{propertyName}"); // Requires knowing the key
+            // The _notifyParentPropertyChanged delegate is likely unnecessary now,
+            // as direct property change notifications are handled correctly.
+            // You can probably remove it unless you have specific needs for it.
         }
 
         protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
