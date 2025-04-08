@@ -158,6 +158,8 @@ namespace Dynamic_Lighting_Key_Indicator
                 this.Activate();
             }
 
+            
+
         }
 
         // ------------------------------- Getters / Setters -------------------------------
@@ -720,6 +722,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private void MainWindow_Activated(object sender, Microsoft.UI.Xaml.WindowActivatedEventArgs args)
         {
             //System.Diagnostics.Debug.WriteLine($"Window activation state: {args.WindowActivationState}");
+            _ = MediaPlaybackHandler.Initialize();
         }
 
         // This will handle the redirected activation from the protocol (URL) activation of further instances
@@ -972,46 +975,48 @@ namespace Dynamic_Lighting_Key_Indicator
             // Get the text block object from various controls
             Debug.WriteLine("Test button clicked.");
 
-            if (AttachedDevice == null || AttachedDevice.lampArray == null)
-            {
-                Debug.WriteLine("Attached device or lamp array was null.");
-                return;
-            }
+            _ = MediaPlaybackHandler.PrintCurrentMediaPlaying();
 
-            Color[] colors1 = [Colors.Green];
-            Color[] colors2 = [Colors.Yellow];
-            VirtualKey[] keys = [VirtualKey.NumberKeyLock];
+            //if (AttachedDevice == null || AttachedDevice.lampArray == null)
+            //{
+            //    Debug.WriteLine("Attached device or lamp array was null.");
+            //    return;
+            //}
 
-            LampArray lampArray = AttachedDevice.lampArray;
+            //Color[] colors1 = [Colors.Green];
+            //Color[] colors2 = [Colors.Yellow];
+            //VirtualKey[] keys = [VirtualKey.NumberKeyLock];
 
-            Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
+            //LampArray lampArray = AttachedDevice.lampArray;
 
-            if (testState)
-            {
-                //AttachedDevice?.lampArray?.SetColor(Colors.Green);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Green);
-                //lampArray.SetColorsForKey(Colors.Green, Windows.System.VirtualKey.NumberKeyLock);
-                //lampArray.SetColorForIndex(50, Colors.Green);
-                //lampArray.SetColorsForKeys(colors1, keys);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Green); // Works
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White); // No Work
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Green);
-                Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White);
-            }
-            else
-            {
-                //AttachedDevice?.lampArray?.SetColor(Colors.Yellow);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Yellow);
-                //lampArray.SetColorsForKey(Colors.Yellow, Windows.System.VirtualKey.NumberKeyLock);
-                //lampArray.SetColorForIndex(50, Colors.Yellow);
-                //lampArray.SetColorsForKeys(colors2, keys);
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Yellow); // Works
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Yellow, Colors.White); // No Work
-                //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Yellow);
-                Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Red, Colors.White);
-            }
+            //Dynamic_Lighting_Key_Indicator.Extras.Tests.GetIndicesPurposesAndUnknownKeys(lampArray);
 
-            testState = !testState;
+            //if (testState)
+            //{
+            //    //AttachedDevice?.lampArray?.SetColor(Colors.Green);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Green);
+            //    //lampArray.SetColorsForKey(Colors.Green, Windows.System.VirtualKey.NumberKeyLock);
+            //    //lampArray.SetColorForIndex(50, Colors.Green);
+            //    //lampArray.SetColorsForKeys(colors1, keys);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Green); // Works
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White); // No Work
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Green);
+            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Green, Colors.White);
+            //}
+            //else
+            //{
+            //    //AttachedDevice?.lampArray?.SetColor(Colors.Yellow);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeyColorsAsList(AttachedDevice.lampArray, Colors.Yellow);
+            //    //lampArray.SetColorsForKey(Colors.Yellow, Windows.System.VirtualKey.NumberKeyLock);
+            //    //lampArray.SetColorForIndex(50, Colors.Yellow);
+            //    //lampArray.SetColorsForKeys(colors2, keys);
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllKeysColorsAsPairedList(AttachedDevice.lampArray, Colors.Yellow); // Works
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Yellow, Colors.White); // No Work
+            //    //Dynamic_Lighting_Key_Indicator.Extras.Tests.SetAllColorsUsingVK(lampArray, Colors.Yellow);
+            //    Dynamic_Lighting_Key_Indicator.Extras.Tests.SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(AttachedDevice.lampArray, VirtualKey.Scroll, Colors.Red, Colors.White);
+            //}
+
+            //testState = !testState;
 
         }
 

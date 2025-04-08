@@ -282,7 +282,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 //uint upperWord = (uint)lParam.ToInt64() >> 16;          // Extract upper word. Not sure what this is for
 
                 // Now we can properly identify and display the notification code
-                Debug.WriteLine($"WM_TRAYICON: Trigger = {mouseMessage:X4} - {Enum.GetName(typeof(WinEnums.WM_MESSAGE), mouseMessage)}");
+                //Debug.WriteLine($"WM_TRAYICON: Trigger = {mouseMessage:X4} - {Enum.GetName(typeof(WinEnums.WM_MESSAGE), mouseMessage)}");
 
                 // Use button_up instead of down because the user might click and hold the icon to drag it
                 if (mouseMessage == (uint)WM_MESSAGE.WM_LBUTTONUP)
