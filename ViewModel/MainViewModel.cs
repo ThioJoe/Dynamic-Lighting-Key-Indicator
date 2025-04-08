@@ -24,7 +24,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private readonly MainWindow mainWindow;
         private static MainViewModel? mainViewModelInstance;
-        public Dictionary<ToggleAbleKeys, KeyIndicatorState> KeyStates { get; } = new Dictionary<ToggleAbleKeys, KeyIndicatorState>();
+        public Dictionary<ToggleAbleKeys, KeyIndicatorState> KeyStates { get; } = [];
 
 
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
@@ -32,19 +32,6 @@ namespace Dynamic_Lighting_Key_Indicator
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
             // Set default values
-            _scrollLockOffGlyph = UnlinkedGlyph;
-            _capsLockOffGlyph = UnlinkedGlyph;
-            _numLockOffGlyph = UnlinkedGlyph;
-            _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _scrollLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _scrollLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
-            _numLockOnGlyph = UnlinkedGlyph;
-            _capsLockOnGlyph = UnlinkedGlyph;
             _startupSettingCanBeChanged = true;
             _startupSettingReason = "";
             _isStartupEnabled = false;
@@ -780,127 +767,6 @@ namespace Dynamic_Lighting_Key_Indicator
 
         // ------------------------------------- Color Values From GUI -------------------------------------
 
-        private bool _syncScrollLockOnColor;
-        public bool SyncScrollLockOnColor
-        {
-            get => _syncScrollLockOnColor;
-            set
-            {
-                if (SetProperty(ref _syncScrollLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(ScrollLockOnGlyph));
-                }
-            }
-        }
-
-        private bool _syncScrollLockOffColor;
-        public bool SyncScrollLockOffColor
-        {
-            get => _syncScrollLockOffColor;
-            set
-            {
-                if (SetProperty(ref _syncScrollLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(ScrollLockOffGlyph));
-                }
-            }
-        }
-
-        private bool _syncCapsLockOnColor;
-        public bool SyncCapsLockOnColor
-        {
-            get => _syncCapsLockOnColor;
-            set
-            {
-                if (SetProperty(ref _syncCapsLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(CapsLockOnGlyph));
-                }
-            }
-        }
-
-        private bool _syncCapsLockOffColor;
-        public bool SyncCapsLockOffColor
-        {
-            get => _syncCapsLockOffColor;
-            set
-            {
-                if (SetProperty(ref _syncCapsLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(CapsLockOffGlyph));
-                }
-            }
-        }
-
-        private bool _syncNumLockOnColor;
-        public bool SyncNumLockOnColor
-        {
-            get => _syncNumLockOnColor;
-            set
-            {
-                if (SetProperty(ref _syncNumLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(NumLockOnGlyph));
-                }
-            }
-        }
-
-        private bool _syncNumLockOffColor;
-        public bool SyncNumLockOffColor
-        {
-            get => _syncNumLockOffColor;
-            set
-            {
-                if (SetProperty(ref _syncNumLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(NumLockOffGlyph));
-                }
-            }
-        }
-
-        private string _scrollLockOnGlyph;
-        public string ScrollLockOnGlyph
-        {
-            get => SyncScrollLockOnColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _scrollLockOnGlyph, value);
-        }
-
-        private string _scrollLockOffGlyph;
-        public string ScrollLockOffGlyph
-        {
-            get => SyncScrollLockOffColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _scrollLockOffGlyph, value);
-        }
-
-        private string _capsLockOnGlyph;
-        public string CapsLockOnGlyph
-        {
-            get => SyncCapsLockOnColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _capsLockOnGlyph, value);
-        }
-
-        private string _capsLockOffGlyph;
-        public string CapsLockOffGlyph
-        {
-            get => SyncCapsLockOffColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _capsLockOffGlyph, value);
-        }
-
-        private string _numLockOnGlyph;
-        public string NumLockOnGlyph
-        {
-            get => SyncNumLockOnColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _numLockOnGlyph, value);
-        }
-
-        private string _numLockOffGlyph;
-        public string NumLockOffGlyph
-        {
-            get => SyncNumLockOffColor ? LinkedGlyph : UnlinkedGlyph;
-            private set => SetProperty(ref _numLockOffGlyph, value);
-        }
-
-
         private int _brightness;
         public int Brightness
         {
@@ -921,132 +787,30 @@ namespace Dynamic_Lighting_Key_Indicator
             switch (colorPropertyName)
             {
                 case ColorPropName.NumLockOn:
-                    SyncNumLockOnColor = syncSetting;
-                    OnPropertyChanged(nameof(NumLockOnGlyph));
+                    NumLockState.SyncOnColor = syncSetting;
                     break;
                 case ColorPropName.NumLockOff:
-                    SyncNumLockOffColor = syncSetting;
-                    OnPropertyChanged(nameof(NumLockOffGlyph));
+                    NumLockState.SyncOffColor = syncSetting;
+
                     break;
                 case ColorPropName.CapsLockOn:
-                    SyncCapsLockOnColor = syncSetting;
-                    OnPropertyChanged(nameof(CapsLockOnGlyph));
+                    CapsLockState.SyncOnColor = syncSetting;
+
                     break;
                 case ColorPropName.CapsLockOff:
-                    SyncCapsLockOffColor = syncSetting;
-                    OnPropertyChanged(nameof(CapsLockOffGlyph));
+                    CapsLockState.SyncOffColor = syncSetting;
+
                     break;
                 case ColorPropName.ScrollLockOn:
-                    SyncScrollLockOnColor = syncSetting;
-                    OnPropertyChanged(nameof(ScrollLockOnGlyph));
+                    CapsLockState.SyncOnColor = syncSetting;
+
                     break;
                 case ColorPropName.ScrollLockOff:
-                    SyncScrollLockOffColor = syncSetting;
-                    OnPropertyChanged(nameof(ScrollLockOffGlyph));
+                    CapsLockState.SyncOffColor = syncSetting;
+
                     break;
                 default:
                     break;
-            }
-        }
-
-        public bool GetSyncSetting_ByPropertyName(string colorPropertyName)
-        {
-            return colorPropertyName switch
-            {
-                ColorPropName.NumLockOn => SyncNumLockOnColor,
-                ColorPropName.NumLockOff => SyncNumLockOffColor,
-                ColorPropName.CapsLockOn => SyncCapsLockOnColor,
-                ColorPropName.CapsLockOff => SyncCapsLockOffColor,
-                ColorPropName.ScrollLockOn => SyncScrollLockOnColor,
-                ColorPropName.ScrollLockOff => SyncScrollLockOffColor,
-                _ => false,
-            };
-        }
-
-
-        public static readonly Thickness ActiveThickness = new Thickness(1);
-        public static readonly Thickness InactiveThickness = new Thickness(0);
-
-        private Thickness _scrollLockOnBorderThickness;
-        private Thickness _scrollLockOffBorderThickness;
-        private Thickness _capsLockOnBorderThickness;
-        private Thickness _capsLockOffBorderThickness;
-        private Thickness _numLockOnBorderThickness;
-        private Thickness _numLockOffBorderThickness;
-
-        public Thickness ScrollLockOnBorderThickness
-        {
-            get => _scrollLockOnBorderThickness;
-            set => SetProperty(ref _scrollLockOnBorderThickness, value);
-        }
-        public Thickness ScrollLockOffBorderThickness
-        {
-            get => _scrollLockOffBorderThickness;
-            set => SetProperty(ref _scrollLockOffBorderThickness, value);
-        }
-        public Thickness CapsLockOnBorderThickness
-        {
-            get => _capsLockOnBorderThickness;
-            set => SetProperty(ref _capsLockOnBorderThickness, value);
-        }
-        public Thickness CapsLockOffBorderThickness
-        {
-            get => _capsLockOffBorderThickness;
-            set => SetProperty(ref _capsLockOffBorderThickness, value);
-        }
-        public Thickness NumLockOnBorderThickness
-        {
-            get => _numLockOnBorderThickness;
-            set => SetProperty(ref _numLockOnBorderThickness, value);
-        }
-        public Thickness NumLockOffBorderThickness
-        {
-            get => _numLockOffBorderThickness;
-            set => SetProperty(ref _numLockOffBorderThickness, value);
-        }
-
-        private bool _LastKnownScrollLockState = false;
-        private bool _LastKnownCapsLockState = false;
-        private bool _LastKnownNumLockState = false;
-
-        public bool LastKnownNumLockState
-        {
-            get => _LastKnownNumLockState;
-            set
-            {
-                SetProperty(ref _LastKnownNumLockState, value);
-                bool onIsActive = value;
-                NumLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
-                NumLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
-                OnPropertyChanged(nameof(NumLockOnBorderThickness));
-                OnPropertyChanged(nameof(NumLockOffBorderThickness));
-            }
-        }
-        public bool LastKnownCapsLockState
-        {
-            get => _LastKnownCapsLockState;
-            set
-            {
-                SetProperty(ref _LastKnownCapsLockState, value);
-                bool onIsActive = value;
-                CapsLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
-                CapsLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
-                OnPropertyChanged(nameof(CapsLockOnBorderThickness));
-                OnPropertyChanged(nameof(CapsLockOffBorderThickness));
-            }
-        }
-        public bool LastKnownScrollLockState
-        {
-            get => _LastKnownScrollLockState;
-            set
-            {
-                SetProperty(ref _LastKnownScrollLockState, value);
-                bool onIsActive = value;
-                ScrollLockOnBorderThickness = onIsActive ? ActiveThickness : InactiveThickness;
-                ScrollLockOffBorderThickness = onIsActive ? InactiveThickness : ActiveThickness;
-                OnPropertyChanged(nameof(ScrollLockOnBorderThickness));
-                OnPropertyChanged(nameof(ScrollLockOffBorderThickness));
-
             }
         }
 

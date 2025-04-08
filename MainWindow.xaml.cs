@@ -566,9 +566,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredKeysList = [
-                new(VK.NumLock,    onColor: ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor,    offColor: ViewModel.KeyStates[ToggleAbleKeys.NumLock].OffColor,      onColorTiedToStandard: ViewModel.SyncNumLockOnColor,    offColorTiedToStandard: ViewModel.SyncNumLockOffColor),
-                new(VK.CapsLock,   onColor: ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OnColor,   offColor: ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.SyncCapsLockOnColor,   offColorTiedToStandard: ViewModel.SyncCapsLockOffColor),
-                new(VK.ScrollLock, onColor: ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OnColor, offColor: ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.SyncScrollLockOnColor, offColorTiedToStandard: ViewModel.SyncScrollLockOffColor)
+                new(VK.NumLock,    onColor: ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor,    offColor: ViewModel.KeyStates[ToggleAbleKeys.NumLock].OffColor,      onColorTiedToStandard: ViewModel.NumLockState.SyncOnColor,    offColorTiedToStandard: ViewModel.NumLockState.SyncOffColor),
+                new(VK.CapsLock,   onColor: ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OnColor,   offColor: ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.CapsLockState.SyncOnColor,   offColorTiedToStandard: ViewModel.CapsLockState.SyncOffColor),
+                new(VK.ScrollLock, onColor: ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OnColor, offColor: ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.ScrollLockState.SyncOnColor, offColorTiedToStandard: ViewModel.ScrollLockState.SyncOffColor)
             ];
 
             RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
@@ -837,56 +837,38 @@ namespace Dynamic_Lighting_Key_Indicator
             // Get the button object
             Button button = (Button)sender;
             string keyName = (string)button.Tag;
+            Color onColor;
+            Color offColor;
+            bool syncOnColor;
+            bool syncOffColor;
+            KeyIndicatorState? keyState = null;
 
-            switch (keyName)
+            foreach (ToggleAbleKeys key in Enum.GetValues(typeof(ToggleAbleKeys)))
             {
-                case "NumLock":
-                    // Store the current color settings, then swapp them
-                    Color numLockOnColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor;
-                    Color numLockOffColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor = numLockOffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OffColor = numLockOnColor;
-
-                    // Swap their sync status
-                    bool syncNumLockOnColor = ViewModel.SyncNumLockOnColor;
-                    bool syncNumLockOffColor = ViewModel.SyncNumLockOffColor;
-                    ViewModel.SyncNumLockOnColor = syncNumLockOffColor;
-                    ViewModel.SyncNumLockOffColor = syncNumLockOnColor;
-
+                if (key.ToString() == keyName)
+                {
+                    keyState = ViewModel.KeyStates[key];
                     break;
-
-                case "CapsLock":
-                    Color capsLockOnColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor;
-                    Color capsLockOffColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OnColor = capsLockOffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.CapsLock].OffColor = capsLockOnColor;
-
-                    bool syncCapsLockOnColor = ViewModel.SyncCapsLockOnColor;
-                    bool syncCapsLockOffColor = ViewModel.SyncCapsLockOffColor;
-                    ViewModel.SyncCapsLockOnColor = syncCapsLockOffColor;
-                    ViewModel.SyncCapsLockOffColor = syncCapsLockOnColor;
-
-                    break;
-
-                case "ScrollLock":
-                    Color scrollLockOnColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OnColor;
-                    Color scrollLockOffColor = ViewModel.KeyStates[ToggleAbleKeys.NumLock].OffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OnColor = scrollLockOffColor;
-                    ViewModel.KeyStates[ToggleAbleKeys.ScrollLock].OffColor = scrollLockOnColor;
-
-                    bool syncScrollLockOnColor = ViewModel.SyncScrollLockOnColor;
-                    bool syncScrollLockOffColor = ViewModel.SyncScrollLockOffColor;
-                    ViewModel.SyncScrollLockOnColor = syncScrollLockOffColor;
-                    ViewModel.SyncScrollLockOffColor = syncScrollLockOnColor;
-
-                    break;
-
-                default:
-                    break;
+                }
             }
 
-            ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
+            if (keyState != null)
+            {
+                onColor = keyState.OnColor;
+                offColor = keyState.OffColor;
+                syncOnColor = keyState.SyncOnColor;
+                syncOffColor = keyState.SyncOffColor;
 
+                // Swap the colors in the ViewModel
+                keyState.OnColor = offColor;
+                keyState.OffColor = onColor;
+
+                // Swap the sync status
+                keyState.SyncOnColor = syncOffColor;
+                keyState.SyncOffColor = syncOnColor;
+
+                ApplyAndSaveColorSettings(saveFile: false, newConfig: null);
+            }
         }
 
         private void RestoreDefaults_Click(object sender, RoutedEventArgs e)

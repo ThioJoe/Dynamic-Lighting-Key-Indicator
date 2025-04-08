@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Windows.UI; // Assuming Color is from here or Microsoft.UI
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
 namespace Dynamic_Lighting_Key_Indicator
 {
     public class KeyIndicatorState : INotifyPropertyChanged
@@ -31,6 +33,7 @@ namespace Dynamic_Lighting_Key_Indicator
             _onColor = Colors.Transparent; // Or some default
             _offColor = Colors.Transparent; // Or some default
         }
+
 
         public KeyIndicatorState(Action<string?> notifyParentPropertyChanged)
         {
