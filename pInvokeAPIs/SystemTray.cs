@@ -37,6 +37,9 @@ namespace Dynamic_Lighting_Key_Indicator
             public IntPtr hBalloonIcon;
         }
 
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern uint RegisterWindowMessage(string lpString);
+
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
         static extern bool Shell_NotifyIcon(WinEnums.NotifyIcon_dwMessage dwMessage, ref NOTIFYICONDATAW lpData);
 
@@ -92,6 +95,26 @@ namespace Dynamic_Lighting_Key_Indicator
         private WndProcDelegate? newWndProc;
         private IntPtr defaultWndProc;
 
+        // For re-creation of the tray icon after a taskbar restart
+        private uint _taskbarCreatedMessageId;
+
+        private void RegisterTaskbarCreatedMessage()
+        {
+            // Register the TaskbarCreated message
+            _taskbarCreatedMessageId = RegisterWindowMessage("TaskbarCreated");
+            if (_taskbarCreatedMessageId == 0)
+            {
+                // Handle error: Could not register the message
+                int error = Marshal.GetLastWin32Error();
+                Debug.WriteLine($"Failed to register TaskbarCreated message. Error: {error}");
+                // Depending on requirements, you might want to throw or log more severely
+            }
+            else
+            {
+                Debug.WriteLine($"TaskbarCreated message registered with ID: {_taskbarCreatedMessageId}");
+            }
+        }
+
         public void InitializeSystemTray()
         {
             // Get the window handle
@@ -99,8 +122,11 @@ namespace Dynamic_Lighting_Key_Indicator
             windowId = Win32Interop.GetWindowIdFromWindow(hwnd);
             appWindow = AppWindow.GetFromWindowId(windowId);
 
-            // Initialize tray icon
-            InitializeNotifyIcon();
+            // If Explorer restarts or the taskbar is re-created we need to re-create the tray icon, otherwise it will be gone
+            RegisterTaskbarCreatedMessage();
+
+            // Initialize and add tray icon
+            InitializeAndAddNotifyIcon();
 
             // Handle window closing
             this.mainWindow.AppWindow.Closing += AppWindow_Closing;
@@ -135,7 +161,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return LoadIcon(IntPtr.Zero, (IntPtr)32512); // IDI_APPLICATION
         }
 
-        public void InitializeNotifyIcon()
+        public void InitializeAndAddNotifyIcon()
         {
             notifyIcon = new NOTIFYICONDATAW
             {
@@ -143,42 +169,66 @@ namespace Dynamic_Lighting_Key_Indicator
                 hWnd = hwnd,
                 uID = 1,
                 uFlags = NOTIFYICONDATAA_uFlags.NIF_ICON | NOTIFYICONDATAA_uFlags.NIF_MESSAGE | NOTIFYICONDATAA_uFlags.NIF_TIP,
-                uCallbackMessage = (uint)WM_MESSAGE.WM_TRAYICON
+                uCallbackMessage = (uint)WM_MESSAGE.WM_TRAYICON,
+                szTip = "Dynamic Lighting Key Indicator" // Tooltip
             };
-
-            // Set tooltip - using Marshal to avoid unsafe code
-            string tip = "Dynamic Lighting Key Indicator";
-            notifyIcon.szTip = tip;
 
             // Load icon from embedded resource
             IntPtr hIcon;
-            System.Drawing.Icon? icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
+            using System.Drawing.Icon? icon = LoadIconFromResource("Dynamic_Lighting_Key_Indicator.Assets.Icon.ico");
 
             if (icon == null)
             {
+                Debug.WriteLine("Failed to load custom icon, using default application icon.");
                 hIcon = GetDefaultIconHandle();
             }
             else
             {
-                hIcon = icon.Handle; // This gives you the HICON handle
+                hIcon = icon.Handle;
             }
-
-            // Load default icon if failed to load from resource
-
 
             notifyIcon.hIcon = hIcon;
 
-            // Add the icon
-            if (!Shell_NotifyIcon((uint)NotifyIcon_dwMessage.NIM_ADD, ref notifyIcon))
+            // Add or Modify the icon
+            // Use NIM_MODIFY if the icon might already exist (e.g., after TaskbarCreated), otherwise use NIM_ADD. NIM_ADD fails if the icon already exists.
+            // A simple strategy is to try Add, and if it fails, try Modify. However, for the initial add, NIM_ADD is correct.
+            if (Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_ADD, ref notifyIcon))
             {
-                // Handle error
-                var error = Marshal.GetLastWin32Error();
-                System.Diagnostics.Debug.WriteLine($"Failed to add tray icon. Error: {error}");
+                notifyIcon.uVersion = uVersion.NOTIFYICON_VERSION_4; // Done after adding the icon
+                if (!Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_SETVERSION, ref notifyIcon))
+                {
+                    Debug.WriteLine($"Failed to set tray icon version. Error: {Marshal.GetLastWin32Error()}");
+                }
+            }
+            else
+            {
+                int error = Marshal.GetLastWin32Error();
+                // ERROR_TIMEOUT (1460) can occur if the taskbar isn't ready.
+                // ERROR_OBJECT_NOT_FOUND (4312) might occur on NIM_MODIFY if icon doesn't exist.
+                Debug.WriteLine($"Failed to add tray icon initially. Error: {error}");
+                // Optionally try NIM_MODIFY here if add failed, though it shouldn't be needed on first run.
+                // if (!Shell_NotifyIcon(WinEnums.NotifyIcon_dwMessage.NIM_MODIFY, ref notifyIcon)) { ... }
             }
 
-            // Set version (required for reliable operation)
-            notifyIcon.uVersion = uVersion.NOTIFYICON_VERSION;
-            Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_SETVERSION, ref notifyIcon);
+            // IMPORTANT: Do NOT dispose the icon object if you are using its Handle (hIcon = icon.Handle).
+            // The NOTIFYICONDATA needs the handle to remain valid. Manage the icon's lifetime appropriately.
+            // If loading frequently (like in Recreate), consider caching the icon or handle.
+        }
+
+        private void RecreateNotifyIcon()
+        {
+            Debug.WriteLine("Taskbar created/restarted. Attempting to recreate tray icon.");
+
+            // If the icon was previously visible (or should be), try adding it again.
+            // The InitializeAndAddNotifyIcon handles the setup and NIM_ADD/NIM_SETVERSION logic.
+            // We might need to NIM_DELETE first if NIM_ADD fails consistently after restart,
+            //      but often just NIM_ADD/NIM_MODIFY after TaskbarCreated is sufficient. Let's retry the Add/SetVersion flow.
+
+            // Remove the old icon first (best practice) - ignore errors as it might already be gone
+            Shell_NotifyIcon(WinEnums.NotifyIcon_dwMessage.NIM_DELETE, ref notifyIcon);
+
+            // Re-initialize and add the icon
+            InitializeAndAddNotifyIcon();
         }
 
         public void MinimizeToTray()
@@ -204,42 +254,61 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public void ExitApplication()
         {
-            Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_DELETE, ref notifyIcon);
-
-            if (defaultWndProc != IntPtr.Zero)
+            // Remove the icon if it was added / we think it should be visible
+            if (!Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_DELETE, ref notifyIcon))
             {
-                SetWindowLongPtr(hwnd, nIndex.GWLP_WNDPROC, defaultWndProc);
+                Debug.WriteLine($"Failed to remove tray icon on exit. Error: {Marshal.GetLastWin32Error()}");
             }
-            Application.Current.Exit(); // This will automatically trigger the .closed event on MainWindow
+
+            // Restore the default window procedure
+            if (defaultWndProc != IntPtr.Zero && hwnd != IntPtr.Zero)
+            {
+                SetWindowLongPtrWrapper(hwnd, (int)nIndex.GWLP_WNDPROC, defaultWndProc);
+            }
+
+            Application.Current.Exit(); // Will automatically trigger .closed event on MainWindow
         }
 
         private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
 
         private IntPtr WndProc(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam)
         {
-            // Look up the debug in WinEnums.WM_MESSAGE for the name
-            //Debug.WriteLine($"WndProc: {Enum.GetName(typeof(WinEnums.WM_MESSAGE), msg)} ({msg:X4})");
-
             if (msg == WM_MESSAGE.WM_TRAYICON)
             {
-                uint lparam = (uint)lParam.ToInt64();
-                if (lparam == (uint)WM_MESSAGE.WM_LBUTTONUP)
+                // Extract the message code from the lower word of lParam
+                // In commit b503283103032d52cabe232afd396ccd7591f094 this wasn't necessary because the higher word was always 0,
+                //      but now it's 1 for some unknown reason
+                uint mouseMessage = (uint)lParam.ToInt64() & 0xFFFF; // Extract lower word
+                //uint upperWord = (uint)lParam.ToInt64() >> 16;          // Extract upper word. Not sure what this is for
+
+                // Now we can properly identify and display the notification code
+                Debug.WriteLine($"WM_TRAYICON: Trigger = {mouseMessage:X4} - {Enum.GetName(typeof(WinEnums.WM_MESSAGE), mouseMessage)}");
+
+                // Use button_up instead of down because the user might click and hold the icon to drag it
+                if (mouseMessage == (uint)WM_MESSAGE.WM_LBUTTONUP)
                 {
                     RestoreFromTray();
                     return IntPtr.Zero;
                 }
-                else if (lparam == (uint)WM_MESSAGE.WM_RBUTTONUP)
+                else if (mouseMessage == (uint)WM_MESSAGE.WM_RBUTTONUP)
                 {
-                    //ShowTrayContextMenu();
                     CustomContextMenu.CreateAndShowMenu(hwnd, this);
                     return IntPtr.Zero;
                 }
+
             }
             else if (msg == WM_MESSAGE.WM_CLOSE)
             {
                 // Intercept window close
                 MinimizeToTray();
                 return IntPtr.Zero;
+            }
+            else if (_taskbarCreatedMessageId != 0 && msg == (WM_MESSAGE)_taskbarCreatedMessageId)
+            {
+                RecreateNotifyIcon();
+                // We handle this message, but it's often broadcast, so returning DefWindowProc might be safer than Zero to allow other apps to receive it too.
+                // However, for handling *our* icon recreation, Zero is technically correct. Let's pass it on just in case.
+                return CallWindowProc(defaultWndProc, hwnd, (uint)msg, wParam, lParam); // Pass it on
             }
 
             // Pass on the other messages to the original window procedure if we didn't handle it ourselves
