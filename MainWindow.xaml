@@ -202,125 +202,117 @@
 
             <!-- Scroll Lock -->
             <TextBlock Grid.Row="1" Grid.Column="0" Text="Scroll Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonScrollLockOn" 
-                    Grid.Row="1" 
-                    Grid.Column="1" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.ScrollLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="ScrollLockOnColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.ScrollLockOnBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOnGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonScrollLockOn"
+                Grid.Row="1"
+                Grid.Column="1"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.ScrollLockState.OnBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="ScrollLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.ScrollLockState.OnBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.ScrollLockState.OnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapScrollLock" 
-                    Grid.Row="1" 
-                    Grid.Column="3" 
-                    Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
-                    Tag="ScrollLock"
-                    HorizontalAlignment="Center"
-                    >
+            <Button x:Name="buttonSwapScrollLock"
+                Grid.Row="1"
+                Grid.Column="3"
+                Style="{StaticResource SwapButtonStyle}"
+                Click="SwapOnOffColor_Click"
+                Tag="ScrollLock" HorizontalAlignment="Center"
+            >
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonScrollLockOff" 
-                    Grid.Row="1" 
-                    Grid.Column="4" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.ScrollLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="ScrollLockOffColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.ScrollLockOffBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding ScrollLockOffGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonScrollLockOff"
+                Grid.Row="1"
+                Grid.Column="4"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.ScrollLockState.OffBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="ScrollLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.ScrollLockState.OffBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.ScrollLockState.OffGlyph, Mode=OneWay}" />
             </Button>
 
             <!-- Caps Lock -->
             <TextBlock Grid.Row="2" Grid.Column="0" Text="Caps Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonCapsLockOn" 
-                    Grid.Row="2" 
-                    Grid.Column="1" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.CapsLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="CapsLockOnColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.CapsLockOnBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOnGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonCapsLockOn"
+                Grid.Row="2"
+                Grid.Column="1"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.CapsLockState.OnBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="CapsLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.CapsLockState.OnBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.CapsLockState.OnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapCapsLock" 
-                    Grid.Row="2" 
-                    Grid.Column="3" 
-                    Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
-                    Tag="CapsLock"
-                    >
+            <Button x:Name="buttonSwapCapsLock"
+                Grid.Row="2"
+                Grid.Column="3"
+                Style="{StaticResource SwapButtonStyle}"
+                Click="SwapOnOffColor_Click"
+                Tag="CapsLock" >
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonCapsLockOff" 
-                    Grid.Row="2" 
-                    Grid.Column="4" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.CapsLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="CapsLockOffColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.CapsLockOffBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding CapsLockOffGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonCapsLockOff"
+                Grid.Row="2"
+                Grid.Column="4"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.CapsLockState.OffBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="CapsLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.CapsLockState.OffBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.CapsLockState.OffGlyph, Mode=OneWay}" />
             </Button>
 
             <!-- Num Lock -->
             <TextBlock Grid.Row="3" Grid.Column="0" Text="Num Lock:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonNumLockOn" 
-                    Grid.Row="3" 
-                    Grid.Column="1" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.NumLockOnBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="NumLockOnColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.NumLockOnBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOnGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonNumLockOn"
+                Grid.Row="3"
+                Grid.Column="1"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.NumLockState.OnBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="NumLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.NumLockState.OnBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.NumLockState.OnGlyph, Mode=OneWay}" />
             </Button>
-            <Button x:Name="buttonSwapNumLock" 
-                    Grid.Row="3" 
-                    Grid.Column="3" 
-                    Style="{StaticResource SwapButtonStyle}"
-                    Click="SwapOnOffColor_Click" 
-                    Tag="NumLock">
+            <Button x:Name="buttonSwapNumLock"
+                Grid.Row="3"
+                Grid.Column="3"
+                Style="{StaticResource SwapButtonStyle}"
+                Click="SwapOnOffColor_Click"
+                Tag="NumLock">
                 <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
             </Button>
-            <Button x:Name="buttonNumLockOff" 
-                    Grid.Row="3" 
-                    Grid.Column="4" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.NumLockOffBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="NumLockOffColor"
-                    BorderBrush="{ThemeResource ButtonBorder}"
-                    BorderThickness="{x:Bind ViewModel.NumLockOffBorderThickness, Mode=OneWay}"
-                    >
-                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding NumLockOffGlyph, Mode=OneWay}" />
+            <Button x:Name="buttonNumLockOff"
+                Grid.Row="3"
+                Grid.Column="4"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.NumLockState.OffBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="NumLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderThickness="{x:Bind ViewModel.NumLockState.OffBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.NumLockState.OffGlyph, Mode=OneWay}" />
             </Button>
 
             <!-- Default -->
             <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonDefaultColor" 
-                    Grid.Row="4" 
-                    Grid.Column="1" 
-                    Style="{StaticResource ColorButtonStyle}"
-                    Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}" 
-                    Click="ColorButton_Click" 
-                    Tag="DefaultColor"
-                    />
+            <Button x:Name="buttonDefaultColor"
+                Grid.Row="4"
+                Grid.Column="1"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                Tag="DefaultColor"
+            />
             <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
         </Grid>
-        
+
         <!-- Brightness Slider -->
         <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5,0,0">
             <TextBlock x:Name="labelGlobalBrightness"  Text="Global Brightness:" VerticalAlignment="Center" Margin="0,0,0,0"/>

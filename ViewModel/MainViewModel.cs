@@ -24,6 +24,8 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private readonly MainWindow mainWindow;
         private static MainViewModel? mainViewModelInstance;
+        public Dictionary<ToggleAbleKeys, KeyIndicatorState> KeyStates { get; } = new Dictionary<ToggleAbleKeys, KeyIndicatorState>();
+
 
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
         {
@@ -56,12 +58,291 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
 
+            foreach (ToggleAbleKeys key in Enum.GetValues(typeof(ToggleAbleKeys)))
+            {
+                // Pass a delegate to allow KeyIndicatorState to raise PropertyChanged on the ViewModel's thread
+                KeyStates.Add(key, new KeyIndicatorState(propName => OnPropertyChanged(propName)));
+            }
+
             AvailableDevices.CollectionChanged += AvailableDevices_CollectionChanged;
         }
 
         public static void SetMainViewModelInstance(MainViewModel vieModelInstance)
         {
             mainViewModelInstance = vieModelInstance;
+        }
+
+        private void UpdateSyncedColorsToDefault()
+        {
+            foreach (var kvp in KeyStates)
+            {
+                bool changed = false;
+                if (kvp.Value.SyncOnColor && kvp.Value.OnColor != DefaultColor)
+                {
+                    kvp.Value.OnColor = DefaultColor; // This will trigger OnPropertyChanged for OnColor and OnBrush internally
+                    changed = true;
+                }
+                if (kvp.Value.SyncOffColor && kvp.Value.OffColor != DefaultColor)
+                {
+                    kvp.Value.OffColor = DefaultColor; // This will trigger OnPropertyChanged for OffColor and OffBrush internally
+                    changed = true;
+                }
+                // If direct changes happened, ensure the save button status is re-evaluated
+                // if (changed) CheckAndUpdateSaveButton_EnabledStatus(); // Already called by DefaultColor setter
+            }
+            // Update the backend/main color if necessary
+            ColorSetter.DefineKeyboardMainColor(DefaultColor);
+        }
+
+        public void UpdateKeySyncSetting(ToggleAbleKeys key, bool isOnState, bool syncSetting)
+        {
+            if (KeyStates.TryGetValue(key, out var state))
+            {
+                if (isOnState)
+                {
+                    state.SyncOnColor = syncSetting; // Triggers internal OnPropertyChanged for SyncOnColor & OnGlyph
+                    if (syncSetting) state.OnColor = DefaultColor; // Sync immediately if turned on
+                }
+                else
+                {
+                    state.SyncOffColor = syncSetting; // Triggers internal OnPropertyChanged for SyncOffColor & OffGlyph
+                    if (syncSetting) state.OffColor = DefaultColor; // Sync immediately if turned on
+                }
+                CheckAndUpdateSaveButton_EnabledStatus(); // Sync setting change might affect save state
+                //mainWindow.ForceUpdateSpecificButtonGlyph(key, isOnState); // Might need helper in MainWindow
+            }
+        }
+
+        public bool GetKeySyncSetting(ToggleAbleKeys key, bool isOnState)
+        {
+            if (KeyStates.TryGetValue(key, out var state))
+            {
+                return isOnState ? state.SyncOnColor : state.SyncOffColor;
+            }
+            return false; // Default or throw exception
+        }
+
+        // Simplified methods to get sync settings based on button name (if still needed)
+        public bool GetSyncSetting_ByButtonName(string buttonName)
+        {
+            return buttonName switch
+            {
+                ButtonName.NumLockOn => GetKeySyncSetting(ToggleAbleKeys.NumLock, true),
+                ButtonName.NumLockOff => GetKeySyncSetting(ToggleAbleKeys.NumLock, false),
+                ButtonName.CapsLockOn => GetKeySyncSetting(ToggleAbleKeys.CapsLock, true),
+                ButtonName.CapsLockOff => GetKeySyncSetting(ToggleAbleKeys.CapsLock, false),
+                ButtonName.ScrollLockOn => GetKeySyncSetting(ToggleAbleKeys.ScrollLock, true),
+                ButtonName.ScrollLockOff => GetKeySyncSetting(ToggleAbleKeys.ScrollLock, false),
+                _ => false,
+            };
+        }
+        public bool GetSyncSetting_ByButtonObject(Button button) => GetSyncSetting_ByButtonName(button.Name);
+
+        // Update the border thickness based on the actual key state
+        public void UpdateLastKnownKeyState(ToggleAbleKeys key, bool state)
+        {
+            if (KeyStates.TryGetValue(key, out var keyState))
+            {
+                keyState.LastKnownState = state; // Setter handles border thickness updates and notifications
+            }
+        }
+
+        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock)
+        {
+            UpdateLastKnownKeyState(ToggleAbleKeys.NumLock, numLock);
+            UpdateLastKnownKeyState(ToggleAbleKeys.CapsLock, capsLock);
+            UpdateLastKnownKeyState(ToggleAbleKeys.ScrollLock, scrollLock);
+        }
+
+        // Static update method - REMAP VK to ToggleAbleKeys
+        public static void StaticUpdateLastKnownKeyState(MonitoredKey key)
+        {
+            if (mainViewModelInstance != null)
+            {
+                // Need a mapping from VK to ToggleAbleKeys
+                if (TryMapVkToToggleKey(key.key, out var toggleKey))
+                {
+                    mainViewModelInstance.UpdateLastKnownKeyState(toggleKey, key.IsOn());
+                }
+            }
+        }
+
+        // Helper mapping (adjust based on your VK and ToggleAbleKeys enums)
+        private static bool TryMapVkToToggleKey(VK vk, out ToggleAbleKeys toggleKey)
+        {
+            switch (vk)
+            {
+                case VK.NumLock: toggleKey = ToggleAbleKeys.NumLock; return true;
+                case VK.CapsLock: toggleKey = ToggleAbleKeys.CapsLock; return true;
+                case VK.ScrollLock: toggleKey = ToggleAbleKeys.ScrollLock; return true;
+                default:
+                    toggleKey = default; // Or a specific 'None' value if you have one
+                    return false;
+            }
+        }
+
+
+        public string GetSyncGlyph_ByButtonObject(Button button)
+        {
+            // This might need adjusting based on how you map button names/objects back to ToggleAbleKeys and On/Off state
+            return GetSyncSetting_ByButtonObject(button) ? KeyIndicatorState.LinkedGlyph : KeyIndicatorState.UnlinkedGlyph;
+        }
+
+        internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig) { /* ... same logic ... */ }
+
+        public static SolidColorBrush GetBrushFromColor(Color color) => new SolidColorBrush(color); // Keep static helper
+
+        private Color _defaultColor;
+
+        public Color DefaultColor
+
+        {
+
+            get => _defaultColor;
+
+            set
+
+            {
+
+                if (SetProperty(ref _defaultColor, value))
+
+                {
+
+                    OnPropertyChanged(nameof(DefaultColorBrush));
+
+                }
+
+            }
+
+        }
+
+        public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
+
+
+        internal void SetAllColorSettingsFromUserConfig(UserConfig config, MainWindow window)
+        {
+            if (config == null || config.MonitoredKeysAndColors == null)
+            {
+                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
+            }
+
+            // Use BeginUpdate/EndUpdate pattern if available and beneficial
+            // bool initialSaveButtonState = IsSaveButtonEnabled; // Capture initial state if needed
+
+            Brightness = config.Brightness; // Use property setter
+            DefaultColor = Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B); // Use property setter
+
+            foreach (MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
+            {
+                // Map VK to ToggleAbleKeys
+                if (!TryMapVkToToggleKey(monitoredKey.key, out var toggleKey)) continue; // Skip if key isn't monitored in UI
+
+                if (KeyStates.TryGetValue(toggleKey, out var state))
+                {
+                    bool onColorTiedToStandard = monitoredKey.onColorTiedToStandard;
+                    bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
+
+                    // Set sync states first
+                    state.SyncOnColor = onColorTiedToStandard;
+                    state.SyncOffColor = offColorTiedToStandard;
+
+                    // Set colors - use DefaultColor if synced
+                    state.OnColor = onColorTiedToStandard
+                        ? DefaultColor
+                        : Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
+
+                    state.OffColor = offColorTiedToStandard
+                        ? DefaultColor
+                        : Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
+                }
+            }
+
+            ColorSetter.DefineKeyboardMainColor(DefaultColor); // Keep this
+
+            window.ForceUpdateButtonBackgrounds(); // Keep this
+            window.ForceUpdateAllButtonGlyphs();   // Keep this
+
+            // Crucially, after loading, the current state *is* the saved state
+            IsSaveButtonEnabled = false; // Explicitly disable save button after load/undo
+            OnPropertyChanged(nameof(IsUndoButtonEnabled)); // Update undo button too
+        }
+
+
+        // This method might be less necessary if bindings are correct, but can be kept for explicit updates
+        public void UpdateAllColorSettingsFromGUI()
+        {
+            // Sync to defaults if set to do so.
+            UpdateSyncedColorsToDefault(); // Refactored this logic
+
+            // This seems redundant if DefaultColor property setter handles it
+            // ColorSetter.DefineKeyboardMainColor(DefaultColor);
+
+            // Check save button status after potential changes
+            CheckAndUpdateSaveButton_EnabledStatus();
+        }
+
+
+        internal bool IsColorSettingsSameAsConfig(UserConfig config)
+        {
+            if (config == null || config.MonitoredKeysAndColors == null)
+            {
+                Debug.WriteLine("IsColorSettingsSameAsConfig: Config is null.");
+                return false; // Or throw? Or treat as different? Assuming different.
+            }
+
+            // Compare Brightness
+            if (Brightness != config.Brightness) return false;
+
+            // Compare DefaultColor
+            if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor)) return false;
+
+            // Compare settings for each key defined in the config
+            foreach (MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
+            {
+                if (!TryMapVkToToggleKey(monitoredKey.key, out var toggleKey)) continue; // Skip keys not in the UI dictionary
+
+                if (KeyStates.TryGetValue(toggleKey, out var currentState))
+                {
+                    // Compare Sync settings
+                    if (currentState.SyncOnColor != monitoredKey.onColorTiedToStandard) return false;
+                    if (currentState.SyncOffColor != monitoredKey.offColorTiedToStandard) return false;
+
+                    // Compare Colors (only if NOT synced, otherwise they should match DefaultColor already checked)
+                    if (!currentState.SyncOnColor && ColorsAreDifferent(currentState.OnColor, monitoredKey.onColor)) return false;
+                    if (!currentState.SyncOffColor && ColorsAreDifferent(currentState.OffColor, monitoredKey.offColor)) return false;
+                }
+                else
+                {
+                    // A key exists in config but not in UI state - counts as different
+                    Debug.WriteLine($"IsColorSettingsSameAsConfig: Key {toggleKey} not found in KeyStates dictionary.");
+                    return false;
+                }
+            }
+
+            // Optional: Check if UI state has keys not in config (might indicate difference depending on requirements)
+            // foreach (var uiKey in KeyStates.Keys) { ... check if exists in config.MonitoredKeysAndColors ... }
+
+
+            // Everything matches
+            return true;
+        }
+
+        // Keep local helper function
+        private bool ColorsAreDifferent(Color color1, RGBTuple color2)
+        {
+            return color1.R != (byte)color2.R || color1.G != (byte)color2.G || color1.B != (byte)color2.B;
+        }
+
+
+        internal void CheckAndUpdateSaveButton_EnabledStatus()
+        {
+            bool shouldBeEnabled = !IsColorSettingsSameAsConfig(MainWindow.SavedConfig);
+            // Only update property if the value changes to avoid unnecessary notifications/cycles
+            if (_isSaveButtonEnabled != shouldBeEnabled)
+            {
+                IsSaveButtonEnabled = shouldBeEnabled; // Use the property setter
+                OnPropertyChanged(nameof(IsUndoButtonEnabled)); // Undo is opposite of Save
+            }
         }
 
         private bool _isStartupEnabled;
@@ -430,18 +711,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 SetProperty(ref _isSaveButtonEnabled, value);
             }
         }
-        internal void CheckAndUpdateSaveButton_EnabledStatus()
-        {
-            // Enable it if the colors are not the same as the config
-            bool newEnabledStatus = !IsColorSettingsSameAsConfig(config: MainWindow.SavedConfig);
 
-            // Only update the property if it doesn't already match the new enabled status
-            if (IsSaveButtonEnabled != newEnabledStatus)
-            {
-                IsSaveButtonEnabled = newEnabledStatus;
-                OnPropertyChanged(nameof(IsSaveButtonEnabled));
-            }
-        }
         public bool IsUndoButtonEnabled => !IsSaveButtonEnabled;
 
         // Info about the attached device
@@ -630,15 +900,6 @@ namespace Dynamic_Lighting_Key_Indicator
             private set => SetProperty(ref _numLockOffGlyph, value);
         }
 
-        // Color backgrounds for buttons
-        public SolidColorBrush ScrollLockOnBrush => GetBrushFromColor(ScrollLockOnColor);
-        public SolidColorBrush ScrollLockOffBrush => GetBrushFromColor(ScrollLockOffColor);
-        public SolidColorBrush CapsLockOnBrush => GetBrushFromColor(CapsLockOnColor);
-        public SolidColorBrush CapsLockOffBrush => GetBrushFromColor(CapsLockOffColor);
-        public SolidColorBrush NumLockOnBrush => GetBrushFromColor(NumLockOnColor);
-        public SolidColorBrush NumLockOffBrush => GetBrushFromColor(NumLockOffColor);
-        public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
-
 
         private int _brightness;
         public int Brightness
@@ -652,102 +913,6 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        private Color _scrollLockOnColor;
-        public Color ScrollLockOnColor
-        {
-            get => _scrollLockOnColor;
-            set
-            {
-                if (SetProperty(ref _scrollLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(ScrollLockOnBrush));
-
-                }
-            }
-        }
-
-        private Color _scrollLockOffColor;
-        public Color ScrollLockOffColor
-        {
-            get => _scrollLockOffColor;
-            set
-            {
-                if (SetProperty(ref _scrollLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(ScrollLockOffBrush));
-
-                }
-            }
-        }
-
-        private Color _capsLockOnColor;
-        public Color CapsLockOnColor
-        {
-            get => _capsLockOnColor;
-            set
-            {
-                if (SetProperty(ref _capsLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(CapsLockOnBrush));
-
-                }
-            }
-        }
-
-        private Color _capsLockOffColor;
-        public Color CapsLockOffColor
-        {
-            get => _capsLockOffColor;
-            set
-            {
-                if (SetProperty(ref _capsLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(CapsLockOffBrush));
-
-                }
-            }
-        }
-
-        private Color _numLockOnColor;
-        public Color NumLockOnColor
-        {
-            get => _numLockOnColor;
-            set
-            {
-                if (SetProperty(ref _numLockOnColor, value))
-                {
-                    OnPropertyChanged(nameof(NumLockOnBrush));
-
-                }
-            }
-        }
-
-        private Color _numLockOffColor;
-        public Color NumLockOffColor
-        {
-            get => _numLockOffColor;
-            set
-            {
-                if (SetProperty(ref _numLockOffColor, value))
-                {
-                    OnPropertyChanged(nameof(NumLockOffBrush));
-
-                }
-            }
-        }
-
-        private Color _defaultColor;
-        public Color DefaultColor
-        {
-            get => _defaultColor;
-            set
-            {
-                if (SetProperty(ref _defaultColor, value))
-                {
-                    OnPropertyChanged(nameof(DefaultColorBrush));
-                }
-            }
-        }
 
         // ------ Other methods ------
         public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
@@ -798,24 +963,6 @@ namespace Dynamic_Lighting_Key_Indicator
             };
         }
 
-        public bool GetSyncSetting_ByButtonName(string buttonName)
-        {
-            return buttonName switch
-            {
-                ButtonName.NumLockOn => SyncNumLockOnColor,
-                ButtonName.NumLockOff => SyncNumLockOffColor,
-                ButtonName.CapsLockOn => SyncCapsLockOnColor,
-                ButtonName.CapsLockOff => SyncCapsLockOffColor,
-                ButtonName.ScrollLockOn => SyncScrollLockOnColor,
-                ButtonName.ScrollLockOff => SyncScrollLockOffColor,
-                _ => false,
-            };
-        }
-
-        public bool GetSyncSetting_ByButtonObject(Button button)
-        {
-            return GetSyncSetting_ByButtonName(button.Name);
-        }
 
         public static readonly Thickness ActiveThickness = new Thickness(1);
         public static readonly Thickness InactiveThickness = new Thickness(0);
@@ -903,257 +1050,11 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public void UpdateLastKnownKeyState(VK key, bool state)
-        {
-            switch (key)
-            {
-                case VK.NumLock:
-                    LastKnownNumLockState = state;
-                    break;
-                case VK.CapsLock:
-                    LastKnownCapsLockState = state;
-                    break;
-                case VK.ScrollLock:
-                    LastKnownScrollLockState = state;
-                    break;
-            }
-        }
-
-        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock)
-        {
-            LastKnownNumLockState = numLock;
-            LastKnownCapsLockState = capsLock;
-            LastKnownScrollLockState = scrollLock;
-        }
-
-        public static void StaticUpdateLastKnownKeyState(MonitoredKey key)
-        {
-            if (mainViewModelInstance != null)
-                mainViewModelInstance.UpdateLastKnownKeyState(key.key, key.IsOn());
-        }
-
         //--------------------------------------------------------------
 
         public const string LinkedGlyph = "\uE71B";     // Chain link glyph
         public const string UnlinkedGlyph = "";         // No glyph if unlinked
 
-        public string GetSyncGlyph_ByButtonObject(Button button)
-        {
-            return GetSyncSetting_ByButtonObject(button) ? LinkedGlyph : UnlinkedGlyph;
-        }
-
-        internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig)
-        {
-            StartMinimizedToTray = userConfig.StartMinimizedToTray;
-        }
-
-        public Color GetColorFromString(string color)
-        {
-            if (string.IsNullOrEmpty(color))
-            {
-                // If the color is null or empty, return the default color
-                return DefaultColor;
-            }
-
-            if (color.StartsWith('#'))
-            {
-                color = color[1..]; // Remove the hash symbol / first character
-            }
-            byte r = Convert.ToByte(color[..2], 16);
-            byte g = Convert.ToByte(color.Substring(startIndex: 2, length: 2), 16);
-            byte b = Convert.ToByte(color.Substring(startIndex: 4, length: 2), 16);
-            return Color.FromArgb(a: 255, r, g, b);
-        }
-
-        public static string AsString(Color color)
-        {
-            return "#" + color.R.ToString("X2") + color.G.ToString("X2") + color.B.ToString("X2");
-        }
-
-        internal void SetAllColorSettingsFromUserConfig(UserConfig config, MainWindow window)
-        {
-            if (config == null || config.MonitoredKeysAndColors == null)
-            {
-                throw new ArgumentNullException(nameof(config), "UserConfig cannot be null.");
-            }
-
-            Brightness = config.Brightness;
-            DefaultColor = Color.FromArgb(255, (byte)config.StandardKeyColor.R, (byte)config.StandardKeyColor.G, (byte)config.StandardKeyColor.B);
-
-            foreach (MonitoredKey monitoredKey in config.MonitoredKeysAndColors)
-            {
-                Color onColor;
-                Color offColor;
-                bool onColorTiedToStandard = monitoredKey.onColorTiedToStandard;
-                bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
-
-                // Sync colors to default if applicable
-                if (onColorTiedToStandard)
-                    onColor = DefaultColor;
-                else
-                    onColor = Color.FromArgb(255, (byte)monitoredKey.onColor.R, (byte)monitoredKey.onColor.G, (byte)monitoredKey.onColor.B);
-
-                if (offColorTiedToStandard)
-                    offColor = DefaultColor;
-                else
-                    offColor = Color.FromArgb(255, (byte)monitoredKey.offColor.R, (byte)monitoredKey.offColor.G, (byte)monitoredKey.offColor.B);
-
-                // Actually apply the colors to the correct properties in the view model after processing
-                switch (monitoredKey.key)
-                {
-                    case VK.NumLock:
-                        NumLockOnColor = onColor;
-                        NumLockOffColor = offColor;
-                        SyncNumLockOnColor = onColorTiedToStandard;
-                        SyncNumLockOffColor = offColorTiedToStandard;
-                        break;
-                    case VK.CapsLock:
-                        CapsLockOnColor = onColor;
-                        CapsLockOffColor = offColor;
-                        SyncCapsLockOnColor = onColorTiedToStandard;
-                        SyncCapsLockOffColor = offColorTiedToStandard;
-                        break;
-                    case VK.ScrollLock:
-                        ScrollLockOnColor = onColor;
-                        ScrollLockOffColor = offColor;
-                        SyncScrollLockOnColor = onColorTiedToStandard;
-                        SyncScrollLockOffColor = offColorTiedToStandard;
-                        break;
-                }
-            }
-
-            ColorSetter.DefineKeyboardMainColor(DefaultColor);
-
-            window.ForceUpdateButtonBackgrounds();
-            window.ForceUpdateAllButtonGlyphs();
-        }
-
-        // Set all the colors from the text boxes in the GUI. This might be redundant now that the properties are bound to the text boxes.
-        public void UpdateAllColorSettingsFromGUI()
-        {
-            // Sync to defaults if set to do so. Janky but whatever
-            if (SyncNumLockOnColor)
-                NumLockOnColor = DefaultColor;
-            if (SyncNumLockOffColor)
-                NumLockOffColor = DefaultColor;
-            if (SyncCapsLockOnColor)
-                CapsLockOnColor = DefaultColor;
-            if (SyncCapsLockOffColor)
-                CapsLockOffColor = DefaultColor;
-            if (SyncScrollLockOnColor)
-                ScrollLockOnColor = DefaultColor;
-            if (SyncScrollLockOffColor)
-                ScrollLockOffColor = DefaultColor;
-
-            ColorSetter.DefineKeyboardMainColor(DefaultColor);
-        }
-
-        public static SolidColorBrush GetBrushFromColor(Color color)
-        {
-            return new SolidColorBrush(color);
-        }
-
-        internal bool IsColorSettingsSameAsConfig(UserConfig config)
-        {
-            // ----------------------- Local Functions -----------------------
-            bool ColorsAreDifferent(Color color1, RGBTuple color2)
-            {
-                if (!color1.R.Equals((byte)color2.R))
-                    return true;
-                else if (!color1.G.Equals((byte)color2.G))
-                    return true;
-                else if (!color1.B.Equals((byte)color2.B))
-                    return true;
-                else
-                    return false;
-            }
-
-            MonitoredKey? GetMonitoredKeyObj(VK key)
-            {
-                MonitoredKey? keyObj = config.MonitoredKeysAndColors.Find(x => x.key == key);
-                return keyObj;
-            }
-
-            //  ---------------------------------------------------------------
-
-            if (config == null)
-            {
-                Debug.WriteLine("IsColorSettingsSameAsConfig: Config is null.");
-                return false;
-            }
-
-            MonitoredKey? CapsLockKey = GetMonitoredKeyObj(VK.CapsLock);
-            MonitoredKey? NumLockKey = GetMonitoredKeyObj(VK.NumLock);
-            MonitoredKey? ScrollLockKey = GetMonitoredKeyObj(VK.ScrollLock);
-
-            // If any of the keys are null, return false
-            if (CapsLockKey == null || NumLockKey == null || ScrollLockKey == null)
-                return false;
-
-            // Brightness
-            if (Brightness != config.Brightness)
-                return false;
-
-            if (ColorsAreDifferent(ScrollLockOnColor, ScrollLockKey.onColor))
-                return false;
-            if (ColorsAreDifferent(ScrollLockOffColor, ScrollLockKey.offColor))
-                return false;
-            if (ColorsAreDifferent(CapsLockOnColor, CapsLockKey.onColor))
-                return false;
-            if (ColorsAreDifferent(CapsLockOffColor, CapsLockKey.offColor))
-                return false;
-            if (ColorsAreDifferent(NumLockOnColor, NumLockKey.onColor))
-                return false;
-            if (ColorsAreDifferent(NumLockOffColor, NumLockKey.offColor))
-                return false;
-            if (ColorsAreDifferent(DefaultColor, config.StandardKeyColor))
-                return false;
-
-            // Sync on/off each key
-            if (SyncScrollLockOnColor != ScrollLockKey.onColorTiedToStandard)
-                return false;
-            if (SyncScrollLockOffColor != ScrollLockKey.offColorTiedToStandard)
-                return false;
-            if (SyncCapsLockOnColor != CapsLockKey.onColorTiedToStandard)
-                return false;
-            if (SyncCapsLockOffColor != CapsLockKey.offColorTiedToStandard)
-                return false;
-            if (SyncNumLockOnColor != NumLockKey.onColorTiedToStandard)
-                return false;
-            if (SyncNumLockOffColor != NumLockKey.offColorTiedToStandard)
-                return false;
-
-            // Everything matches at this point
-            return true;
-        }
-
-        internal static VK GetKeyByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(NumLockOnColor) => VK.NumLock,
-                nameof(NumLockOffColor) => VK.NumLock,
-                nameof(CapsLockOnColor) => VK.CapsLock,
-                nameof(CapsLockOffColor) => VK.CapsLock,
-                nameof(ScrollLockOnColor) => VK.ScrollLock,
-                nameof(ScrollLockOffColor) => VK.ScrollLock,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
-        }
-
-        internal static StateColorApply GetStateByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(NumLockOnColor) => StateColorApply.On,
-                nameof(NumLockOffColor) => StateColorApply.Off,
-                nameof(CapsLockOnColor) => StateColorApply.On,
-                nameof(CapsLockOffColor) => StateColorApply.Off,
-                nameof(ScrollLockOnColor) => StateColorApply.On,
-                nameof(ScrollLockOffColor) => StateColorApply.Off,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
-        }
 
         // TODO: Maybe use the properties directory or an enum instead of strings at some point but this works
         internal class ColorPropName
@@ -1176,6 +1077,39 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string ScrollLockOn = "buttonScrollLockOn";
             public const string ScrollLockOff = "buttonScrollLockOff";
         }
+
+        internal static VK GetKeyByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                ColorPropName.NumLockOn     => VK.NumLock,
+                ColorPropName.NumLockOff    => VK.NumLock,
+                ColorPropName.CapsLockOn    => VK.CapsLock,
+                ColorPropName.CapsLockOff   => VK.CapsLock,
+                ColorPropName.ScrollLockOn   => VK.ScrollLock,
+                ColorPropName.ScrollLockOff => VK.ScrollLock,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
+        }
+
+        internal static StateColorApply GetStateByPropertyName(string propertyName)
+        {
+            return propertyName switch
+            {
+                ColorPropName.NumLockOn         => StateColorApply.On,
+                ColorPropName.NumLockOff        => StateColorApply.Off,
+                ColorPropName.CapsLockOn        => StateColorApply.On,
+                ColorPropName.CapsLockOff       => StateColorApply.Off,
+                ColorPropName.ScrollLockOn      => StateColorApply.On,
+                ColorPropName.ScrollLockOff     => StateColorApply.Off,
+                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
+            };
+        }
+
+        public KeyIndicatorState ScrollLockState => KeyStates[ToggleAbleKeys.ScrollLock];
+        public KeyIndicatorState CapsLockState => KeyStates[ToggleAbleKeys.CapsLock];
+        public KeyIndicatorState NumLockState => KeyStates[ToggleAbleKeys.NumLock];
+
 
     } // ----------------------- End of MainViewModel -----------------------
 
