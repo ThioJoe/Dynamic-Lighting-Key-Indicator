@@ -80,6 +80,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static bool FetchKeyState(int vkCode)
         {
+            //TODO: Here add more handling depending on key type like if it's a media key or a toggle key
             bool state = ((GetKeyState(vkCode) & 1) == 1);
             return state;
         }

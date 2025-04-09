@@ -761,9 +761,9 @@ public enum VKey: Int32
     Comma = 0xBC,
 
     // ---------------- Duplicate Definitions ----------------
-    NumLock = 0x90,
-    CapsLock = 0x14,
-    ScrollLock = 0x91,
+    NumLock = NumberKeyLock,
+    CapsLock = CapitalLock,
+    ScrollLock = Scroll,
 
     // ----------------- Other -----------------------
     Null = -1, // No key. Could also use None but this might have specific meaning in my app

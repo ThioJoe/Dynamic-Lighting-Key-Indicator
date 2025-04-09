@@ -45,7 +45,7 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
 
-            foreach (VKey key in Enum.GetValues(typeof(VKey)))
+            foreach (VKey key in Enum.GetValues<ToggleAbleKeys>())
             {
                 // Pass the MainViewModel's DispatcherQueue
                 KeyStates.Add(key, new KeyIndicatorGUI(this._dispatcherQueue));

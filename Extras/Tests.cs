@@ -70,8 +70,8 @@ internal class Tests
         List<VKey> allVKs = Enum.GetValues<VKey>().ToList();
 
         // Get the list of all virtual key codes and their corresponding integer values
-        List<(VirtualKey, int)> VKCodesTupleList = [];
-        foreach (VirtualKey vk in allVKs)
+        List<(VKey, int)> VKCodesTupleList = [];
+        foreach (VKey vk in allVKs)
         {
             VKCodesTupleList.Add((vk, (int)vk));
         }
@@ -85,11 +85,11 @@ internal class Tests
         }
 
         // Get the indices that correspond to each virtual key
-        List<(VirtualKey, int[])> keyIndicesDict = [];
-        List<VirtualKey> keysWithNoCorrespondingLight = [];
+        List<(VKey, int[])> keyIndicesDict = [];
+        List<VKey> keysWithNoCorrespondingLight = [];
         foreach (var (vk, vkInt) in VKCodesTupleList)
         {
-            int[] indices = lampArray.GetIndicesForKey(vk);
+            int[] indices = lampArray.GetIndicesForKey((VirtualKey)vk);
             if (indices.Length > 0)
                 keyIndicesDict.Add((vk, indices));
             else
@@ -103,9 +103,9 @@ internal class Tests
             List<VirtualKey> keys = [];
             foreach (var (vk, vkInt) in VKCodesTupleList)
             {
-                int[] keyIndices = lampArray.GetIndicesForKey(vk);
+                int[] keyIndices = lampArray.GetIndicesForKey((VirtualKey)vk);
                 if (keyIndices.Length > 0 && keyIndices.Any(index => indices.Contains(index)))
-                    keys.Add(vk);
+                    keys.Add((VirtualKey)vk);
             }
             purposeKeysDict.Add(purpose, keys);
         }
@@ -142,10 +142,10 @@ internal class Tests
             }
         }
 
-        List<(int, VirtualKey)> indexToVKTupleList = [];
-        foreach (var (vk, vkInt) in VKCodesTupleList)
+        List<(int, VKey)> indexToVKTupleList = [];
+        foreach ((VKey vk, int vkInt) in VKCodesTupleList)
         {
-            int[] indices = lampArray.GetIndicesForKey(vk);
+            int[] indices = lampArray.GetIndicesForKey((VirtualKey)vk);
             foreach (int index in indices)
             {
                 indexToVKTupleList.Add((index, vk));

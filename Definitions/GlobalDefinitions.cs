@@ -2,7 +2,7 @@
 // Set global aliases for commonly used types
 global using DWORD = System.UInt32;        // 4 Bytes, aka uint, uint32
 global using RGBTuple = (int R, int G, int B);
-global using TK = Dynamic_Lighting_Key_Indicator.ToggleAbleKeys;
+
 //global using VKey = System.Int32;         // VirtualKey
 
 // Set default namespaces for certain types
@@ -247,13 +247,13 @@ namespace Dynamic_Lighting_Key_Indicator
             return Color.FromArgb(255, (byte)onColor.R, (byte)onColor.G, (byte)onColor.B);
         }
 
-        public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> keys)
+        public static void DefineAllMonitoredKeysAndColors(List<MonitoredKey> monitorTogglekeys)
         {
-            KeyStatesHandler.monitoredKeys = keys;
+            KeyStatesHandler.monitoredKeys = monitorTogglekeys;
 
             // Create a dictionary for faster lookups
             KeyStatesHandler.monitoredKeysDict = [];
-            foreach (MonitoredKey key in keys)
+            foreach (MonitoredKey key in monitorTogglekeys)
             {
                 KeyStatesHandler.monitoredKeysDict.Add(key.key, key);
             }

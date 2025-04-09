@@ -128,7 +128,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // Set up keyboard hook
             #pragma warning disable IDE0028
-            MonitoredKey.DefineAllMonitoredKeysAndColors(keys: new List<MonitoredKey> {
+            MonitoredKey.DefineAllMonitoredKeysAndColors(monitorTogglekeys: new List<MonitoredKey> {
                 new(ToggleAbleKeys.NumLock,    onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.NumLock),    offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.NumLock)),
                 new(ToggleAbleKeys.CapsLock,   onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.CapsLock),   offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.CapsLock)),
                 new(ToggleAbleKeys.ScrollLock, onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.ScrollLock), offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.ScrollLock))
@@ -565,17 +565,16 @@ namespace Dynamic_Lighting_Key_Indicator
             }
 
             // TODO: Add binding to new settings to link on/off colors to standard color
-            List<MonitoredKey> monitoredKeysList = [
+            List<MonitoredKey> monitoredToggleKeysList = [
                 new(ToggleAbleKeys.NumLock,    onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OnColor,    offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OffColor,      onColorTiedToStandard: ViewModel.NumLockState.SyncOnColor,    offColorTiedToStandard: ViewModel.NumLockState.SyncOffColor),
                 new(ToggleAbleKeys.CapsLock,   onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OnColor,   offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.CapsLockState.SyncOnColor,   offColorTiedToStandard: ViewModel.CapsLockState.SyncOffColor),
                 new(ToggleAbleKeys.ScrollLock, onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OnColor, offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.ScrollLockState.SyncOnColor, offColorTiedToStandard: ViewModel.ScrollLockState.SyncOffColor)
             ];
+            MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredToggleKeysList);
+
 
             RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
-
-            MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredKeysList);
-            //KeyStatesHandler.UpdateMonitoredKeyColorSettings(monitoredKeysList);
-            currentConfig = new UserConfig(defaultColor, monitoredKeysList, ViewModel.Brightness);
+            currentConfig = new UserConfig(defaultColor, monitoredToggleKeysList, ViewModel.Brightness);
 
             // If there was a device attached, update the colors
             if (ColorSetter.CurrentDevice != null)
@@ -832,16 +831,17 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             // Get the button object
             Button button = (Button)sender;
-            string keyName = (string)button.Tag;
             Color onColor;
             Color offColor;
             bool syncOnColor;
             bool syncOffColor;
             KeyIndicatorGUI? keyState = null;
 
-            foreach (VKey key in Enum.GetValues(typeof(ToggleAbleKeys)))
+            VKey keyFromButton = ButtonParameters.GetKeyName(button);
+
+            foreach (VKey key in Enum.GetValues<VKey>())
             {
-                if (key.ToString() == keyName)
+                if (key == keyFromButton)
                 {
                     keyState = ViewModel.KeyStates[key];
                     break;
