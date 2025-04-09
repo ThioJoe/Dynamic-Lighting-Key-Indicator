@@ -26,7 +26,6 @@ namespace Dynamic_Lighting_Key_Indicator
         private static MainViewModel? mainViewModelInstance;
         public Dictionary<VKey, KeyIndicatorGUI> KeyStates { get; } = [];
 
-
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
         {
             _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
@@ -61,7 +60,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private void UpdateSyncedColorsToDefault()
         {
-            foreach (var kvp in KeyStates)
+            foreach (KeyValuePair<VKey, KeyIndicatorGUI> kvp in KeyStates)
             {
                 if (kvp.Value.SyncOnColor && kvp.Value.OnColor != DefaultColor)
                 {

@@ -569,14 +569,23 @@ namespace Dynamic_Lighting_Key_Indicator
                 ViewModel.SetAllColorSettingsFromUserConfig(config: newConfig, window: this);
             }
 
-            // TODO: Add binding to new settings to link on/off colors to standard color
-            List<MonitoredKey> monitoredToggleKeysList = [
-                new(VKey.NumLock,    onColor: ViewModel.KeyStates[VKey.NumLock].OnColor,    offColor: ViewModel.KeyStates[VKey.NumLock].OffColor,      onColorTiedToStandard: ViewModel.NumLockState.SyncOnColor,    offColorTiedToStandard: ViewModel.NumLockState.SyncOffColor),
-                new(VKey.CapsLock,   onColor: ViewModel.KeyStates[VKey.CapsLock].OnColor,   offColor: ViewModel.KeyStates[VKey.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.CapsLockState.SyncOnColor,   offColorTiedToStandard: ViewModel.CapsLockState.SyncOffColor),
-                new(VKey.ScrollLock, onColor: ViewModel.KeyStates[VKey.ScrollLock].OnColor, offColor: ViewModel.KeyStates[VKey.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.ScrollLockState.SyncOnColor, offColorTiedToStandard: ViewModel.ScrollLockState.SyncOffColor)
-            ];
-            MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredToggleKeysList);
+            List<MonitoredKey> monitoredToggleKeysList = new List<MonitoredKey>();
+            // Programattically add them
+            foreach (ToggleAbleKeys key in Enum.GetValues<ToggleAbleKeys>())
+            {
+                VKey vkKey = (VKey)key;
 
+                MonitoredKey monitoredKey = new(
+                    vkKey, 
+                    onColor: ViewModel.KeyStates[vkKey].OnColor, 
+                    offColor: ViewModel.KeyStates[vkKey].OffColor, 
+                    onColorTiedToStandard: ViewModel.KeyStates[vkKey].SyncOnColor, 
+                    offColorTiedToStandard: ViewModel.KeyStates[vkKey].SyncOffColor
+                );
+                monitoredToggleKeysList.Add(monitoredKey);
+            }
+
+            MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredToggleKeysList);
 
             RGBTuple defaultColor = (ViewModel.DefaultColor.R, ViewModel.DefaultColor.G, ViewModel.DefaultColor.B);
             currentConfig = new UserConfig(defaultColor, monitoredToggleKeysList, ViewModel.Brightness);
