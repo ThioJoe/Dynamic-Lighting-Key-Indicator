@@ -43,6 +43,8 @@ namespace Dynamic_Lighting_Key_Indicator
         static UserConfig currentConfig = new();
         static UserConfig configSavedOnDisk = new();
 
+        
+
         // Related to known / currently attached LampArrays
         public readonly ObservableCollection<DeviceInformation> availableDevices = [];
         private static LampArrayInfo? _attachedDevice = null;
@@ -73,6 +75,9 @@ namespace Dynamic_Lighting_Key_Indicator
         // Imported Windows API functions
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, int wParam, IntPtr lParam);
+
+        List<Button> ColorButtonsList => [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff, buttonPlaybackOff, buttonPlaybackOn];
+        List<Button> ColorButtonsList_InlcudingDefault => ColorButtonsList.Concat([buttonDefaultColor]).ToList();
 
         // --------------------------------------------------- CONSTRUCTOR ---------------------------------------------------
         public MainWindow(string[] args)
@@ -126,14 +131,7 @@ namespace Dynamic_Lighting_Key_Indicator
             ViewModel.DebugFileLoggingEnabled = currentConfig.DebugLoggingEnabled;
             ColorSetter.DefineKeyboardMainColor(currentConfig.StandardKeyColor);
 
-            // Set up keyboard hook
-            #pragma warning disable IDE0028
-            MonitoredKey.DefineAllMonitoredKeysAndColors(monitorTogglekeys: new List<MonitoredKey> {
-                new(VKey.NumLock,    onColor: currentConfig.GetVKOnColor(VKey.NumLock),    offColor: currentConfig.GetVKOffColor(VKey.NumLock)),
-                new(VKey.CapsLock,   onColor: currentConfig.GetVKOnColor(VKey.CapsLock),   offColor: currentConfig.GetVKOffColor(VKey.CapsLock)),
-                new(VKey.ScrollLock, onColor: currentConfig.GetVKOnColor(VKey.ScrollLock), offColor: currentConfig.GetVKOffColor(VKey.ScrollLock))
-            });
-            #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
+            MonitoredKey.DefineAllMonitoredKeysAndColors(currentConfig.GetDefinitionsFromConfigFile());
 
             ForceUpdateButtonBackgrounds(); // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
             ForceUpdateAllButtonGlyphs();   // TODO: These might not be necessary they're also called from SetAllColorSettingsFromUserConfig
@@ -158,8 +156,6 @@ namespace Dynamic_Lighting_Key_Indicator
                 this.Activate();
             }
 
-            
-
         }
 
         // ------------------------------- Getters / Setters -------------------------------
@@ -177,6 +173,8 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // ------------------------------- Methods -------------------------------
+
+        
 
         public static StartupTaskState ChangWindowsStartupState(bool enableAtStartupRequestedState)
         {
@@ -476,13 +474,20 @@ namespace Dynamic_Lighting_Key_Indicator
         // This doesn't work when put in the viewmodel class for some reason
         internal void ForceUpdateButtonBackgrounds()
         {
-            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.NumLock].OnColor);
-            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.NumLock].OffColor);
-            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.CapsLock].OnColor);
-            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.CapsLock].OffColor);
-            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.ScrollLock].OnColor);
-            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.ScrollLock].OffColor);
-            buttonDefaultColor.Background = new SolidColorBrush(ViewModel.DefaultColor);
+            foreach (Button button in ColorButtonsList_InlcudingDefault)
+            {
+                if (button == null)
+                    return;
+                VKey key = ButtonParameters.GetKeyName(button);
+                StateColorApply colorState = ButtonParameters.GetColorState(button);
+
+                if (key != VKey.Null && colorState != StateColorApply.Null)
+                {
+                    // Get the color from the ViewModel
+                    Color color = ViewModel.KeyStates[key].GetStateColor(colorState);
+                    button.Background = new SolidColorBrush(color);
+                }
+            }
         }
 
         // Determine whether to use white or black text based on the background color
@@ -505,7 +510,7 @@ namespace Dynamic_Lighting_Key_Indicator
         internal void ForceUpdateAllButtonGlyphs()
         {
             // Update the sync glpyhs
-            foreach (var button in new[] { buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff })
+            foreach (Button button in ColorButtonsList)
             {
                 if (button == null)
                     return;
@@ -1188,9 +1193,9 @@ namespace Dynamic_Lighting_Key_Indicator
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
                 if (isDefault == true)
                 {
-                    List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff];
+                    //List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff];
 
-                    foreach (Button button in buttonsList) // Iterate through the list of tuples for each button
+                    foreach (Button button in ColorButtonsList_InlcudingDefault) // Iterate through the list of tuples for each button
                     {
                         if (button == null)
                             continue;

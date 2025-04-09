@@ -760,6 +760,8 @@ public enum VKey: Int32
     Tilde = 0xC0, // Tilde/Grave/Backtick key
     Comma = 0xBC,
 
+    PlayPause = 0xB3,
+
     // ---------------- Duplicate Definitions ----------------
     NumLock = NumberKeyLock,
     CapsLock = CapitalLock,

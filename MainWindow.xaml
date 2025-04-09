@@ -186,6 +186,7 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>    <!-- Key Label -->
@@ -318,17 +319,57 @@
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.NumLockState.OffGlyph, Mode=OneWay}" />
             </Button>
 
-            <!-- Default -->
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
-            <Button x:Name="buttonDefaultColor"
+            <!-- Playback -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Play/Pause:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonPlaybackOn"
                 Grid.Row="4"
+                Grid.Column="1"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.PlaybackState.OnBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="On"
+                local:ButtonParameters.KeyName="PlayPause"
+                BorderThickness="{x:Bind ViewModel.PlaybackState.OnBorderThickness, Mode=OneWay}"
+            >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.PlaybackState.OnGlyph, Mode=OneWay}" />
+                        </Button>
+            <Button x:Name="buttonPlaybackSwap"
+                Grid.Row="4"
+                Grid.Column="3"
+                Style="{StaticResource SwapButtonStyle}"
+                Click="SwapOnOffColor_Click"
+                Tag="PlaybackState"
+                local:ButtonParameters.KeyName="PlayPause"
+                >
+
+                <FontIcon Style="{StaticResource SwapIconGlyphStyle}" />
+                        </Button>
+            <Button x:Name="buttonPlaybackOff"
+                Grid.Row="4"
+                Grid.Column="4"
+                Style="{StaticResource ColorButtonStyle}"
+                Background="{x:Bind ViewModel.PlaybackState.OffBrush, Mode=OneWay}"
+                Click="ColorButton_Click"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="Off"
+                local:ButtonParameters.KeyName="PlayPause"
+                BorderThickness="{x:Bind ViewModel.PlaybackState.OffBorderThickness, Mode=OneWay}"
+                >
+                <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.PlaybackState.OffGlyph, Mode=OneWay}" />
+            </Button>
+
+            <!-- Default -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Text="Default:" VerticalAlignment="Center" Margin="0,5,10,5"/>
+            <Button x:Name="buttonDefaultColor"
+                Grid.Row="5"
                 Grid.Column="1"
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.DefaultColorBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
                 Tag="DefaultColor"
             />
-            <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>
+            <!-- <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding DefaultColorHex}" Margin="5,2"/>-->
         </Grid>
 
         <!-- Brightness Slider -->

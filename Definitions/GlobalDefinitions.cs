@@ -68,12 +68,7 @@ namespace Dynamic_Lighting_Key_Indicator
         NumLock = 0x90,
         CapsLock = 0x14,
         ScrollLock = 0x91,
-    }
-
-    public enum SpecialKeys : Int32
-    {
         Playback = 0xB3,
-        Null = 0x00,
     }
 
     public enum StateColorApply

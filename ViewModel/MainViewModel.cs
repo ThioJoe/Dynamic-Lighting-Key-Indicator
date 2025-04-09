@@ -104,21 +104,17 @@ namespace Dynamic_Lighting_Key_Indicator
             return false; // Default or throw exception
         }
 
-        // Simplified methods to get sync settings based on button name (if still needed)
-        public bool GetSyncSetting_ByButtonName(string buttonName)
+        public bool GetSyncSetting_ByButtonObject(Button button)
         {
-            return buttonName switch
+            VKey key = ButtonParameters.GetKeyName(button);
+            StateColorApply state = ButtonParameters.GetColorState(button);
+            return state switch
             {
-                ButtonName.NumLockOn => GetKeySyncSetting(VKey.NumLock, true),
-                ButtonName.NumLockOff => GetKeySyncSetting(VKey.NumLock, false),
-                ButtonName.CapsLockOn => GetKeySyncSetting(VKey.CapsLock, true),
-                ButtonName.CapsLockOff => GetKeySyncSetting(VKey.CapsLock, false),
-                ButtonName.ScrollLockOn => GetKeySyncSetting(VKey.ScrollLock, true),
-                ButtonName.ScrollLockOff => GetKeySyncSetting(VKey.ScrollLock, false),
+                StateColorApply.On => GetKeySyncSetting(key, true),
+                StateColorApply.Off => GetKeySyncSetting(key, false),
                 _ => false,
             };
         }
-        public bool GetSyncSetting_ByButtonObject(Button button) => GetSyncSetting_ByButtonName(button.Name);
 
         // Update the border thickness based on the actual key state
         public void UpdateLastKnownKeyState(VKey key, bool state)
@@ -158,25 +154,15 @@ namespace Dynamic_Lighting_Key_Indicator
         private Color _defaultColor;
 
         public Color DefaultColor
-
         {
-
             get => _defaultColor;
-
             set
-
             {
-
                 if (SetProperty(ref _defaultColor, value))
-
                 {
-
                     OnPropertyChanged(nameof(DefaultColorBrush));
-
                 }
-
             }
-
         }
 
         public SolidColorBrush DefaultColorBrush => GetBrushFromColor(DefaultColor);
@@ -767,94 +753,10 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
-        {
-            // Update the relevant sync setting in ViewModel based on the colorPropertyName
-            switch (colorPropertyName)
-            {
-                case ColorPropName.NumLockOn:
-                    NumLockState.SyncOnColor = syncSetting;
-                    break;
-                case ColorPropName.NumLockOff:
-                    NumLockState.SyncOffColor = syncSetting;
-
-                    break;
-                case ColorPropName.CapsLockOn:
-                    CapsLockState.SyncOnColor = syncSetting;
-
-                    break;
-                case ColorPropName.CapsLockOff:
-                    CapsLockState.SyncOffColor = syncSetting;
-
-                    break;
-                case ColorPropName.ScrollLockOn:
-                    CapsLockState.SyncOnColor = syncSetting;
-
-                    break;
-                case ColorPropName.ScrollLockOff:
-                    CapsLockState.SyncOffColor = syncSetting;
-
-                    break;
-                default:
-                    break;
-            }
-        }
-
         //--------------------------------------------------------------
 
         public const string LinkedGlyph = "\uE71B";     // Chain link glyph
         public const string UnlinkedGlyph = "";         // No glyph if unlinked
-
-
-        // TODO: Maybe use the properties directory or an enum instead of strings at some point but this works
-        internal class ColorPropName
-        {
-            public const string NumLockOn = "NumLockOnColor";
-            public const string NumLockOff = "NumLockOffColor";
-            public const string CapsLockOn = "CapsLockOnColor";
-            public const string CapsLockOff = "CapsLockOffColor";
-            public const string ScrollLockOn = "ScrollLockOnColor";
-            public const string ScrollLockOff = "ScrollLockOffColor";
-            public const string DefaultColor = "DefaultColor";
-        }
-
-        internal class ButtonName
-        {
-            public const string NumLockOn = "buttonNumLockOn";
-            public const string NumLockOff = "buttonNumLockOff";
-            public const string CapsLockOn = "buttonCapsLockOn";
-            public const string CapsLockOff = "buttonCapsLockOff";
-            public const string ScrollLockOn = "buttonScrollLockOn";
-            public const string ScrollLockOff = "buttonScrollLockOff";
-        }
-
-        internal static VKey GetKeyByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                ColorPropName.NumLockOn     => VKey.NumLock,
-                ColorPropName.NumLockOff    => VKey.NumLock,
-                ColorPropName.CapsLockOn    => VKey.CapsLock,
-                ColorPropName.CapsLockOff   => VKey.CapsLock,
-                ColorPropName.ScrollLockOn   => VKey.ScrollLock,
-                ColorPropName.ScrollLockOff => VKey.ScrollLock,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
-        }
-
-        internal static StateColorApply GetStateByPropertyName(string propertyName)
-        {
-            return propertyName switch
-            {
-                ColorPropName.NumLockOn         => StateColorApply.On,
-                ColorPropName.NumLockOff        => StateColorApply.Off,
-                ColorPropName.CapsLockOn        => StateColorApply.On,
-                ColorPropName.CapsLockOff       => StateColorApply.Off,
-                ColorPropName.ScrollLockOn      => StateColorApply.On,
-                ColorPropName.ScrollLockOff     => StateColorApply.Off,
-                _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
-            };
-        }
 
         public KeyIndicatorGUI? GetKeyIndicatorStateByKey(VKey key)
         {
@@ -872,6 +774,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public KeyIndicatorGUI ScrollLockState => KeyStates[VKey.ScrollLock];
         public KeyIndicatorGUI CapsLockState => KeyStates[VKey.CapsLock];
         public KeyIndicatorGUI NumLockState => KeyStates[VKey.NumLock];
+        public KeyIndicatorGUI PlaybackState => KeyStates[VKey.PlayPause];
 
 
     } // ----------------------- End of MainViewModel -----------------------
