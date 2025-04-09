@@ -193,7 +193,7 @@ namespace Dynamic_Lighting_Key_Indicator
     public class MonitoredKey
     {
         [JsonInclude]
-        public ToggleAbleKeys key;
+        public VKey key;
         [JsonInclude]
         public RGBTuple offColor;
         [JsonInclude]
@@ -206,7 +206,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public bool IsOn() => KeyStatesHandler.FetchKeyState((int)key);
 
         [JsonConstructor]
-        public MonitoredKey(ToggleAbleKeys key, RGBTuple onColor, RGBTuple offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+        public MonitoredKey(VKey key, RGBTuple onColor, RGBTuple offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
         {
             this.key = key;
             this.offColor = offColor;
@@ -215,7 +215,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.offColorTiedToStandard = offColorTiedToStandard;
         }
 
-        public MonitoredKey(ToggleAbleKeys key, Color onColor, Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
+        public MonitoredKey(VKey key, Color onColor, Color offColor, bool onColorTiedToStandard = false, bool offColorTiedToStandard = false)
         {
             this.key = key;
             this.onColor = (onColor.R, onColor.G, onColor.B);
@@ -224,7 +224,7 @@ namespace Dynamic_Lighting_Key_Indicator
             this.offColorTiedToStandard = offColorTiedToStandard;
         }
 
-        public MonitoredKey(ToggleAbleKeys key)
+        public MonitoredKey(VKey key)
         {
             this.key = key;
             this.offColor = UserConfig.DefaultStandardKeyColor;

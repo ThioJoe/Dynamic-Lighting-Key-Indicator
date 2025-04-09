@@ -129,9 +129,9 @@ namespace Dynamic_Lighting_Key_Indicator
             // Set up keyboard hook
             #pragma warning disable IDE0028
             MonitoredKey.DefineAllMonitoredKeysAndColors(monitorTogglekeys: new List<MonitoredKey> {
-                new(ToggleAbleKeys.NumLock,    onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.NumLock),    offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.NumLock)),
-                new(ToggleAbleKeys.CapsLock,   onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.CapsLock),   offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.CapsLock)),
-                new(ToggleAbleKeys.ScrollLock, onColor: currentConfig.GetVKOnColor(ToggleAbleKeys.ScrollLock), offColor: currentConfig.GetVKOffColor(ToggleAbleKeys.ScrollLock))
+                new(VKey.NumLock,    onColor: currentConfig.GetVKOnColor(VKey.NumLock),    offColor: currentConfig.GetVKOffColor(VKey.NumLock)),
+                new(VKey.CapsLock,   onColor: currentConfig.GetVKOnColor(VKey.CapsLock),   offColor: currentConfig.GetVKOffColor(VKey.CapsLock)),
+                new(VKey.ScrollLock, onColor: currentConfig.GetVKOnColor(VKey.ScrollLock), offColor: currentConfig.GetVKOffColor(VKey.ScrollLock))
             });
             #pragma warning restore IDE0028 // Disable message to simplify collection initialization. I want to keep the clarity of what type 'keys' is
 
@@ -476,12 +476,12 @@ namespace Dynamic_Lighting_Key_Indicator
         // This doesn't work when put in the viewmodel class for some reason
         internal void ForceUpdateButtonBackgrounds()
         {
-            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OnColor);
-            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OffColor);
-            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OnColor);
-            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OffColor);
-            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OnColor);
-            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OffColor);
+            buttonNumLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.NumLock].OnColor);
+            buttonNumLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.NumLock].OffColor);
+            buttonCapsLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.CapsLock].OnColor);
+            buttonCapsLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.CapsLock].OffColor);
+            buttonScrollLockOn.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.ScrollLock].OnColor);
+            buttonScrollLockOff.Background = new SolidColorBrush(ViewModel.KeyStates[VKey.ScrollLock].OffColor);
             buttonDefaultColor.Background = new SolidColorBrush(ViewModel.DefaultColor);
         }
 
@@ -566,9 +566,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
             // TODO: Add binding to new settings to link on/off colors to standard color
             List<MonitoredKey> monitoredToggleKeysList = [
-                new(ToggleAbleKeys.NumLock,    onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OnColor,    offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.NumLock].OffColor,      onColorTiedToStandard: ViewModel.NumLockState.SyncOnColor,    offColorTiedToStandard: ViewModel.NumLockState.SyncOffColor),
-                new(ToggleAbleKeys.CapsLock,   onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OnColor,   offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.CapsLockState.SyncOnColor,   offColorTiedToStandard: ViewModel.CapsLockState.SyncOffColor),
-                new(ToggleAbleKeys.ScrollLock, onColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OnColor, offColor: ViewModel.KeyStates[(VKey)ToggleAbleKeys.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.ScrollLockState.SyncOnColor, offColorTiedToStandard: ViewModel.ScrollLockState.SyncOffColor)
+                new(VKey.NumLock,    onColor: ViewModel.KeyStates[VKey.NumLock].OnColor,    offColor: ViewModel.KeyStates[VKey.NumLock].OffColor,      onColorTiedToStandard: ViewModel.NumLockState.SyncOnColor,    offColorTiedToStandard: ViewModel.NumLockState.SyncOffColor),
+                new(VKey.CapsLock,   onColor: ViewModel.KeyStates[VKey.CapsLock].OnColor,   offColor: ViewModel.KeyStates[VKey.CapsLock].OffColor,     onColorTiedToStandard: ViewModel.CapsLockState.SyncOnColor,   offColorTiedToStandard: ViewModel.CapsLockState.SyncOffColor),
+                new(VKey.ScrollLock, onColor: ViewModel.KeyStates[VKey.ScrollLock].OnColor, offColor: ViewModel.KeyStates[VKey.ScrollLock].OffColor,   onColorTiedToStandard: ViewModel.ScrollLockState.SyncOnColor, offColorTiedToStandard: ViewModel.ScrollLockState.SyncOffColor)
             ];
             MonitoredKey.DefineAllMonitoredKeysAndColors(monitoredToggleKeysList);
 

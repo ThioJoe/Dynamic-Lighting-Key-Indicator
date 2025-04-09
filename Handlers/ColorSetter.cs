@@ -17,7 +17,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public static Color KeyboardMainColor => _keyboardMainColor;
         public static LampArray? CurrentDevice => _currentDevice;
         public static List<int>? MonitoredIndices => _monitoredIndices;
-        public static Dictionary<ToggleAbleKeys, int> MonitoredKeyIndicesDict { get; set; } = [];
+        public static Dictionary<VKey, int> MonitoredKeyIndicesDict { get; set; } = [];
         public static List<int> NonMonitoredKeyIndices { get; set; } = []; // Maybe make this an array later
 
         private static readonly System.Threading.Lock _lock = new();
@@ -40,7 +40,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             if (device == null) // Reset the dictionaries if device is null
             {
-                MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
+                MonitoredKeyIndicesDict = new Dictionary<VKey, int>();
                 NonMonitoredKeyIndices = new List<int>();
             }
             else
@@ -163,7 +163,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             List<int> keyIndices = [];
             keyIndices.AddRange(NonMonitoredKeyIndices);
-            keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[(ToggleAbleKeys)key]));
+            keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[(VKey)key]));
 
             lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
         }
@@ -175,7 +175,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public static void BuildMonitoredKeyIndicesDict(LampArray lampArray)
         {
-            MonitoredKeyIndicesDict = new Dictionary<ToggleAbleKeys, int>();
+            MonitoredKeyIndicesDict = new Dictionary<VKey, int>();
             NonMonitoredKeyIndices = new List<int>();
 
             // Put this within debug preprocessor directive in case I forget to comment it out

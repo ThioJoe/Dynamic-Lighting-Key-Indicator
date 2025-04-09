@@ -134,7 +134,7 @@ namespace Dynamic_Lighting_Key_Indicator
             RGBTuple standardColorFromConfig = config.StandardKeyColor;
 
             // ---------- Local Function -----------------
-            void SetKeyColor(ToggleAbleKeys key_vk, bool on, string value)
+            void SetKeyColor(VKey key_vk, bool on, string value)
             {
                 MonitoredKey? key = config.GetMonitoredKey(key_vk);
                 bool addKeyToConfig = false;
@@ -217,22 +217,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 switch (paramKey.ToLower())
                 {
                     case ParameterNames.ScrollLockOnColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.ScrollLock, on: true, value: value);
+                        SetKeyColor(key_vk: VKey.ScrollLock, on: true, value: value);
                         break;
                     case ParameterNames.ScrollLockOffColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.ScrollLock, on: false, value: value);
+                        SetKeyColor(key_vk: VKey.ScrollLock, on: false, value: value);
                         break;
                     case ParameterNames.NumLockOnColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.NumLock, on: true, value: value);
+                        SetKeyColor(key_vk: VKey.NumLock, on: true, value: value);
                         break;
                     case ParameterNames.NumLockOffColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.NumLock, on: false, value: value);
+                        SetKeyColor(key_vk: VKey.NumLock, on: false, value: value);
                         break;
                     case ParameterNames.CapsLockOnColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.CapsLock, on: true, value: value);
+                        SetKeyColor(key_vk: VKey.CapsLock, on: true, value: value);
                         break;
                     case ParameterNames.CapsLockOffColor:
-                        SetKeyColor(key_vk: ToggleAbleKeys.CapsLock, on: false, value: value);
+                        SetKeyColor(key_vk: VKey.CapsLock, on: false, value: value);
                         break;
                 }
 

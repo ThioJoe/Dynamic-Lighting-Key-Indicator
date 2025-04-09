@@ -9,7 +9,7 @@ namespace Dynamic_Lighting_Key_Indicator
     internal static class KeyStatesHandler
     {
         public static List<MonitoredKey> monitoredKeys = [];
-        public static Dictionary<ToggleAbleKeys, MonitoredKey> monitoredKeysDict = [];
+        public static Dictionary<VKey, MonitoredKey> monitoredKeysDict = [];
         public static bool rawInputWatcherActive = false;
 
         // Win32 API imports
@@ -165,7 +165,7 @@ namespace Dynamic_Lighting_Key_Indicator
                     if (rawInput.keyboard.Flags.HasFlag(_Flags.RI_KEY_BREAK))
                     {
                         // Check the dictionary
-                        if (monitoredKeysDict.TryGetValue((ToggleAbleKeys)rawInput.keyboard.VKey, out MonitoredKey? mk))
+                        if (monitoredKeysDict.TryGetValue((VKey)rawInput.keyboard.VKey, out MonitoredKey? mk))
                         {
                             Task.Run(() => ColorSetter.SetSingleMonitorKeyColor_ToKeyboard(mk));
                             //Task.Run(() => ColorSetter.SetProperColorsEveryKey_ToKeyboard());

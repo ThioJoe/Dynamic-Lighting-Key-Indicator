@@ -31,9 +31,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
         public readonly static List<MonitoredKey> DefaultMonitoredKeysAndColors =
         [
-                new(ToggleAbleKeys.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
-                new(ToggleAbleKeys.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
-                new(ToggleAbleKeys.ScrollLock, onColor : DefaultMonitoredKeyActiveColor, offColor : DefaultStandardKeyColor, onColorTiedToStandard : false, offColorTiedToStandard : true)
+                new(VKey.NumLock,    onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new(VKey.CapsLock,   onColor: DefaultMonitoredKeyActiveColor, offColor: DefaultStandardKeyColor, onColorTiedToStandard: false, offColorTiedToStandard: true),
+                new(VKey.ScrollLock, onColor : DefaultMonitoredKeyActiveColor, offColor : DefaultStandardKeyColor, onColorTiedToStandard : false, offColorTiedToStandard : true)
         ];
 
         // ------------ Private Variables ------------
@@ -194,7 +194,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // ----------------- General Methods ------------------
-        public RGBTuple GetVKOnColor(ToggleAbleKeys key)
+        public RGBTuple GetVKOnColor(VKey key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))
@@ -204,7 +204,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).onColor;
         }
 
-        public RGBTuple GetVKOffColor(ToggleAbleKeys key)
+        public RGBTuple GetVKOffColor(VKey key)
         {
             // If the key is not in the list, return the standard key color
             if (MonitoredKeysAndColors == null || !MonitoredKeysAndColors.Any(mk => mk.key == key))
@@ -214,7 +214,7 @@ namespace Dynamic_Lighting_Key_Indicator
             return MonitoredKeysAndColors.First(mk => mk.key == key).offColor;
         }
 
-        public MonitoredKey? GetMonitoredKey(ToggleAbleKeys key)
+        public MonitoredKey? GetMonitoredKey(VKey key)
         {
             if (MonitoredKeysAndColors == null)
                 return null;
