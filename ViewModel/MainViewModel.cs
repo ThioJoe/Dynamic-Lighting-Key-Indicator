@@ -24,7 +24,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
         private readonly MainWindow mainWindow;
         private static MainViewModel? mainViewModelInstance;
-        public Dictionary<ToggleAbleKeys, KeyIndicatorState> KeyStates { get; } = [];
+        public Dictionary<VKey, KeyIndicatorGUI> KeyStates { get; } = [];
 
 
         public MainViewModel(MainWindow mainWindowPassIn, bool debugMode)
@@ -45,10 +45,10 @@ namespace Dynamic_Lighting_Key_Indicator
             Debug.WriteLine("MainViewModel created.");
             this._showAdvancedInfo = debugMode;
 
-            foreach (ToggleAbleKeys key in Enum.GetValues(typeof(ToggleAbleKeys)))
+            foreach (VKey key in Enum.GetValues(typeof(VKey)))
             {
                 // Pass the MainViewModel's DispatcherQueue
-                KeyStates.Add(key, new KeyIndicatorState(this._dispatcherQueue));
+                KeyStates.Add(key, new KeyIndicatorGUI(this._dispatcherQueue));
             }
 
             AvailableDevices.CollectionChanged += AvailableDevices_CollectionChanged;
@@ -63,25 +63,20 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             foreach (var kvp in KeyStates)
             {
-                bool changed = false;
                 if (kvp.Value.SyncOnColor && kvp.Value.OnColor != DefaultColor)
                 {
                     kvp.Value.OnColor = DefaultColor; // This will trigger OnPropertyChanged for OnColor and OnBrush internally
-                    changed = true;
                 }
                 if (kvp.Value.SyncOffColor && kvp.Value.OffColor != DefaultColor)
                 {
                     kvp.Value.OffColor = DefaultColor; // This will trigger OnPropertyChanged for OffColor and OffBrush internally
-                    changed = true;
                 }
-                // If direct changes happened, ensure the save button status is re-evaluated
-                // if (changed) CheckAndUpdateSaveButton_EnabledStatus(); // Already called by DefaultColor setter
             }
             // Update the backend/main color if necessary
             ColorSetter.DefineKeyboardMainColor(DefaultColor);
         }
 
-        public void UpdateKeySyncSetting(ToggleAbleKeys key, bool isOnState, bool syncSetting)
+        public void UpdateKeySyncSetting(VKey key, bool isOnState, bool syncSetting)
         {
             if (KeyStates.TryGetValue(key, out var state))
             {
@@ -100,7 +95,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public bool GetKeySyncSetting(ToggleAbleKeys key, bool isOnState)
+        public bool GetKeySyncSetting(VKey key, bool isOnState)
         {
             if (KeyStates.TryGetValue(key, out var state))
             {
@@ -114,12 +109,12 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             return buttonName switch
             {
-                ButtonName.NumLockOn => GetKeySyncSetting(ToggleAbleKeys.NumLock, true),
-                ButtonName.NumLockOff => GetKeySyncSetting(ToggleAbleKeys.NumLock, false),
-                ButtonName.CapsLockOn => GetKeySyncSetting(ToggleAbleKeys.CapsLock, true),
-                ButtonName.CapsLockOff => GetKeySyncSetting(ToggleAbleKeys.CapsLock, false),
-                ButtonName.ScrollLockOn => GetKeySyncSetting(ToggleAbleKeys.ScrollLock, true),
-                ButtonName.ScrollLockOff => GetKeySyncSetting(ToggleAbleKeys.ScrollLock, false),
+                ButtonName.NumLockOn => GetKeySyncSetting((VKey)ToggleAbleKeys.NumLock, true),
+                ButtonName.NumLockOff => GetKeySyncSetting((VKey)ToggleAbleKeys.NumLock, false),
+                ButtonName.CapsLockOn => GetKeySyncSetting((VKey)ToggleAbleKeys.CapsLock, true),
+                ButtonName.CapsLockOff => GetKeySyncSetting((VKey)ToggleAbleKeys.CapsLock, false),
+                ButtonName.ScrollLockOn => GetKeySyncSetting((VKey)ToggleAbleKeys.ScrollLock, true),
+                ButtonName.ScrollLockOff => GetKeySyncSetting((VKey)ToggleAbleKeys.ScrollLock, false),
                 _ => false,
             };
         }
@@ -128,17 +123,17 @@ namespace Dynamic_Lighting_Key_Indicator
         // Update the border thickness based on the actual key state
         public void UpdateLastKnownKeyState(ToggleAbleKeys key, bool state)
         {
-            if (KeyStates.TryGetValue(key, out var keyState))
+            if (KeyStates.TryGetValue((VKey)key, out KeyIndicatorGUI? keyState))
             {
                 keyState.LastKnownState = state; // Setter handles border thickness updates and notifications
             }
         }
 
-        public void UpdateAllKeyStates(bool numLock, bool capsLock, bool scrollLock)
+        public void UpdateAllToggleKeyStates()
         {
-            UpdateLastKnownKeyState(ToggleAbleKeys.NumLock, numLock);
-            UpdateLastKnownKeyState(ToggleAbleKeys.CapsLock, capsLock);
-            UpdateLastKnownKeyState(ToggleAbleKeys.ScrollLock, scrollLock);
+            UpdateLastKnownKeyState(ToggleAbleKeys.NumLock, KeyStatesHandler.FetchKeyState((int)ToggleAbleKeys.NumLock));
+            UpdateLastKnownKeyState(ToggleAbleKeys.CapsLock, KeyStatesHandler.FetchKeyState((int)ToggleAbleKeys.CapsLock));
+            UpdateLastKnownKeyState(ToggleAbleKeys.ScrollLock, KeyStatesHandler.FetchKeyState((int)ToggleAbleKeys.ScrollLock));
         }
 
         // Static update method - REMAP VK to ToggleAbleKeys
@@ -155,13 +150,13 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // Helper mapping (adjust based on your VK and ToggleAbleKeys enums)
-        private static bool TryMapVkToToggleKey(VK vk, out ToggleAbleKeys toggleKey)
+        private static bool TryMapVkToToggleKey(ToggleAbleKeys vk, out ToggleAbleKeys toggleKey)
         {
             switch (vk)
             {
-                case VK.NumLock: toggleKey = ToggleAbleKeys.NumLock; return true;
-                case VK.CapsLock: toggleKey = ToggleAbleKeys.CapsLock; return true;
-                case VK.ScrollLock: toggleKey = ToggleAbleKeys.ScrollLock; return true;
+                case ToggleAbleKeys.NumLock: toggleKey = ToggleAbleKeys.NumLock; return true;
+                case ToggleAbleKeys.CapsLock: toggleKey = ToggleAbleKeys.CapsLock; return true;
+                case ToggleAbleKeys.ScrollLock: toggleKey = ToggleAbleKeys.ScrollLock; return true;
                 default:
                     toggleKey = default; // Or a specific 'None' value if you have one
                     return false;
@@ -172,7 +167,7 @@ namespace Dynamic_Lighting_Key_Indicator
         public string GetSyncGlyph_ByButtonObject(Button button)
         {
             // This might need adjusting based on how you map button names/objects back to ToggleAbleKeys and On/Off state
-            return GetSyncSetting_ByButtonObject(button) ? KeyIndicatorState.LinkedGlyph : KeyIndicatorState.UnlinkedGlyph;
+            return GetSyncSetting_ByButtonObject(button) ? KeyIndicatorGUI.LinkedGlyph : KeyIndicatorGUI.UnlinkedGlyph;
         }
 
         internal void ApplyAppSettingsFromUserConfig(UserConfig userConfig) { /* ... same logic ... */ }
@@ -224,7 +219,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 // Map VK to ToggleAbleKeys
                 if (!TryMapVkToToggleKey(monitoredKey.key, out var toggleKey)) continue; // Skip if key isn't monitored in UI
 
-                if (KeyStates.TryGetValue(toggleKey, out var state))
+                if (KeyStates.TryGetValue((VKey)toggleKey, out var state))
                 {
                     bool onColorTiedToStandard = monitoredKey.onColorTiedToStandard;
                     bool offColorTiedToStandard = monitoredKey.offColorTiedToStandard;
@@ -288,7 +283,7 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 if (!TryMapVkToToggleKey(monitoredKey.key, out var toggleKey)) continue; // Skip keys not in the UI dictionary
 
-                if (KeyStates.TryGetValue(toggleKey, out var currentState))
+                if (KeyStates.TryGetValue((VKey)toggleKey, out var currentState))
                 {
                     // Compare Sync settings
                     if (currentState.SyncOnColor != monitoredKey.onColorTiedToStandard) return false;
@@ -781,9 +776,9 @@ namespace Dynamic_Lighting_Key_Indicator
 
 
         // ------ Other methods ------
-        public void UpdateSyncSetting(ToggleAbleKeys? key, StateColorApply state, bool syncSetting)
+        public void UpdateSyncSetting(VKey? key, StateColorApply state, bool syncSetting)
         {
-            if (key is ToggleAbleKeys keyTry && KeyStates.TryGetValue(keyTry, out var keyState))
+            if (key is VKey keyTry && KeyStates.TryGetValue(keyTry, out var keyState))
             {
                 if (state == StateColorApply.On)
                 {
@@ -857,16 +852,16 @@ namespace Dynamic_Lighting_Key_Indicator
             public const string ScrollLockOff = "buttonScrollLockOff";
         }
 
-        internal static VK GetKeyByPropertyName(string propertyName)
+        internal static ToggleAbleKeys GetKeyByPropertyName(string propertyName)
         {
             return propertyName switch
             {
-                ColorPropName.NumLockOn     => VK.NumLock,
-                ColorPropName.NumLockOff    => VK.NumLock,
-                ColorPropName.CapsLockOn    => VK.CapsLock,
-                ColorPropName.CapsLockOff   => VK.CapsLock,
-                ColorPropName.ScrollLockOn   => VK.ScrollLock,
-                ColorPropName.ScrollLockOff => VK.ScrollLock,
+                ColorPropName.NumLockOn     => ToggleAbleKeys.NumLock,
+                ColorPropName.NumLockOff    => ToggleAbleKeys.NumLock,
+                ColorPropName.CapsLockOn    => ToggleAbleKeys.CapsLock,
+                ColorPropName.CapsLockOff   => ToggleAbleKeys.CapsLock,
+                ColorPropName.ScrollLockOn   => ToggleAbleKeys.ScrollLock,
+                ColorPropName.ScrollLockOff => ToggleAbleKeys.ScrollLock,
                 _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
             };
         }
@@ -885,7 +880,7 @@ namespace Dynamic_Lighting_Key_Indicator
             };
         }
 
-        public KeyIndicatorState GetKeyIndicatorStateByKey(ToggleAbleKeys key)
+        public KeyIndicatorGUI GetKeyIndicatorStateByKey(VKey key)
         {
             if (KeyStates.TryGetValue(key, out var state))
             {
@@ -894,9 +889,9 @@ namespace Dynamic_Lighting_Key_Indicator
             throw new ArgumentException($"Key {key} not found in KeyStates dictionary.");
         }
 
-        public KeyIndicatorState ScrollLockState => KeyStates[ToggleAbleKeys.ScrollLock];
-        public KeyIndicatorState CapsLockState => KeyStates[ToggleAbleKeys.CapsLock];
-        public KeyIndicatorState NumLockState => KeyStates[ToggleAbleKeys.NumLock];
+        public KeyIndicatorGUI ScrollLockState => KeyStates[(VKey)ToggleAbleKeys.ScrollLock];
+        public KeyIndicatorGUI CapsLockState => KeyStates[(VKey)ToggleAbleKeys.CapsLock];
+        public KeyIndicatorGUI NumLockState => KeyStates[(VKey)ToggleAbleKeys.NumLock];
 
 
     } // ----------------------- End of MainViewModel -----------------------

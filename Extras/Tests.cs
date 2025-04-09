@@ -11,15 +11,15 @@ namespace Dynamic_Lighting_Key_Indicator.Extras;
 internal class Tests
 {
 
-    public static List<VirtualKey> GetVKsForAllLamps(LampArray lampArray)
+    public static List<VKey> GetVKsForAllLamps(LampArray lampArray)
     {
-        List<(VirtualKey, int)> vkTuples = GetVKCodesTupleList();
+        List<(VKey, int)> vkTuples = GetVKCodesTupleList();
 
         // Get the indices that correspond to each virtual key
-        List<(VirtualKey, int[])> keyIndicesDict = [];
+        List<(VKey, int[])> keyIndicesDict = [];
         foreach (var (vk, vkInt) in vkTuples)
         {
-            int[] indices = lampArray.GetIndicesForKey(vk);
+            int[] indices = lampArray.GetIndicesForKey((VirtualKey)vk);
             if (indices.Length > 0)
                 keyIndicesDict.Add((vk, indices));
         }
@@ -28,8 +28,8 @@ internal class Tests
         Dictionary<int, int[]> rawVKCodesMatchingOnly = [];
         for (int i = 0; i < 256; i++)
         {
-            VirtualKey vk = (VirtualKey)i;
-            int[] indices = lampArray.GetIndicesForKey(vk);
+            VKey vk = (VKey)i;
+            int[] indices = lampArray.GetIndicesForKey((VirtualKey)vk);
             if (indices.Length > 0)
             {
                 rawVKCodesMatchingOnly.Add(i, indices);
@@ -37,21 +37,21 @@ internal class Tests
         }
 
         // Convert the raw VK codes to a list of VKs
-        List<VirtualKey> rawVKCodesMatchingOnlyList = [];
+        List<VKey> rawVKCodesMatchingOnlyList = [];
         foreach (var (vkInt, indices) in rawVKCodesMatchingOnly)
         {
-            rawVKCodesMatchingOnlyList.Add((VirtualKey)vkInt);
+            rawVKCodesMatchingOnlyList.Add((VKey)vkInt);
         }
 
         return rawVKCodesMatchingOnlyList;
 
     }
 
-    public static List<(VirtualKey, int)> GetVKCodesTupleList()
+    public static List<(VKey, int)> GetVKCodesTupleList()
     {
-        List<VirtualKey> allVKs = (List<VirtualKey>)ExtendedVirtualKeySet.GetAllKeys().ToList();
-        List<(VirtualKey, int)> VKCodesTupleList = [];
-        foreach (VirtualKey vk in allVKs)
+        List<VKey> allVKs = Enum.GetValues<VKey>().ToList();
+        List<(VKey, int)> VKCodesTupleList = [];
+        foreach (VKey vk in allVKs)
         {
             VKCodesTupleList.Add((vk, (int)vk));
         }
@@ -67,9 +67,7 @@ internal class Tests
             allIndices.Add(i);
         }
 
-        List<VirtualKey> allVKs = [];
-        //allVKs = Enum.GetValues<VirtualKey>().ToList();
-        allVKs = (List<VirtualKey>)ExtendedVirtualKeySet.GetAllKeys().ToList();
+        List<VKey> allVKs = Enum.GetValues<VKey>().ToList();
 
         // Get the list of all virtual key codes and their corresponding integer values
         List<(VirtualKey, int)> VKCodesTupleList = [];
@@ -130,8 +128,8 @@ internal class Tests
         List<int> unknownVKCodes = [];
         for (int i = 0; i < 256; i++)
         {
-            VirtualKey vk = (VirtualKey)i;
-            int[] indices = lampArray.GetIndicesForKey(vk);
+            VKey vk = (VKey)i;
+            int[] indices = lampArray.GetIndicesForKey((VirtualKey)vk);
             rawVKCodesDict.Add(i, indices);
             if (indices.Length > 0)
             {
@@ -183,18 +181,22 @@ internal class Tests
         lampArray.SetSingleColorForIndices(color, allIndices.ToArray());
     }
 
-
-
     public static void SetAllColorsUsingVK(LampArray lampArray, Color color)
     {
-        List<VirtualKey> VKList = GetVKsForAllLamps(lampArray);
+        List<VKey> VKList = GetVKsForAllLamps(lampArray);
+        List<VirtualKey> allVKsCasted = new List<VirtualKey>();
+        foreach (var vk in VKList)
+        {
+            allVKsCasted.Add((VirtualKey)vk);
+        }
+
         Color[] colors = new Color[VKList.Count];
         for (int i = 0; i < VKList.Count; i++)
         {
             colors[i] = color;
         }
 
-        lampArray.SetColorsForKeys(colors, VKList.ToArray());
+        lampArray.SetColorsForKeys(colors, allVKsCasted.ToArray());
     }
 
     public static void SetAllKeysColorsAsPairedList(LampArray lampArray, Color color)
@@ -237,9 +239,15 @@ internal class Tests
         lampArray.SetColorsForIndices(colors, allIndices.ToArray());
     }
 
-    public static void SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(LampArray lampArray, VirtualKey key, Color chosenKeyColor, Color otherColor)
+    public static void SetOneKeyOneColorRestOtherKeyAnotherColor_UsingVK(LampArray lampArray, VKey key, Color chosenKeyColor, Color otherColor)
     {
-        List<VirtualKey> VKList = GetVKsForAllLamps(lampArray);
+        List<VKey> VKList = GetVKsForAllLamps(lampArray);
+        List<VirtualKey> allVKsCasted = [];
+        foreach (var vk in VKList)
+        {
+            allVKsCasted.Add((VirtualKey)vk);
+        }
+
         Color[] colors = new Color[VKList.Count];
         for (int i = 0; i < VKList.Count; i++)
         {
@@ -249,7 +257,7 @@ internal class Tests
                 colors[i] = otherColor;
         }
 
-        lampArray.SetColorsForKeys(colors, VKList.ToArray());
+        lampArray.SetColorsForKeys(colors, allVKsCasted.ToArray());
     }
 
     public static void SetOneIndexOneColorOthersAnotherColor(LampArray lampArray, int keyIndex, Color chosenKeyColor, Color otherColor)

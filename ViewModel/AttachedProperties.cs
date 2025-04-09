@@ -11,17 +11,17 @@ public static class ButtonParameters
     public static readonly DependencyProperty KeyNameProperty = // Property names usually end with "Property" by convention
         DependencyProperty.RegisterAttached(
             "KeyName", // Registered name (used in XAML)
-            typeof(ToggleAbleKeys?),
+            typeof(VKey?),
             typeof(ButtonParameters),
             new PropertyMetadata(null));
 
-    public static void SetKeyName(DependencyObject element, ToggleAbleKeys? value)
+    public static void SetKeyName(DependencyObject element, VKey? value)
     {
         element.SetValue(KeyNameProperty, value);
     }
-    public static ToggleAbleKeys? GetKeyName(DependencyObject element)
+    public static VKey? GetKeyName(DependencyObject element)
     {
-        return (ToggleAbleKeys?)element.GetValue(KeyNameProperty);
+        return (VKey?)element.GetValue(KeyNameProperty);
     }
 
     // Define second parameter property

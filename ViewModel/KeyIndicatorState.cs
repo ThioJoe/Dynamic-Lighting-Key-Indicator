@@ -11,7 +11,7 @@ using Windows.UI; // Assuming Color is from here or Microsoft.UI
 
 namespace Dynamic_Lighting_Key_Indicator
 {
-    public class KeyIndicatorState : INotifyPropertyChanged
+    public class KeyIndicatorGUI : INotifyPropertyChanged
     {
         // Constants from MainViewModel (or define globally)
         public const string LinkedGlyph = "\uE71B";   // Chain link glyph
@@ -24,7 +24,7 @@ namespace Dynamic_Lighting_Key_Indicator
         private readonly DispatcherQueue _dispatcherQueue; // Add this field
 
         // Modify the constructor
-        public KeyIndicatorState(DispatcherQueue dispatcherQueue) // Accept DispatcherQueue
+        public KeyIndicatorGUI(DispatcherQueue dispatcherQueue) // Accept DispatcherQueue
         {
             _dispatcherQueue = dispatcherQueue ?? throw new ArgumentNullException(nameof(dispatcherQueue));
             // Set initial defaults
@@ -35,7 +35,7 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
 
-        public KeyIndicatorState(Action<string?> notifyParentPropertyChanged)
+        public KeyIndicatorGUI(Action<string?> notifyParentPropertyChanged)
         {
             _notifyParentPropertyChanged = notifyParentPropertyChanged ?? throw new ArgumentNullException(nameof(notifyParentPropertyChanged));
             // Set initial defaults

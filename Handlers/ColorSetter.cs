@@ -135,7 +135,7 @@ namespace Dynamic_Lighting_Key_Indicator
             if (DetermineLampArray(lampArray) is not LampArray lampArrayToUse)
                 return;
 
-            ToggleAbleKeys key = colorUpdateInfo.key;
+            VKey key = colorUpdateInfo.key;
             RGBTuple color = colorUpdateInfo.color;
             StateColorApply forState = colorUpdateInfo.forState;
 
@@ -154,7 +154,7 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        public static void SetColorToDefaultAndAdditionalIndices(RGBTuple colorTuple, List<VK> additionalKeys, LampArray? lampArray)
+        public static void SetColorToDefaultAndAdditionalIndices(RGBTuple colorTuple, List<VKey> additionalKeys, LampArray? lampArray)
         {
             if (lampArray == null)
                 return;
@@ -163,7 +163,7 @@ namespace Dynamic_Lighting_Key_Indicator
 
             List<int> keyIndices = [];
             keyIndices.AddRange(NonMonitoredKeyIndices);
-            keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[key]));
+            keyIndices.AddRange(additionalKeys.Select(key => MonitoredKeyIndicesDict[(ToggleAbleKeys)key]));
 
             lampArray.SetSingleColorForIndices(colorToUse, keyIndices.ToArray());
         }

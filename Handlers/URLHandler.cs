@@ -217,22 +217,22 @@ namespace Dynamic_Lighting_Key_Indicator
                 switch (paramKey.ToLower())
                 {
                     case ParameterNames.ScrollLockOnColor:
-                        SetKeyColor(key_vk: VK.ScrollLock, on: true, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.ScrollLock, on: true, value: value);
                         break;
                     case ParameterNames.ScrollLockOffColor:
-                        SetKeyColor(key_vk: VK.ScrollLock, on: false, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.ScrollLock, on: false, value: value);
                         break;
                     case ParameterNames.NumLockOnColor:
-                        SetKeyColor(key_vk: VK.NumLock, on: true, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.NumLock, on: true, value: value);
                         break;
                     case ParameterNames.NumLockOffColor:
-                        SetKeyColor(key_vk: VK.NumLock, on: false, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.NumLock, on: false, value: value);
                         break;
                     case ParameterNames.CapsLockOnColor:
-                        SetKeyColor(key_vk: VK.CapsLock, on: true, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.CapsLock, on: true, value: value);
                         break;
                     case ParameterNames.CapsLockOffColor:
-                        SetKeyColor(key_vk: VK.CapsLock, on: false, value: value);
+                        SetKeyColor(key_vk: ToggleAbleKeys.CapsLock, on: false, value: value);
                         break;
                 }
 
