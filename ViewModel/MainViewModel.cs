@@ -880,13 +880,17 @@ namespace Dynamic_Lighting_Key_Indicator
             };
         }
 
-        public KeyIndicatorGUI GetKeyIndicatorStateByKey(VKey key)
+        public KeyIndicatorGUI? GetKeyIndicatorStateByKey(VKey key)
         {
             if (KeyStates.TryGetValue(key, out var state))
             {
                 return state;
             }
-            throw new ArgumentException($"Key {key} not found in KeyStates dictionary.");
+            else
+            {
+                Debug.WriteLine($"Key {key} not found in KeyStates dictionary.");
+                return null; // Or throw an exception, or handle as needed
+            }
         }
 
         public KeyIndicatorGUI ScrollLockState => KeyStates[(VKey)ToggleAbleKeys.ScrollLock];

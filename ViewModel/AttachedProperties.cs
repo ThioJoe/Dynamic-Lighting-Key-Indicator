@@ -11,17 +11,20 @@ public static class ButtonParameters
     public static readonly DependencyProperty KeyNameProperty = // Property names usually end with "Property" by convention
         DependencyProperty.RegisterAttached(
             "KeyName", // Registered name (used in XAML)
-            typeof(VKey?),
+            typeof(VKey),
             typeof(ButtonParameters),
-            new PropertyMetadata(null));
+            new PropertyMetadata(VKey.Null));
 
-    public static void SetKeyName(DependencyObject element, VKey? value)
+    public static void SetKeyName(DependencyObject element, VKey value)
     {
         element.SetValue(KeyNameProperty, value);
     }
-    public static VKey? GetKeyName(DependencyObject element)
+    public static VKey GetKeyName(DependencyObject element)
     {
-        return (VKey?)element.GetValue(KeyNameProperty);
+        if (element.GetValue(KeyNameProperty) is VKey vk)
+            return vk;
+        else
+            return VKey.Null; // Return a default value if not set
     }
 
     // Define second parameter property

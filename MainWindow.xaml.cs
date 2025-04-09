@@ -1092,7 +1092,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 return;
             }
 
-            VKey? keyToUpdate = ButtonParameters.GetKeyName(button);
+            VKey keyToUpdate = ButtonParameters.GetKeyName(button);
             StateColorApply colorState = ButtonParameters.GetColorState(button);
             KeyIndicatorGUI? keyIndicatorState;
 
@@ -1101,7 +1101,7 @@ namespace Dynamic_Lighting_Key_Indicator
             {
                 isDefault = true;
             }
-            else if (colorState == StateColorApply.Null || keyToUpdate == null)
+            else if (colorState == StateColorApply.Null || keyToUpdate == VKey.Null)
             {
                 Debug.WriteLine("Button color state is null.");
                 return;
@@ -1124,9 +1124,15 @@ namespace Dynamic_Lighting_Key_Indicator
 
             Color? currentColorStateSetting;
 
-            if (keyToUpdate is VKey keyNotNull)
+            if (keyToUpdate != VKey.Null)
             {
-                keyIndicatorState = ViewModel.GetKeyIndicatorStateByKey(keyNotNull);
+                keyIndicatorState = ViewModel.GetKeyIndicatorStateByKey(keyToUpdate);
+                if (keyIndicatorState == null)
+                {
+                    Debug.WriteLine("Key indicator state was null.");
+                    return;
+                }
+
                 currentColorStateSetting = keyIndicatorState.GetStateColor(colorState);
             }
             else if (isDefault == true) // Default color button
@@ -1204,10 +1210,10 @@ namespace Dynamic_Lighting_Key_Indicator
                     ApplyNewDefaultColor((args.NewColor.R, args.NewColor.G, args.NewColor.B), monitoredKeysToPreviewDefaultColor);
                 }
                 // Create the KeyColorUpdateInfo object to pass to the ApplySpecificMonitoredKeyColor method, depending on which color is being updated
-                else if (keyToUpdate is VKey keyNotNull && colorState != StateColorApply.Null)
+                else if (keyToUpdate != VKey.Null && colorState != StateColorApply.Null)
                 {
                     KeyColorUpdateInfo colorUpdateInfo = new KeyColorUpdateInfo(
-                        key: keyNotNull,
+                        key: keyToUpdate,
                         color: (args.NewColor.R, args.NewColor.G, args.NewColor.B),
                         forState: colorState
                     );
