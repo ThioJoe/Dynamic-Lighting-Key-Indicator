@@ -912,22 +912,18 @@ namespace Dynamic_Lighting_Key_Indicator
         }
 
         // This is the button within the flyout  menu
-        private void SyncToStandardColor_Click(string colorPropertyName, ColorPicker colorPicker, Button parentButton, Flyout colorPickerFlyout)
+        private void SyncToStandardColor_Click(StateColorApply colorState, ToggleAbleKeys? keyName, ColorPicker colorPicker, Button parentButton, Flyout colorPickerFlyout)
         {
-            string defaultColorPropertyName = "DefaultColor";
-            Color? defaultColor = (Color?)ViewModel?.GetType()?.GetProperty(defaultColorPropertyName)?.GetValue(ViewModel);
-            if (defaultColor == null)
-                return;
+            Color defaultColor = ViewModel.DefaultColor;
 
             colorPicker.Color = (Color)defaultColor;
 
             colorPicker.ColorChanged += (s, args) =>
             {
-                ViewModel?.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor);
                 parentButton.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the default color
             };
 
-            ViewModel?.UpdateSyncSetting(syncSetting: true, colorPropertyName: colorPropertyName);
+            ViewModel?.UpdateSyncSetting(key: keyName, state:colorState, syncSetting: true);
 
             ForceUpdateAllButtonGlyphs();
 
@@ -1093,28 +1089,30 @@ namespace Dynamic_Lighting_Key_Indicator
                 }
             }
 
-
-            var button = sender as Button;
+            Button? button = sender as Button;
             if (button == null)
             {
                 Debug.WriteLine("Button is null.");
                 return;
             }
 
+            ToggleAbleKeys? keyToUpdate = ButtonParameters.GetKeyName(button);
+            StateColorApply colorState = ButtonParameters.GetColorState(button);
+            KeyIndicatorState? keyIndicatorState;
 
-            if (button.Tag is not string colorPropertyName)
+            bool isDefault = false;
+            if (button.Tag is string tagString && tagString == "DefaultColor")
             {
-                Debug.WriteLine("Color property name is null.");
+                isDefault = true;
+            }
+            else if (colorState == StateColorApply.Null || keyToUpdate == null)
+            {
+                Debug.WriteLine("Button color state is null.");
                 return;
             }
 
-            ViewModel.UpdateSyncSetting(syncSetting: false, colorPropertyName: colorPropertyName); // Disabling syncing if the user opens the color picker
+            ViewModel.UpdateSyncSetting(key: keyToUpdate, state: colorState, syncSetting: false); // Disabling syncing if the user opens the color picker
             ForceUpdateAllButtonGlyphs();
-
-            // Update the button color from the settings as soon as the button is clicked. Also will be updated later
-            //SolidColorBrush? newBGColor = ViewModel.GetType().GetProperty(colorPropertyName)?.GetValue(ViewModel) as SolidColorBrush;
-            //if (button != null && newBGColor != null)
-            //    button.Background = newBGColor;
 
             // Next show the color picker flyout
             var flyout = new Flyout();
@@ -1128,25 +1126,65 @@ namespace Dynamic_Lighting_Key_Indicator
                 MinHeight = 400
             };
 
-            Color? currentColor = (Color?)ViewModel.GetType()?.GetProperty(colorPropertyName)?.GetValue(ViewModel);
-            if (currentColor == null)
+            Color? currentColorStateSetting;
+
+            if (keyToUpdate is ToggleAbleKeys keyNotNull)
             {
-                Debug.WriteLine("Current color is null.");
+                keyIndicatorState = ViewModel.GetKeyIndicatorStateByKey(keyNotNull);
+                currentColorStateSetting = keyIndicatorState.GetStateColor(colorState);
+            }
+            else if (isDefault == true) // Default color button
+            {
+                currentColorStateSetting = ViewModel.DefaultColor;
+                keyIndicatorState = null; // No key indicator state for default color
+            }
+            else
+            {
+                Debug.WriteLine("Key to update was null.");
                 return;
             }
 
-            colorPicker.Color = (Color)currentColor;
+            colorPicker.Color = (Color)currentColorStateSetting;
 
-            colorPicker.ColorChanged += (s, args) =>
+            colorPicker.ColorChanged += OnColorChanged; // Attach the event handler to the ColorChanged event
+
+            // Create a button in the flyout to sync the color setting to the default/standard color
+            Button syncButton = new Button
+            {
+                Content = "Sync to default color",
+                Margin = new Thickness(0, 10, 0, 0)
+            };
+
+            if (button == null)
+                return;
+
+            // Attach the event handler to the button's Click event
+            syncButton.Click += (s, args) => SyncToStandardColor_Click(colorState: colorState, keyName: keyToUpdate, colorPicker: colorPicker, parentButton: button, colorPickerFlyout: flyout);
+
+            stackPanel.Children.Add(colorPicker);
+
+            // Add the sync button if it's not the default color button
+            if (isDefault == true)
+                stackPanel.Children.Add(syncButton);
+
+            flyout.Content = stackPanel;
+            flyout.ShowAt(button);
+
+            // =============================================================================
+            // ============================ EVENT HANDLERS =================================
+            // =============================================================================
+
+            void OnColorChanged(object s, ColorChangedEventArgs args)
             {
                 if (button == null)
                     return;
 
-                ViewModel.GetType()?.GetProperty(colorPropertyName)?.SetValue(ViewModel, args.NewColor); // Update the color setting in the ViewModel
+                keyIndicatorState?.SetStateColor(colorState, args.NewColor); // Update the color setting in the ViewModel
+
                 button.Background = new SolidColorBrush(args.NewColor); // Update the button color to reflect the new color
 
                 // If updating the DefaultColor, check the ColorSettings for which keys are set to sync to default, and update their buttons too
-                if (colorPropertyName == "DefaultColor")
+                if (isDefault == true)
                 {
                     List<Button> buttonsList = [buttonNumLockOn, buttonNumLockOff, buttonCapsLockOn, buttonCapsLockOff, buttonScrollLockOn, buttonScrollLockOff];
 
@@ -1166,49 +1204,22 @@ namespace Dynamic_Lighting_Key_Indicator
                                 fontIcon.Foreground = DetermineGlyphColor(button);
                         }
                     }
-                }
-                //ApplyAndSaveColorSettings(saveFile: false, newConfig: null); // Works to continuously update the colors, but monitored keys flicker, so it's disabled for now
 
-                // Create the KeyColorUpdateInfo object to pass to the ApplySpecificMonitoredKeyColor method, depending on which color is being updated
-                if (colorPropertyName == "DefaultColor")
-                {
                     ApplyNewDefaultColor((args.NewColor.R, args.NewColor.G, args.NewColor.B), monitoredKeysToPreviewDefaultColor);
                 }
-                else
+                // Create the KeyColorUpdateInfo object to pass to the ApplySpecificMonitoredKeyColor method, depending on which color is being updated
+                else if (keyToUpdate is ToggleAbleKeys keyNotNull && colorState != StateColorApply.Null)
                 {
                     KeyColorUpdateInfo colorUpdateInfo = new KeyColorUpdateInfo(
-                        key: MainViewModel.GetKeyByPropertyName(colorPropertyName),
+                        key: keyNotNull,
                         color: (args.NewColor.R, args.NewColor.G, args.NewColor.B),
-                        forState: MainViewModel.GetStateByPropertyName(colorPropertyName)
+                        forState: colorState
                     );
 
                     ApplySpecificMonitoredKeyColor(colorUpdateInfo);
                 }
-            };
-
-            // Create a button in the flyout to sync the color setting to the default/standard color
-            var syncButton = new Button
-            {
-                Content = "Sync to default color",
-                Margin = new Thickness(0, 10, 0, 0)
-            };
-
-            if (button == null)
-                return;
-
-            // Attach the event handler to the button's Click event
-            syncButton.Click += (s, args) => SyncToStandardColor_Click(colorPropertyName, colorPicker, button, flyout);
-
-            stackPanel.Children.Add(colorPicker);
-
-            // Add the sync button if it's not the default color button
-            if (colorPropertyName != "DefaultColor")
-                stackPanel.Children.Add(syncButton);
-
-            flyout.Content = stackPanel;
-            flyout.ShowAt(button);
+            }
         }
-
 
         // ---------------------------------------------------------------------------------------------------
     }

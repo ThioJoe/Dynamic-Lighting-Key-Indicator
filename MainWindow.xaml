@@ -208,7 +208,9 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.ScrollLockState.OnBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="ScrollLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="On"
+                local:ButtonParameters.KeyName="ScrollLock"
                 BorderThickness="{x:Bind ViewModel.ScrollLockState.OnBorderThickness, Mode=OneWay}"
             >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.ScrollLockState.OnGlyph, Mode=OneWay}" />
@@ -228,7 +230,9 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.ScrollLockState.OffBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="ScrollLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="Off"
+                local:ButtonParameters.KeyName="ScrollLock"
                 BorderThickness="{x:Bind ViewModel.ScrollLockState.OffBorderThickness, Mode=OneWay}"
             >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.ScrollLockState.OffGlyph, Mode=OneWay}" />
@@ -242,7 +246,9 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.CapsLockState.OnBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="CapsLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="On"
+                local:ButtonParameters.KeyName="CapsLock"
                 BorderThickness="{x:Bind ViewModel.CapsLockState.OnBorderThickness, Mode=OneWay}"
             >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.CapsLockState.OnGlyph, Mode=OneWay}" />
@@ -261,7 +267,9 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.CapsLockState.OffBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="CapsLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="Off"
+                local:ButtonParameters.KeyName="CapsLock"
                 BorderThickness="{x:Bind ViewModel.CapsLockState.OffBorderThickness, Mode=OneWay}"
             >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.CapsLockState.OffGlyph, Mode=OneWay}" />
@@ -275,7 +283,9 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.NumLockState.OnBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="NumLockOnColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="On"
+                local:ButtonParameters.KeyName="NumLock"
                 BorderThickness="{x:Bind ViewModel.NumLockState.OnBorderThickness, Mode=OneWay}"
             >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.NumLockState.OnGlyph, Mode=OneWay}" />
@@ -294,9 +304,11 @@
                 Style="{StaticResource ColorButtonStyle}"
                 Background="{x:Bind ViewModel.NumLockState.OffBrush, Mode=OneWay}"
                 Click="ColorButton_Click"
-                Tag="NumLockOffColor" BorderBrush="{ThemeResource ButtonBorder}"
+                BorderBrush="{ThemeResource ButtonBorder}"
+                local:ButtonParameters.ColorState="Off"
+                local:ButtonParameters.KeyName="NumLock"
                 BorderThickness="{x:Bind ViewModel.NumLockState.OffBorderThickness, Mode=OneWay}"
-            >
+                >
                 <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{x:Bind ViewModel.NumLockState.OffGlyph, Mode=OneWay}" />
             </Button>
 

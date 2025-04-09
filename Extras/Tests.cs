@@ -163,8 +163,6 @@ internal class Tests
             allLampInfo.Add(lampArray.GetLampInfo(i));
         }
 
-        bool yes = true;
-
         // Test loop with delay to flash the incides with no keys a few times
         //for (int i = 0; i < 5; i++)
         //{

@@ -781,6 +781,21 @@ namespace Dynamic_Lighting_Key_Indicator
 
 
         // ------ Other methods ------
+        public void UpdateSyncSetting(ToggleAbleKeys? key, StateColorApply state, bool syncSetting)
+        {
+            if (key is ToggleAbleKeys keyTry && KeyStates.TryGetValue(keyTry, out var keyState))
+            {
+                if (state == StateColorApply.On)
+                {
+                    keyState.SyncOnColor = syncSetting;
+                }
+                else
+                {
+                    keyState.SyncOffColor = syncSetting;
+                }
+            }
+        }
+
         public void UpdateSyncSetting(bool syncSetting, string colorPropertyName)
         {
             // Update the relevant sync setting in ViewModel based on the colorPropertyName
@@ -868,6 +883,15 @@ namespace Dynamic_Lighting_Key_Indicator
                 ColorPropName.ScrollLockOff     => StateColorApply.Off,
                 _ => throw new ArgumentException("Invalid property name.", nameof(propertyName)),
             };
+        }
+
+        public KeyIndicatorState GetKeyIndicatorStateByKey(ToggleAbleKeys key)
+        {
+            if (KeyStates.TryGetValue(key, out var state))
+            {
+                return state;
+            }
+            throw new ArgumentException($"Key {key} not found in KeyStates dictionary.");
         }
 
         public KeyIndicatorState ScrollLockState => KeyStates[ToggleAbleKeys.ScrollLock];

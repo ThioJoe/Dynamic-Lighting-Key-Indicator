@@ -19,3 +19,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Needs to be not static to use in Xaml binding", Scope = "member", Target = "~P:Dynamic_Lighting_Key_Indicator.MainWindow.DefaultFontColor")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Needs to be not static to use in Xaml binding", Scope = "member", Target = "~P:Dynamic_Lighting_Key_Indicator.MainViewModel.DebugMode_VisibilityBool")]
 [assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "It's a test function that changes so remove static warning", Scope = "member", Target = "~M:Dynamic_Lighting_Key_Indicator.MainWindow.TestButton_Click(System.Object,System.Object)")]
+[assembly: SuppressMessage("Interoperability", "CA1416:Validate platform compatibility")]

@@ -128,6 +128,33 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
+        public Color GetStateColor(StateColorApply state)
+        {
+            return state switch
+            {
+                StateColorApply.On => OnColor,
+                StateColorApply.Off => OffColor,
+                _ => throw new ArgumentOutOfRangeException(nameof(state), state, null)
+            };
+        }
+
+        public void SetStateColor(StateColorApply state, Color color)
+        {
+            switch (state)
+            {
+                case StateColorApply.On:
+                    OnColor = color;
+                    break;
+                case StateColorApply.Off:
+                    OffColor = color;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(state), state, null);
+            }
+        }
+
+        // --------------------------------------------------------------------
+
         // Derived Properties (Read-only)
         public string OnGlyph => SyncOnColor ? LinkedGlyph : UnlinkedGlyph;
         public string OffGlyph => SyncOffColor ? LinkedGlyph : UnlinkedGlyph;

@@ -73,7 +73,8 @@ namespace Dynamic_Lighting_Key_Indicator
     {
         On,
         Off,
-        Both
+        Both,
+        Null
     }
 
     // ------------------ Global Classes ------------------
