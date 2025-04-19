@@ -29,7 +29,7 @@ namespace Dynamic_Lighting_Key_Indicator
             public uint dwStateMask;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
             public string szInfo;
-            public WinEnums.uVersion uVersion;  // Changed from union to direct field
+            public uVersion uVersion;  // Changed from union to direct field
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
             public string szInfoTitle;
             public uint dwInfoFlags;
@@ -41,13 +41,13 @@ namespace Dynamic_Lighting_Key_Indicator
         static extern uint RegisterWindowMessage(string lpString);
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
-        static extern bool Shell_NotifyIcon(WinEnums.NotifyIcon_dwMessage dwMessage, ref NOTIFYICONDATAW lpData);
+        static extern bool Shell_NotifyIcon(NotifyIcon_dwMessage dwMessage, ref NOTIFYICONDATAW lpData);
 
         [DllImport("user32.dll")]
         static extern IntPtr DefWindowProc(IntPtr hWnd, uint uMsg, UIntPtr wParam, IntPtr lParam);
         // For 64 Bit
         [DllImport("user32.dll")]
-        static extern IntPtr SetWindowLongPtr(IntPtr hWnd, WinEnums.nIndex nIndex, IntPtr dwNewLong);
+        static extern IntPtr SetWindowLongPtr(IntPtr hWnd, nIndex nIndex, IntPtr dwNewLong);
         // For 32 Bit
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
@@ -56,7 +56,7 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             if (IntPtr.Size == 8) // 64-bit
             {
-                return SetWindowLongPtr(hWnd, (WinEnums.nIndex)nIndex, dwNewLong);
+                return SetWindowLongPtr(hWnd, (nIndex)nIndex, dwNewLong);
             }
             else // 32-bit
             {
@@ -169,7 +169,7 @@ namespace Dynamic_Lighting_Key_Indicator
                 hWnd = hwnd,
                 uID = 1,
                 uFlags = NOTIFYICONDATAA_uFlags.NIF_ICON | NOTIFYICONDATAA_uFlags.NIF_MESSAGE | NOTIFYICONDATAA_uFlags.NIF_TIP,
-                uCallbackMessage = (uint)WM_MESSAGE.WM_TRAYICON,
+                uCallbackMessage = (uint)WM_MESSAGE_SystemTray.WM_TRAYICON,
                 szTip = "Dynamic Lighting Key Indicator" // Tooltip
             };
 
@@ -225,7 +225,7 @@ namespace Dynamic_Lighting_Key_Indicator
             //      but often just NIM_ADD/NIM_MODIFY after TaskbarCreated is sufficient. Let's retry the Add/SetVersion flow.
 
             // Remove the old icon first (best practice) - ignore errors as it might already be gone
-            Shell_NotifyIcon(WinEnums.NotifyIcon_dwMessage.NIM_DELETE, ref notifyIcon);
+            Shell_NotifyIcon(NotifyIcon_dwMessage.NIM_DELETE, ref notifyIcon);
 
             // Re-initialize and add the icon
             InitializeAndAddNotifyIcon();
@@ -269,11 +269,11 @@ namespace Dynamic_Lighting_Key_Indicator
             Application.Current.Exit(); // Will automatically trigger .closed event on MainWindow
         }
 
-        private delegate IntPtr WndProcDelegate(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam);
+        private delegate IntPtr WndProcDelegate(IntPtr hwnd, WM_MESSAGE_SystemTray msg, UIntPtr wParam, IntPtr lParam);
 
-        private IntPtr WndProc(IntPtr hwnd, WinEnums.WM_MESSAGE msg, UIntPtr wParam, IntPtr lParam)
+        private IntPtr WndProc(IntPtr hwnd, WM_MESSAGE_SystemTray msg, UIntPtr wParam, IntPtr lParam)
         {
-            if (msg == WM_MESSAGE.WM_TRAYICON)
+            if (msg == WM_MESSAGE_SystemTray.WM_TRAYICON)
             {
                 // Extract the message code from the lower word of lParam
                 // In commit b503283103032d52cabe232afd396ccd7591f094 this wasn't necessary because the higher word was always 0,
@@ -282,28 +282,28 @@ namespace Dynamic_Lighting_Key_Indicator
                 //uint upperWord = (uint)lParam.ToInt64() >> 16;          // Extract upper word. Not sure what this is for
 
                 // Now we can properly identify and display the notification code
-                Debug.WriteLine($"WM_TRAYICON: Trigger = {mouseMessage:X4} - {Enum.GetName(typeof(WinEnums.WM_MESSAGE), mouseMessage)}");
+                //Debug.WriteLine($"WM_TRAYICON: Trigger = {mouseMessage:X4} - {Enum.GetName(typeof(WM_MESSAGE), mouseMessage)}");
 
                 // Use button_up instead of down because the user might click and hold the icon to drag it
-                if (mouseMessage == (uint)WM_MESSAGE.WM_LBUTTONUP)
+                if (mouseMessage == (uint)WM_MESSAGE_SystemTray.WM_LBUTTONUP)
                 {
                     RestoreFromTray();
                     return IntPtr.Zero;
                 }
-                else if (mouseMessage == (uint)WM_MESSAGE.WM_RBUTTONUP)
+                else if (mouseMessage == (uint)WM_MESSAGE_SystemTray.WM_RBUTTONUP)
                 {
                     CustomContextMenu.CreateAndShowMenu(hwnd, this);
                     return IntPtr.Zero;
                 }
 
             }
-            else if (msg == WM_MESSAGE.WM_CLOSE)
+            else if (msg == WM_MESSAGE_SystemTray.WM_CLOSE)
             {
                 // Intercept window close
                 MinimizeToTray();
                 return IntPtr.Zero;
             }
-            else if (_taskbarCreatedMessageId != 0 && msg == (WM_MESSAGE)_taskbarCreatedMessageId)
+            else if (_taskbarCreatedMessageId != 0 && msg == (WM_MESSAGE_SystemTray)_taskbarCreatedMessageId)
             {
                 RecreateNotifyIcon();
                 // We handle this message, but it's often broadcast, so returning DefWindowProc might be safer than Zero to allow other apps to receive it too.
@@ -329,5 +329,48 @@ namespace Dynamic_Lighting_Key_Indicator
     internal interface IWindowNative
     {
         IntPtr WindowHandle { get; }
+    }
+
+    [Flags]
+    public enum NOTIFYICONDATAA_uFlags : uint
+    {
+        NIF_MESSAGE = 0x00000001,
+        NIF_ICON = 0x00000002,
+        NIF_TIP = 0x00000004,
+        NIF_STATE = 0x00000008,
+        NIF_INFO = 0x00000010,
+        NIF_GUID = 0x00000020,
+        NIF_REALTIME = 0x00000040,
+        NIF_SHOWTIP = 0x00000080
+    }
+
+    // For use in the NOTIFYICONDATA structure
+    // See: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/ns-shellapi-notifyicondataa
+    // Values from shellapi.h
+    public enum uVersion : uint
+    {
+        _zero = 0, // Not named but a possible value
+        NOTIFYICON_VERSION = 3, // Use this or else the context menu will not work
+        NOTIFYICON_VERSION_4 = 4
+    }
+
+    // See: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shell_notifyiconw
+    public enum NotifyIcon_dwMessage
+    {
+        NIM_ADD = 0x00000000,
+        NIM_MODIFY = 0x00000001,
+        NIM_DELETE = 0x00000002,
+        NIM_SETFOCUS = 0x00000003,
+        NIM_SETVERSION = 0x00000004
+    }
+
+    public enum WM_MESSAGE_SystemTray : uint
+    {
+        WM_RBUTTONUP = 0x0205,
+        WM_LBUTTONUP = 0x0202,
+        WM_CLOSE = 0x0010,
+
+        // Can't find exactly where these are from but apparently it's correct
+        WM_TRAYICON = 0x800
     }
 }
