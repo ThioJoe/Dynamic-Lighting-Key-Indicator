@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-#pragma warning disable IDE0305 // Collection expression more confusing than a simple ToArray initializer
-
 namespace Dynamic_Lighting_Key_Indicator
 {
     public class NativeContextMenu
