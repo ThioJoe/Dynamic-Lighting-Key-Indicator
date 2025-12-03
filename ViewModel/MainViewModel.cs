@@ -46,6 +46,7 @@ namespace Dynamic_Lighting_Key_Indicator
             _startupSettingCanBeChanged = true;
             _startupSettingReason = "";
             _isStartupEnabled = false;
+            _isRunAsAdminEnabled = false;
             _deviceStatusMessage = new DeviceStatusInfo(DeviceStatusInfo.Msg.Empty);
             _attachedDevicesMessage = "";
             _deviceWatcherStatusMessage = "";
@@ -74,6 +75,19 @@ namespace Dynamic_Lighting_Key_Indicator
                 {
                     // Change the startup task state when the property changes
                     UpdateStartupTaskStateAsync(value);
+                }
+            }
+        }
+
+        private bool _isRunAsAdminEnabled;
+        public bool IsRunAsAdminEnabled
+        {
+            get => _isRunAsAdminEnabled;
+            set
+            {
+                if (SetProperty(ref _isRunAsAdminEnabled, value))
+                {
+                    UpdateRunAsAdminStateAsync(value);
                 }
             }
         }
@@ -140,6 +154,11 @@ namespace Dynamic_Lighting_Key_Indicator
         {
             get => _startupSettingReason;
             set => SetProperty(ref _startupSettingReason, value);
+        }
+
+        private void UpdateRunAsAdminStateAsync(bool newDesiredStateBool)
+        {
+            MainWindow.ChangeRunAsAdminState(newDesiredStateBool);
         }
 
         private void UpdateStartupTaskStateAsync(bool newDesiredStateBool)

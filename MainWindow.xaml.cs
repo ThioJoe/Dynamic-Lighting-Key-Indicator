@@ -243,7 +243,21 @@ namespace Dynamic_Lighting_Key_Indicator
             }
         }
 
-        
+        public static void ChangeRunAsAdminState(bool newDesiredStateBool)
+        {
+            // Get current file name
+            string aliasPath =
+                  Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) +
+                  @"\microsoft\windowsapps\" + AppExecutionAlias;
+
+            ProcessStartInfo info = new();
+            info.Verb = "runas";
+            info.UseShellExecute = true;
+            info.FileName = aliasPath;
+            Process.Start(info);
+
+            App.Current.Exit();
+        }
 
         private void UpdateStatusMessage()
         {
