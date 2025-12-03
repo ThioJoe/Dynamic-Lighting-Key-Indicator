@@ -62,6 +62,7 @@ namespace Dynamic_Lighting_Key_Indicator
         // Constants
         public const string MainIconFileName = "Icon.ico";
         public const string MainWindowTitle = "Dynamic Lighting Key Indicator";
+        public const string AppExecutionAlias = "Dynamic-Lighting-Key-Indicator.exe";
         public const string StartupTaskId = "Dynamic-Lighting-Key-Indicator-StartupTask";
         public const string UpdatesURL = @"https://github.com/ThioJoe/Dynamic-Lighting-Key-Indicator/releases";
 
